@@ -8,15 +8,14 @@ using UnityEngine;
 /// </summary>
 public abstract class Field : MonoBehaviour
 {
+    #region properties
     public Guid Id;
     public int DimX;
     public int DimZ;
-
     private Stack<Container>[,] _ground;
     public Stack<Container>[,] Ground {
         get { return _ground; }
     }
-
     public bool IsGroundEmpty {
         get {
             bool isEmpty = true;
@@ -29,7 +28,6 @@ public abstract class Field : MonoBehaviour
             return isEmpty;
         }
     }
-
     public bool IsGroundFull {
         get {
             bool isFull = true;
@@ -42,20 +40,37 @@ public abstract class Field : MonoBehaviour
             return isFull;
         }
     }
+    #endregion
 
-    #region public methods
-    public void AddToGround(Container container) {
+    #region logic methods
+    public virtual void AddToGround(Container container) {
         throw new NotImplementedException();
     }
 
-    public Container RemoveFromGround(int x, int z) {
+    public virtual Container RemoveFromGround(Container container) {
         throw new NotImplementedException();
     }
 
-    public Container RemoveFromGround(Container container) {
+    public virtual void RearrangeContainer(Container container) {
         throw new NotImplementedException();
     }
 
+    /// <summary>
+    /// to init containers for inField and stackField
+    /// </summary>
+    public virtual void InitContainers() {
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// this function is to destory the field and containers belongs to it
+    /// </summary>
+    public void DestroyField() {
+        
+    }
+    #endregion
+
+    #region public minor methods
     public Vector3 IndexToCoordinate() {
         throw new NotImplementedException();
     }
@@ -66,6 +81,9 @@ public abstract class Field : MonoBehaviour
     #endregion
 
     #region private methods
+    private void generateContainer() {
+
+    }
 
     private bool dimCheck(IndexInStack index) {
         throw new NotImplementedException();

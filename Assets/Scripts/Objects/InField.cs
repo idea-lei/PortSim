@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class IoField : Field
+public class InField : Field
 {
     public DateTime TimePlaned;
     public DateTime TimeReal;

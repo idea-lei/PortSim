@@ -7,8 +7,8 @@ public class Container : MonoBehaviour
 {
     #region public fields
     public Guid Id;
-    public IoField OutField;
-    public IoField InField;
+    public OutField OutField;
+    public InField InField;
     public IndexInStack IndexInStack;
     #endregion
 
@@ -21,6 +21,15 @@ public class Container : MonoBehaviour
     private void Awake() {
         stackField = FindObjectOfType<StackField>();
         decisionMaker = FindObjectOfType<DecisionMaker>();
+    }
+
+    private void OnTriggerEnter(Collider other) {
+        if (other.CompareTag("container")) {
+
+        }
+        if (other.CompareTag("field")) {
+
+        }
     }
     #endregion
 }
