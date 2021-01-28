@@ -13,3 +13,8 @@ public struct IndexInStack {
         return IsValid? $"x={x}, z = {z}": "not valid!";
     }
 }
+
+public struct ResultWithMessage {
+    public string Message;
+    public bool Result;
+}

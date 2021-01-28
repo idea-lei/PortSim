@@ -9,7 +9,6 @@ public class Container : MonoBehaviour
     public Guid Id;
     public OutField OutField;
     public InField InField;
-    public IndexInStack IndexInStack;
     #endregion
 
     #region private fields

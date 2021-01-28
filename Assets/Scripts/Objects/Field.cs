@@ -6,12 +6,12 @@ using UnityEngine;
 /// <summary>
 /// this is the base class of the fields (ioField, stackField)
 /// </summary>
-public abstract class Field : MonoBehaviour
-{
+public abstract class Field : MonoBehaviour {
     #region properties
     public Guid Id;
     public int DimX;
     public int DimZ;
+    public int MaxLayer;
     private Stack<Container>[,] _ground;
     public Stack<Container>[,] Ground {
         get { return _ground; }
@@ -43,12 +43,31 @@ public abstract class Field : MonoBehaviour
     #endregion
 
     #region logic methods
-    public virtual void AddToGround(Container container) {
+    public (Container, IndexInStack) FindContainerWithIndex(Guid id) {
         throw new NotImplementedException();
     }
 
-    public virtual Container RemoveFromGround(Container container) {
+    public virtual void AddToGround(Container container, IndexInStack index) {
+        if (!IsAbleToAddContainerToIndex(index)) {
+            throw new Exception("can not add container to index!");
+        }
+        container.tag = "container_stacked";
+        container.transform.SetParent(transform);
+        Ground[index.x, index.z].Push(container);
+    }
+
+    public virtual Container RemoveFromGround(Guid id) {
         throw new NotImplementedException();
+    }
+
+    public virtual Container RemoveFromGround(Container c_wanted) {
+        var index = CoordinateToIndex(c_wanted.transform.localPosition);
+        if(Ground[index.x, index.z].Peek() == c_wanted) {
+            Ground[index.x, index.z].Pop();
+        }
+
+        c_wanted.tag = "container_out";
+        return c_wanted;
     }
 
     public virtual void RearrangeContainer(Container container) {
@@ -66,12 +85,26 @@ public abstract class Field : MonoBehaviour
     /// this function is to destory the field and containers belongs to it
     /// </summary>
     public void DestroyField() {
-        
+        Destroy(gameObject);
+    }
+
+    public bool IsAbleToAddContainerToIndex(int x, int z) {
+        if (x >= DimX || z >= DimZ) return false;
+        if (Ground[x, z].Count + 1 > MaxLayer) return false;
+        return true;
+    }
+    public bool IsAbleToAddContainerToIndex(IndexInStack index) {
+        if (!index.IsValid) return false;
+        return IsAbleToAddContainerToIndex(index.x, index.z);
     }
     #endregion
 
     #region public minor methods
-    public Vector3 IndexToCoordinate() {
+    public Vector3 IndexToCoordinate(IndexInStack index) {
+        throw new NotImplementedException();
+    }
+
+    public IndexInStack CoordinateToIndex(Vector3 vec) {
         throw new NotImplementedException();
     }
 
@@ -85,8 +118,24 @@ public abstract class Field : MonoBehaviour
 
     }
 
-    private bool dimCheck(IndexInStack index) {
-        throw new NotImplementedException();
+    // todo: this function need to be trained for stackField
+    /// <summary>
+    /// this function could vary between stackField and outField
+    /// </summary>
+    /// <returns></returns>
+    protected virtual IndexInStack findIndexToStack() {
+        for (int x = 0; x < DimX; x++) {
+            for (int z = 0; z < DimZ; z++) {
+                if (IsAbleToAddContainerToIndex(x, z)) {
+                    return new IndexInStack { 
+                        IsValid = true,
+                        x=x,
+                        z=z
+                    };
+                }
+            }
+        }
+        return new IndexInStack();
     }
     #endregion
 }
