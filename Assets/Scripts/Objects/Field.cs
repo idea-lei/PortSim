@@ -48,7 +48,7 @@ public abstract class Field : MonoBehaviour {
     #endregion
 
     #region private / protected properties
-    protected Stack<Container>[,] _ground;
+    private Stack<Container>[,] _ground;
     [SerializeField]
     protected GameObject containerPrefab;
     #endregion

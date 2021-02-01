@@ -6,8 +6,31 @@ using System.Text;
 using UnityEngine;
 
 public sealed class InField : IoField {
-    private void Start() {
-        initContainers();
+    private MeshRenderer[] meshRenderersInChildren;
+    private BoxCollider[] collidersInChildren;
+    private void OnEnable() {
+        updateState(true);
+        if (meshRenderersInChildren == null) initContainers();
+        transform.position = Port.transform.position;
+    }
+
+    private void OnDisable() {
+        updateState(false);
+    }
+
+    private void updateState(bool state) {
+        GetComponent<MeshRenderer>().enabled = state;
+        if (meshRenderersInChildren != null) {
+            foreach (var m in meshRenderersInChildren) {
+                m.enabled = state;
+            }
+        }
+        GetComponent<MeshCollider>().enabled = state;
+        if (collidersInChildren != null) {
+            foreach (var c in collidersInChildren) {
+                c.enabled = state;
+            }
+        }
     }
 
     protected override void initContainers() {
@@ -17,5 +40,7 @@ public sealed class InField : IoField {
                 c.InField = this;
             }
         }
+        meshRenderersInChildren = GetComponentsInChildren<MeshRenderer>();
+        collidersInChildren = GetComponentsInChildren<BoxCollider>();
     }
 }

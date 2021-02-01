@@ -33,13 +33,13 @@ public class IoFields : MonoBehaviour {
         for (int i = 0; i < 3; i++) {
             var (obj, field) = GenerateInField();
             InFields.Add(field);
-            obj.SetActive(false);
+            field.enabled = false;
         }
         // init outFields, add 20 fields for test
         for (int i = 0; i < 5; i++) {
             var (obj, field) = GenerateOutField();
             OutFields.Add(field);
-            obj.SetActive(false);
+            field.enabled = false;
         }
     }
 

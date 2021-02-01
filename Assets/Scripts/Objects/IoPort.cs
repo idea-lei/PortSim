@@ -49,8 +49,17 @@ public class IoPort : MonoBehaviour
     }
 
     private void updateFieldProperties() {
-        CurrentField.gameObject.SetActive(true);
-        CurrentField.GetComponent<MeshRenderer>().enabled = false;
-        CurrentField.StartCoroutine(_currentField.WaitUntilEnable());
+        CurrentField.enabled = false;
+        CurrentField.StartCoroutine(WaitUntilEnable());
+    }
+
+    public IEnumerator WaitUntilEnable() {
+        Debug.Log((CurrentField is InField ? "In " : "Out ") + $"Container enable unitil {CurrentField.TimePlaned - DateTime.Now}");
+        while (CurrentField.TimePlaned > DateTime.Now) {
+            yield return null;
+
+        }
+        Debug.Log("time up!");
+        CurrentField.enabled = true;
     }
 }
