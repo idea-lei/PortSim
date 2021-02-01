@@ -7,6 +7,10 @@ TagManager:
   - container_in
   - container_out
   - container_stacked
+  - field_in
+  - field_stack
+  - field_out
+  - crane
   layers:
   - Default
   - TransparentFX

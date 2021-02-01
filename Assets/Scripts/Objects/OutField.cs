@@ -5,4 +5,8 @@ using UnityEngine;
 public class OutField : Field
 {
     public bool IsReady; //ready to leave (destory gameobjects)
+
+    protected override void initContainers() {
+        throw new System.NotImplementedException();
+    }
 }
