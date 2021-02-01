@@ -110,4 +110,6 @@ MonoBehaviour:
   DimX: 0
   DimZ: 0
   MaxLayer: 0
+  containerPrefab: {fileID: 5385178441320679463, guid: f7ee619fd64211e45b386bc250c8fb5a,
+    type: 3}
   IsReady: 0

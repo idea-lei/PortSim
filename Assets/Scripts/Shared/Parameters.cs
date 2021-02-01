@@ -9,15 +9,17 @@ public static class Parameters
     public static readonly int MaxLayer = 5;
 
     // number of containers in z/x
-    public static readonly int DimZ = 5;
-    public static readonly int DimX = 8;
+    public static readonly int DimZ = 8;
+    public static readonly int DimX = 10;
+    public static readonly int MinDim = 2; // this is only for test (random generation)
 
     public static readonly float ContainerHeight = 2.5f;
     public static readonly float ContainerWidth = 2.5f;
     public static readonly float ContainerLength_Long = 12f;
     public static readonly float ContainerLength_Short = 6f;
 
-    public static readonly float Gap = 1f;
+    public static readonly float Gap_Container = 1f;
+    public static readonly float Gap_Field = 5f;
     public static readonly float SpawnInterval = 10f;
     #endregion
 

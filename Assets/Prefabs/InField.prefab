@@ -28,7 +28,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3579832801740148446}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 10.29, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 0.0001, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -110,4 +110,6 @@ MonoBehaviour:
   DimX: 0
   DimZ: 0
   MaxLayer: 0
+  containerPrefab: {fileID: 5385178441320679463, guid: f7ee619fd64211e45b386bc250c8fb5a,
+    type: 3}
   GenerationPoint: {x: 0, y: 0}
