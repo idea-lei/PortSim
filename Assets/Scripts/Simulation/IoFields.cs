@@ -5,6 +5,7 @@ using UnityEngine;
 
 /// <summary>
 /// this class is to generate and store the input/output fields
+/// it's not the ioField!
 /// </summary>
 public class IoFields : MonoBehaviour {
     public HashSet<InField> InFields = new HashSet<InField>();

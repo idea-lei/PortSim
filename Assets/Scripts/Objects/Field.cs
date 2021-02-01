@@ -7,14 +7,17 @@ using UnityEngine;
 
 /// <summary>
 /// this is the base class of the fields (ioField, stackField)
+/// this class should have no unity life circle methods
 /// </summary>
 public abstract class Field : MonoBehaviour {
     #region public properties
     public Guid Id;
 
+    // the fllowing 3 elements should be set on Awake
     public int DimX;
     public int DimZ;
     public int MaxLayer;
+
     public Stack<Container>[,] Ground {
         get { return _ground; }
     }
