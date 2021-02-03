@@ -2,7 +2,7 @@
 
 ## Forbidden / Must attention
 1. necver use update / fixedUpdate to change States, use Event instead! in case you really need this, backup your current version in case you need to roll back!
-
+2. abstract class should have no Lifecircle functions, write them as virtual and override in end class!
 ## LifeCycle
 ### Awake
 1. Find Objects

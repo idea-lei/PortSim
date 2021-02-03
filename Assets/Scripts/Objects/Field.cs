@@ -18,7 +18,6 @@ public abstract class Field : MonoBehaviour {
     public int DimZ;
     public int MaxLayer;
 
-
     public Stack<Container>[,] Ground {
         get { return _ground; }
     }
@@ -148,7 +147,7 @@ public abstract class Field : MonoBehaviour {
     #endregion
 
     #region private methods
-    protected void initField() {
+    protected virtual void initField() {
         Id = Guid.NewGuid();
         _ground = new Stack<Container>[DimX, DimZ];
         // because the plane scale 1 means 10m

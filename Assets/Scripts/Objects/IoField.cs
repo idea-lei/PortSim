@@ -14,24 +14,19 @@ public abstract class IoField : Field {
     public TimeSpan EstimatedDuration;  // this estimated duration for loading / unloading process
     [NonSerialized] public IoPort Port;
 
-    #region unity methods
-    private void Awake() {
+    #region logic methods
+    protected override void initField() {
         DimX = UnityEngine.Random.Range(1, Parameters.DimX - Parameters.MinDim);
         DimZ = UnityEngine.Random.Range(1, Parameters.DimZ - Parameters.MinDim);
         MaxLayer = UnityEngine.Random.Range(1, Parameters.MaxLayer - Parameters.MinDim);
-        initField();
         TimePlaned = DateTime.Now + new TimeSpan(
             UnityEngine.Random.Range(0, 0),
             UnityEngine.Random.Range(0, 2),
             UnityEngine.Random.Range(0, 3),
             UnityEngine.Random.Range(0, 30));
-
         assignPort();
+        base.initField();
     }
-    #endregion
-
-    #region logic methods
-
     private void assignPort() {
         var ports = FindObjectsOfType<IoPort>();
         Port = ports[UnityEngine.Random.Range(0, ports.Length)];

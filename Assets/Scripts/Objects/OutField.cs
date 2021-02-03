@@ -8,10 +8,11 @@ public class OutField : IoField
 {
     private void Awake() {
         name = "OutField_" + DateTime.Now.ToString("T");
+        base.initField();
+        transform.position = Port.transform.position;
     }
     private void OnEnable() {
         updateState(true);
-        transform.position = Port.transform.position;
     }
 
     private void OnDisable() {

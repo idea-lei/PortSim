@@ -8,10 +8,14 @@ using UnityEngine;
 public sealed class InField : IoField {
     private MeshRenderer[] meshRenderersInChildren;
     private BoxCollider[] collidersInChildren;
+
+    private bool inited {
+        get {
+            return meshRenderersInChildren != null && collidersInChildren != null;
+        }
+    }
     private void Awake() {
-        name = "InField_" + DateTime.Now.ToString("T");
-        if (meshRenderersInChildren == null) initContainers();
-        transform.position = Port.transform.position;
+        initField();
     }
     private void OnEnable() {
         updateState(true);
@@ -35,10 +39,17 @@ public sealed class InField : IoField {
         }
     }
 
+    protected override void initField() {
+        base.initField();
+        name = "InField_" + DateTime.Now.ToString("T");
+        if (!inited) initContainers();
+        transform.position = Port.transform.position;
+    }
+
     protected override void initContainers() {
         base.initContainers();
-        foreach(var s in Ground) {
-            foreach(var c in s) {
+        foreach (var s in Ground) {
+            foreach (var c in s) {
                 c.InField = this;
             }
         }
