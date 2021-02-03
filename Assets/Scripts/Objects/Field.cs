@@ -14,9 +14,7 @@ public abstract class Field : MonoBehaviour {
     public Guid Id;
 
     // the fllowing 3 elements should be set on Awake
-    public int DimX;
-    public int DimZ;
-    public int MaxLayer;
+    public int DimX, DimZ, MaxLayer;
 
     public Stack<Container>[,] Ground {
         get { return _ground; }
@@ -61,7 +59,7 @@ public abstract class Field : MonoBehaviour {
     #region private / protected properties
     private Stack<Container>[,] _ground;
     [SerializeField]
-    protected GameObject containerPrefab;
+    private GameObject containerPrefab;
     private IoFieldsGenerator ioFieldsGenerator;
     #endregion
 

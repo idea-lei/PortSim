@@ -40,15 +40,4 @@ public class IoFieldsGenerator : MonoBehaviour {
         outField.enabled = false;
         return (obj, outField);
     }
-
-    private void setFieldActive(IoField field) {
-        field.Port.FieldsBuffer.Remove(field);
-        field.gameObject.SetActive(true);
-    }
-
-    private bool isOkToActivate(IoField field) {
-        if (DateTime.Now <= field.TimePlaned) return false;
-        if (field.Port.CurrentField != null) return false;
-        return true;
-    }
 }

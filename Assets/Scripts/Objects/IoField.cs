@@ -14,6 +14,10 @@ public abstract class IoField : Field {
     [NonSerialized] public TimeSpan EstimatedDuration;  // this estimated duration for loading / unloading process
     [NonSerialized] public IoPort Port;
 
+    private void OnDestroy() {
+        if(Port.isActiveAndEnabled) Port.UpdateCurrentField();
+    }
+
     #region logic methods
     protected override void initField() {
         DimX = UnityEngine.Random.Range(1, Parameters.DimX - Parameters.MinDim);

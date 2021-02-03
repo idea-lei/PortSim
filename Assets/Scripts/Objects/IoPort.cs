@@ -10,8 +10,7 @@ using System.Text;
 /// </summary>
 public class IoPort : MonoBehaviour {
     // the max dim of the ioField
-    [NonSerialized] public int DimX;
-    [NonSerialized] public int DimZ;
+    [NonSerialized] public int DimX, DimZ;
 
     private IoField _currentField;
 
@@ -26,7 +25,7 @@ public class IoPort : MonoBehaviour {
 
     public void UpdateCurrentField() {
         _currentField = FindNextField();
-        updateFieldProperties();
+        StartCoroutine(WaitUntilEnable());
     }
 
     /// <summary>
@@ -39,11 +38,6 @@ public class IoPort : MonoBehaviour {
         var next = FieldsBuffer[0];
         FieldsBuffer.RemoveAt(0);
         return next;
-    }
-
-    private void updateFieldProperties() {
-        CurrentField.enabled = false;
-        CurrentField.StartCoroutine(WaitUntilEnable());
     }
 
     public IEnumerator WaitUntilEnable() {
