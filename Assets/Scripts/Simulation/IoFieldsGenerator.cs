@@ -13,16 +13,6 @@ public class IoFieldsGenerator : MonoBehaviour {
     private GameObject inFieldPrefab;
     [SerializeField]
     private GameObject outFieldPrefab;
-    [SerializeField]
-    private GameObject inFieldsGroup;
-    [SerializeField]
-    private GameObject outFieldsGroup;
-
-    private IoPort[] ioPorts;
-
-    private void Awake() {
-        ioPorts = FindObjectsOfType<IoPort>();
-    }
 
     private void Start() {
         initFields();
@@ -32,13 +22,13 @@ public class IoFieldsGenerator : MonoBehaviour {
         // init inFields, add 3 fields for test
         for (int i = 0; i < 3; i++) {
             var (obj, field) = GenerateInField();
-            field.transform.SetParent(inFieldsGroup.transform);
+            field.transform.SetParent(field.Port.transform);
             field.enabled = false;
         }
         // init outFields, add 20 fields for test
         for (int i = 0; i < 5; i++) {
             var (obj, field) = GenerateOutField();
-            field.transform.SetParent(outFieldsGroup.transform);
+            field.transform.SetParent(field.Port.transform);
             field.enabled = false;
         }
     }

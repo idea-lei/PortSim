@@ -7,8 +7,12 @@ using UnityEngine;
 public class OutField : IoField
 {
     private void Awake() {
-        name = "OutField_" + DateTime.Now.ToString("T");
+        initField();
+    }
+
+    protected override void initField() {
         base.initField();
+        name = "Out" + name;
         transform.position = Port.transform.position;
     }
     private void OnEnable() {

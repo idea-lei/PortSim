@@ -121,36 +121,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &44068429
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 44068430}
-  m_Layer: 0
-  m_Name: OutFields
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &44068430
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 44068429}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 7
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &182197369
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -619,7 +589,7 @@ MonoBehaviour:
       onUpdateState:
         m_PersistentCalls:
           m_Calls: []
-    - position: {x: 638, y: 454}
+    - position: {x: 636, y: 184}
       id: MoveOut
       onEnterState:
         m_PersistentCalls:
@@ -641,7 +611,7 @@ MonoBehaviour:
       onUpdateState:
         m_PersistentCalls:
           m_Calls: []
-    - position: {x: 475, y: 455}
+    - position: {x: 637, y: 399}
       id: MoveIn
       onEnterState:
         m_PersistentCalls:
@@ -750,11 +720,23 @@ MonoBehaviour:
           m_Calls: []
       duration: 0
       timeMode: 0
+    - id: Transition 8
+      label: 
+      originID: MoveOut
+      targetID: Wait
+      onEnterTransition:
+        m_PersistentCalls:
+          m_Calls: []
+      onExitTransition:
+        m_PersistentCalls:
+          m_Calls: []
+      duration: 0
+      timeMode: 0
     preferences:
       zoomSettings:
         zoomFactor: 1
       dragSettings:
-        dragOffset: {x: 0, y: 0}
+        dragOffset: {x: -221.71431, y: -115.71434}
       gridSettings:
         isEnabled: 1
       labelSettings:
@@ -806,9 +788,101 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   graph:
-    states: []
+    states:
+    - position: {x: 279, y: 120}
+      id: Port_1_Empty
+      onEnterState:
+        m_PersistentCalls:
+          m_Calls: []
+      onExitState:
+        m_PersistentCalls:
+          m_Calls: []
+      onUpdateState:
+        m_PersistentCalls:
+          m_Calls: []
+    - position: {x: 517, y: 119}
+      id: Port_2_Empty
+      onEnterState:
+        m_PersistentCalls:
+          m_Calls: []
+      onExitState:
+        m_PersistentCalls:
+          m_Calls: []
+      onUpdateState:
+        m_PersistentCalls:
+          m_Calls: []
+    - position: {x: 279, y: 233}
+      id: Port_1_Occupied
+      onEnterState:
+        m_PersistentCalls:
+          m_Calls: []
+      onExitState:
+        m_PersistentCalls:
+          m_Calls: []
+      onUpdateState:
+        m_PersistentCalls:
+          m_Calls: []
+    - position: {x: 517, y: 234}
+      id: Port_2_Occupied
+      onEnterState:
+        m_PersistentCalls:
+          m_Calls: []
+      onExitState:
+        m_PersistentCalls:
+          m_Calls: []
+      onUpdateState:
+        m_PersistentCalls:
+          m_Calls: []
     anyStates: []
-    transitions: []
+    transitions:
+    - id: Transition
+      label: 
+      originID: Port_1_Empty
+      targetID: Port_1_Occupied
+      onEnterTransition:
+        m_PersistentCalls:
+          m_Calls: []
+      onExitTransition:
+        m_PersistentCalls:
+          m_Calls: []
+      duration: 0
+      timeMode: 0
+    - id: Transition 1
+      label: 
+      originID: Port_1_Occupied
+      targetID: Port_1_Empty
+      onEnterTransition:
+        m_PersistentCalls:
+          m_Calls: []
+      onExitTransition:
+        m_PersistentCalls:
+          m_Calls: []
+      duration: 0
+      timeMode: 0
+    - id: Transition 2
+      label: 
+      originID: Port_2_Empty
+      targetID: Port_2_Occupied
+      onEnterTransition:
+        m_PersistentCalls:
+          m_Calls: []
+      onExitTransition:
+        m_PersistentCalls:
+          m_Calls: []
+      duration: 0
+      timeMode: 0
+    - id: Transition 3
+      label: 
+      originID: Port_2_Occupied
+      targetID: Port_2_Empty
+      onEnterTransition:
+        m_PersistentCalls:
+          m_Calls: []
+      onExitTransition:
+        m_PersistentCalls:
+          m_Calls: []
+      duration: 0
+      timeMode: 0
     preferences:
       zoomSettings:
         zoomFactor: 1
@@ -818,7 +892,7 @@ MonoBehaviour:
         isEnabled: 1
       labelSettings:
         isEnabled: 1
-    entryState: 
+    entryState: Port_1_Empty
 --- !u!1 &1362254851
 GameObject:
   m_ObjectHideFlags: 0
@@ -973,14 +1047,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 17f490eda2f6dcf479f44c76e33bdbd8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  InFields: []
-  OutFields: []
   inFieldPrefab: {fileID: 3579832801740148446, guid: cb2eac5053b25b94b859052a0641731d,
     type: 3}
   outFieldPrefab: {fileID: 266249568749748751, guid: 90e6e8b69055dc24a893ead275e89e36,
     type: 3}
-  inFieldsGroup: {fileID: 1958057486}
-  outFieldsGroup: {fileID: 44068429}
 --- !u!4 &1544357562
 Transform:
   m_ObjectHideFlags: 0
@@ -994,34 +1064,4 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 3
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1958057486
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1958057487}
-  m_Layer: 0
-  m_Name: InFields
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1958057487
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1958057486}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

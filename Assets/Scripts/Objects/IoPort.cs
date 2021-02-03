@@ -8,22 +8,16 @@ using System.Text;
 /// <summary>
 /// this class stricts the ioField, means which size of the field is suitable for the port
 /// </summary>
-public class IoPort : MonoBehaviour
-{
+public class IoPort : MonoBehaviour {
     // the max dim of the ioField
     [NonSerialized] public int DimX;
     [NonSerialized] public int DimZ;
 
     private IoField _currentField;
-    private IoFieldsGenerator ioFields;
 
     public List<IoField> FieldsBuffer = new List<IoField>();
     public IoField CurrentField {
         get { return _currentField; }
-    }
-
-    private void Awake() {
-        ioFields = FindObjectOfType<IoFieldsGenerator>();
     }
 
     private void Start() {
@@ -65,8 +59,8 @@ public class IoPort : MonoBehaviour
     public override string ToString() {
         var str = new StringBuilder();
         str.Append(name + "\n");
-        foreach(var f in FieldsBuffer) {
-            str.Append($"{f.name} -- time planed: {f.TimePlaned.ToString("T")}\n");
+        foreach (var f in FieldsBuffer) {
+            str.Append($"{f.name} -- time planed: {f.TimePlaned:T}\n");
         }
         return str.ToString();
     }

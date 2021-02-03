@@ -9,9 +9,9 @@ using UnityEngine;
 /// base class of the inField and outField
 /// </summary>
 public abstract class IoField : Field {
-    public DateTime TimePlaned;
-    public DateTime TimeReal;
-    public TimeSpan EstimatedDuration;  // this estimated duration for loading / unloading process
+    [NonSerialized] public DateTime TimePlaned;
+    [NonSerialized] public DateTime TimeReal;
+    [NonSerialized] public TimeSpan EstimatedDuration;  // this estimated duration for loading / unloading process
     [NonSerialized] public IoPort Port;
 
     #region logic methods
@@ -24,6 +24,7 @@ public abstract class IoField : Field {
             UnityEngine.Random.Range(0, 2),
             UnityEngine.Random.Range(0, 3),
             UnityEngine.Random.Range(0, 30));
+        name = "Field_" + TimePlaned.ToString("G");
         assignPort();
         base.initField();
     }
@@ -32,13 +33,13 @@ public abstract class IoField : Field {
         Port = ports[UnityEngine.Random.Range(0, ports.Length)];
         Port.FieldsBuffer.Add(this);
     }
-    #endregion
-
-    #region minor methods
     protected virtual void updateState(bool state) {
         GetComponent<MeshRenderer>().enabled = state;
         GetComponent<MeshCollider>().enabled = state;
     }
+    #endregion
+
+    #region minor methods
     public override string ToString() {
         var str = new StringBuilder();
         str.Append($"time planed: {TimePlaned.ToString("T")}\n");

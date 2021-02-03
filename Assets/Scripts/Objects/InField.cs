@@ -9,11 +9,7 @@ public sealed class InField : IoField {
     private MeshRenderer[] meshRenderersInChildren;
     private BoxCollider[] collidersInChildren;
 
-    private bool inited {
-        get {
-            return meshRenderersInChildren != null && collidersInChildren != null;
-        }
-    }
+    #region unity life circle
     private void Awake() {
         initField();
     }
@@ -24,6 +20,7 @@ public sealed class InField : IoField {
     private void OnDisable() {
         updateState(false);
     }
+    #endregion
 
     protected override void updateState(bool state) {
         base.updateState(state);
@@ -41,11 +38,14 @@ public sealed class InField : IoField {
 
     protected override void initField() {
         base.initField();
-        name = "InField_" + DateTime.Now.ToString("T");
-        if (!inited) initContainers();
+        name = "In"+name;
+        initContainers();
         transform.position = Port.transform.position;
     }
 
+    /// <summary>
+    /// assign properties for generated containers
+    /// </summary>
     protected override void initContainers() {
         base.initContainers();
         foreach (var s in Ground) {
