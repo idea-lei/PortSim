@@ -18,14 +18,13 @@ public sealed class InField : IoField {
         updateState(false);
     }
 
-    private void updateState(bool state) {
-        GetComponent<MeshRenderer>().enabled = state;
+    protected override void updateState(bool state) {
+        base.updateState(state);
         if (meshRenderersInChildren != null) {
             foreach (var m in meshRenderersInChildren) {
                 m.enabled = state;
             }
         }
-        GetComponent<MeshCollider>().enabled = state;
         if (collidersInChildren != null) {
             foreach (var c in collidersInChildren) {
                 c.enabled = state;

@@ -39,6 +39,10 @@ public abstract class IoField : Field {
     #endregion
 
     #region minor methods
+    protected virtual void updateState(bool state) {
+        GetComponent<MeshRenderer>().enabled = state;
+        GetComponent<MeshCollider>().enabled = state;
+    }
     public override string ToString() {
         var str = new StringBuilder();
         str.Append($"time planed: {TimePlaned.ToString("T")}\n");

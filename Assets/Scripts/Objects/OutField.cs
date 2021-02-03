@@ -6,4 +6,12 @@ using UnityEngine;
 
 public class OutField : IoField
 {
+    private void OnEnable() {
+        updateState(true);
+        transform.position = Port.transform.position;
+    }
+
+    private void OnDisable() {
+        updateState(false);
+    }
 }
