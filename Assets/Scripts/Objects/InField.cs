@@ -8,24 +8,27 @@ using UnityEngine;
 public sealed class InField : IoField {
     private MeshRenderer[] meshRenderersInChildren;
     private BoxCollider[] collidersInChildren;
+
+    #region unity life circle
+    private void Awake() {
+        initField();
+    }
     private void OnEnable() {
         updateState(true);
-        if (meshRenderersInChildren == null) initContainers();
-        transform.position = Port.transform.position;
     }
 
     private void OnDisable() {
         updateState(false);
     }
+    #endregion
 
-    private void updateState(bool state) {
-        GetComponent<MeshRenderer>().enabled = state;
+    protected override void updateState(bool state) {
+        base.updateState(state);
         if (meshRenderersInChildren != null) {
             foreach (var m in meshRenderersInChildren) {
                 m.enabled = state;
             }
         }
-        GetComponent<MeshCollider>().enabled = state;
         if (collidersInChildren != null) {
             foreach (var c in collidersInChildren) {
                 c.enabled = state;
@@ -33,10 +36,20 @@ public sealed class InField : IoField {
         }
     }
 
+    protected override void initField() {
+        base.initField();
+        name = "In"+name;
+        initContainers();
+        transform.position = Port.transform.position;
+    }
+
+    /// <summary>
+    /// assign properties for generated containers
+    /// </summary>
     protected override void initContainers() {
         base.initContainers();
-        foreach(var s in Ground) {
-            foreach(var c in s) {
+        foreach (var s in Ground) {
+            foreach (var c in s) {
                 c.InField = this;
             }
         }

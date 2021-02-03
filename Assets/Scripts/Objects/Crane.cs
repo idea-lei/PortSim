@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class Crane : MonoBehaviour
 {
+    private List<Container> _pickupQueue = new List<Container>();
+    public List<Container> PickupQueue {
+        get => _pickupQueue;
+    }
     private void OnTriggerEnter(Collider other) {
         if (other.CompareTag("container_in")) {
             var container = other.GetComponent<Container>();
@@ -17,6 +21,13 @@ public class Crane : MonoBehaviour
     }
 
     #region private methods
+    /// <summary>
+    ///  
+    /// </summary>
+    /// <remarks>
+    /// do not modify this method unless you can really figure out 
+    /// relationship between the vector2.y here and position.z
+    /// </remarks>
     private void moveTo(Vector2 destination, bool isLoaded) {
         // fixedUpdate time span is 0.02f
         float timeSpan = 0.02f;

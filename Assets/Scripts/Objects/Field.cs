@@ -147,7 +147,7 @@ public abstract class Field : MonoBehaviour {
     #endregion
 
     #region private methods
-    protected void initField() {
+    protected virtual void initField() {
         Id = Guid.NewGuid();
         _ground = new Stack<Container>[DimX, DimZ];
         // because the plane scale 1 means 10m
@@ -158,7 +158,7 @@ public abstract class Field : MonoBehaviour {
     }
 
     /// <summary>
-    /// to init containers for inField and stackField
+    /// to generate containers for field
     /// </summary>
     protected virtual void initContainers() {
         for (int x = 0; x < DimX; x++) {
