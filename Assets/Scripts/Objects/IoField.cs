@@ -46,7 +46,7 @@ public abstract class IoField : Field {
     #region minor methods
     public override string ToString() {
         var str = new StringBuilder();
-        str.Append($"time planed: {TimePlaned.ToString("T")}\n");
+        str.Append($"time planed: {TimePlaned:T}\n");
         str.Append($"Ground:\n{base.ToString()}");
         return str.ToString();
     }

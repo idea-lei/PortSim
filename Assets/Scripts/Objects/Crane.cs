@@ -1,26 +1,44 @@
-﻿using System.Collections;
+﻿using Ilumisoft.VisualStateMachine;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class Crane : MonoBehaviour
 {
-    private List<Container> _pickupQueue = new List<Container>();
-    public List<Container> PickupQueue {
-        get => _pickupQueue;
+    private StateMachine stateMachine;
+    private Container containerCarry;
+    private Container containerWant;
+    private void Awake() {
+        stateMachine = FindObjectOfType<StateMachine>();
     }
     private void OnTriggerEnter(Collider other) {
-        if (other.CompareTag("container_in")) {
-            var container = other.GetComponent<Container>();
-            if (container.Id.ToString()== "the next id we want") {
-                // move container to outfield
-            }
-        }
-        if (other.CompareTag("field")) {
-            Debug.LogError("crane touched field!");
+        switch (other.tag) {
+            case "container_in":
+            case "container_stacked":
+                // pickup and decide where to go
+                break;
+            default:
+                throw new Exception("illegal crane touch");
         }
     }
 
     #region private methods
+    /// <summary>
+    /// find container in inField or StackField to move
+    /// </summary>
+    /// <returns></returns>
+    public Container FindContainerToPick() {
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// move container from inField to stackField, not for outField
+    /// </summary>
+    /// <returns>available index in stackField</returns>
+    public IndexInStack FindIndexToStack() {
+        throw new NotImplementedException();
+    }
     /// <summary>
     ///  
     /// </summary>

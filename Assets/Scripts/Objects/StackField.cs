@@ -23,6 +23,7 @@ public sealed class StackField : Field {
         foreach (var s in Ground) {
             foreach (var c in s) {
                 assignOutPort(c);
+                c.tag = "container_stacked";
             }
         }
     }

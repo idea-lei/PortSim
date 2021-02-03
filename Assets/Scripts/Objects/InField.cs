@@ -52,6 +52,7 @@ public sealed class InField : IoField {
             foreach (var c in s) {
                 c.InField = this;
                 assignOutPort(c);
+                c.tag = "container_in";
             }
         }
         meshRenderersInChildren = GetComponentsInChildren<MeshRenderer>();
