@@ -50,8 +50,7 @@ public abstract class Field : MonoBehaviour {
     public int Count {
         get {
             int sum = 0;
-            foreach(var s in Ground) {
-                if (s == null) break;
+            foreach (var s in Ground) {
                 sum += s.Count;
             }
             return sum;
@@ -63,6 +62,7 @@ public abstract class Field : MonoBehaviour {
     private Stack<Container>[,] _ground;
     [SerializeField]
     protected GameObject containerPrefab;
+    private IoFieldsGenerator ioFieldsGenerator;
     #endregion
 
     #region logic methods
@@ -169,8 +169,14 @@ public abstract class Field : MonoBehaviour {
 
     #region private methods
     protected virtual void initField() {
+        ioFieldsGenerator = FindObjectOfType<IoFieldsGenerator>();
         Id = Guid.NewGuid();
         _ground = new Stack<Container>[DimX, DimZ];
+        for (int x = 0; x < DimX; x++) {
+            for (int z = 0; z < DimZ; z++) {
+                Ground[x, z] = new Stack<Container>();
+            }
+        }
         // because the plane scale 1 means 10m
         transform.localScale = new Vector3(
             (DimX * (Parameters.ContainerLength_Long + Parameters.Gap_Container) + Parameters.Gap_Container) / 10f,
@@ -184,7 +190,6 @@ public abstract class Field : MonoBehaviour {
     protected virtual void initContainers() {
         for (int x = 0; x < DimX; x++) {
             for (int z = 0; z < DimZ; z++) {
-                Ground[x, z] = new Stack<Container>();
                 for (int k = 0; k <= UnityEngine.Random.Range(0, MaxLayer); k++) {
                     var pos = IndexToLocalPosition(x, z, Ground[x, z].Count());
                     var container = generateContainer(pos);
@@ -206,6 +211,31 @@ public abstract class Field : MonoBehaviour {
         container.Id = Guid.NewGuid();
 
         return container;
+    }
+
+    /// <summary>
+    /// this method assign the outFields of the containers,
+    /// will generate outField if not exist
+    /// </summary>
+    protected void assignOutPort(Container container) {
+        void assign(Container c, OutField f) {
+            f.incomingContainers.Add(c);
+            c.OutField = f;
+        }
+
+        if (UnityEngine.Random.Range(0, 1f) > Parameters.PossibilityOfNewOutField) {
+            var outFields = FindObjectsOfType<OutField>();
+            if (outFields.Length > 0) {
+                var index = UnityEngine.Random.Range(0, outFields.Length);
+                if (!outFields[index].IsGroundFull) {
+                    assign(container, outFields[index]);
+                    return;
+                }
+            }
+
+        }
+        var (obj, field) = ioFieldsGenerator.GenerateOutField();
+        assign(container, field);
     }
 
     private (float, float, float) genRGB() {

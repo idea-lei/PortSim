@@ -51,6 +51,7 @@ public sealed class InField : IoField {
         foreach (var s in Ground) {
             foreach (var c in s) {
                 c.InField = this;
+                assignOutPort(c);
             }
         }
         meshRenderersInChildren = GetComponentsInChildren<MeshRenderer>();
