@@ -15,6 +15,10 @@ public class IoFields : MonoBehaviour {
     private GameObject inFieldPrefab;
     [SerializeField]
     private GameObject outFieldPrefab;
+    [SerializeField]
+    private GameObject inFieldsGroup;
+    [SerializeField]
+    private GameObject outFieldsGroup;
 
     //private IoPort[] ioPorts;
 
@@ -33,12 +37,14 @@ public class IoFields : MonoBehaviour {
         for (int i = 0; i < 3; i++) {
             var (obj, field) = GenerateInField();
             InFields.Add(field);
+            field.transform.SetParent(inFieldsGroup.transform);
             field.enabled = false;
         }
         // init outFields, add 20 fields for test
         for (int i = 0; i < 5; i++) {
             var (obj, field) = GenerateOutField();
             OutFields.Add(field);
+            field.transform.SetParent(outFieldsGroup.transform);
             field.enabled = false;
         }
     }

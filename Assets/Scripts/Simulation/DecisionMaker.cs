@@ -4,4 +4,10 @@ using UnityEngine;
 
 public class DecisionMaker : MonoBehaviour
 {
+    private Crane crane;
+    private void Awake() {
+        crane = FindObjectOfType<Crane>();
+    }
+
+
 }
