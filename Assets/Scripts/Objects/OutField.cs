@@ -6,6 +6,15 @@ using UnityEngine;
 
 public class OutField : IoField
 {
+    public List<Container> incomingContainers = new List<Container>();
+
+    public override bool IsGroundEmpty { get {
+            return base.IsGroundEmpty && incomingContainers.Count ==0;
+        } 
+    }
+
+    public override bool IsGroundFull => incomingContainers.Count + Count >= MaxCount;
+
     private void Awake() {
         initField();
     }

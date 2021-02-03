@@ -21,27 +21,23 @@ public class IoFieldsGenerator : MonoBehaviour {
     private void initFields() {
         // init inFields, add 3 fields for test
         for (int i = 0; i < 3; i++) {
-            var (obj, field) = GenerateInField();
-            field.transform.SetParent(field.Port.transform);
-            field.enabled = false;
-        }
-        // init outFields, add 20 fields for test
-        for (int i = 0; i < 5; i++) {
-            var (obj, field) = GenerateOutField();
-            field.transform.SetParent(field.Port.transform);
-            field.enabled = false;
+            GenerateInField();
         }
     }
 
     public (GameObject, InField) GenerateInField() {
         var obj = Instantiate(inFieldPrefab);
         var inField = obj.GetComponent<InField>();
+        inField.transform.SetParent(inField.Port.transform);
+        inField.enabled = false;
         return (obj, inField);
     }
 
     public (GameObject, OutField) GenerateOutField() {
         var obj = Instantiate(outFieldPrefab);
         var outField = obj.GetComponent<OutField>();
+        outField.transform.SetParent(outField.Port.transform);
+        outField.enabled = false;
         return (obj, outField);
     }
 

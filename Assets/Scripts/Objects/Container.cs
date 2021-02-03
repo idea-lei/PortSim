@@ -31,4 +31,10 @@ public class Container : MonoBehaviour
         }
     }
     #endregion
+
+    public override string ToString() {
+        return $"{name}\n" +
+            $"OutField: " + (OutField == null ? "" :OutField.name) + "\n" +
+            $"InField: " + (InField == null ? "" : InField.name);
+    }
 }

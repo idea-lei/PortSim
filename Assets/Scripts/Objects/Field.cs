@@ -21,7 +21,7 @@ public abstract class Field : MonoBehaviour {
     public Stack<Container>[,] Ground {
         get { return _ground; }
     }
-    public bool IsGroundEmpty {
+    public virtual bool IsGroundEmpty {
         get {
             bool isEmpty = true;
             foreach (var stack in Ground) {
@@ -33,7 +33,7 @@ public abstract class Field : MonoBehaviour {
             return isEmpty;
         }
     }
-    public bool IsGroundFull {
+    public virtual bool IsGroundFull {
         get {
             bool isFull = true;
             foreach (var stack in Ground) {
@@ -43,6 +43,18 @@ public abstract class Field : MonoBehaviour {
                 }
             }
             return isFull;
+        }
+    }
+    public int MaxCount => DimX * DimZ * MaxLayer;
+
+    public int Count {
+        get {
+            int sum = 0;
+            foreach(var s in Ground) {
+                if (s == null) break;
+                sum += s.Count;
+            }
+            return sum;
         }
     }
     #endregion
@@ -62,9 +74,18 @@ public abstract class Field : MonoBehaviour {
         if (!IsAbleToAddContainerToIndex(index)) {
             throw new Exception("can not add container to index!");
         }
-        container.tag = "container_stacked";
+        //container.tag = "container_stacked";
         container.transform.SetParent(transform);
         Ground[index.x, index.z].Push(container);
+    }
+
+    /// <summary>
+    /// this method will automatically find a index to stack the container
+    /// </summary>
+    /// <param name="container"></param>
+    public virtual void AddToGround(Container container) {
+        var index = findIndexToStack();
+        AddToGround(container, index);
     }
 
     public virtual Container RemoveFromGround(Guid id) {

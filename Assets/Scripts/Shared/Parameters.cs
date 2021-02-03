@@ -21,6 +21,8 @@ public static class Parameters
     public static readonly float Gap_Container = 1f;
     public static readonly float Gap_Field = 5f;
     public static readonly float SpawnInterval = 10f;
+
+    public static readonly float PossibilityOfNewOutField = 0.1f; // this is only for test (random generation)
     #endregion
 
     #region Movement
