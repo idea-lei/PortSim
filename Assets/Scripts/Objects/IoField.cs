@@ -12,7 +12,7 @@ public abstract class IoField : Field {
     public DateTime TimePlaned;
     public DateTime TimeReal;
     public TimeSpan EstimatedDuration;  // this estimated duration for loading / unloading process
-    public IoPort Port;
+    [NonSerialized] public IoPort Port;
 
     #region unity methods
     private void Awake() {
@@ -35,6 +35,7 @@ public abstract class IoField : Field {
     private void assignPort() {
         var ports = FindObjectsOfType<IoPort>();
         Port = ports[UnityEngine.Random.Range(0, ports.Length)];
+        Port.FieldsBuffer.Add(this);
     }
     #endregion
 

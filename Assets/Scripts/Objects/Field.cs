@@ -18,6 +18,7 @@ public abstract class Field : MonoBehaviour {
     public int DimZ;
     public int MaxLayer;
 
+
     public Stack<Container>[,] Ground {
         get { return _ground; }
     }

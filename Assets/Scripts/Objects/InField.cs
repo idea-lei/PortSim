@@ -8,10 +8,13 @@ using UnityEngine;
 public sealed class InField : IoField {
     private MeshRenderer[] meshRenderersInChildren;
     private BoxCollider[] collidersInChildren;
-    private void OnEnable() {
-        updateState(true);
+    private void Awake() {
+        name = "InField_" + DateTime.Now.ToString("T");
         if (meshRenderersInChildren == null) initContainers();
         transform.position = Port.transform.position;
+    }
+    private void OnEnable() {
+        updateState(true);
     }
 
     private void OnDisable() {

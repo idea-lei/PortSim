@@ -7,9 +7,7 @@ using UnityEngine;
 /// this class is to generate and store the input/output fields
 /// it's not the ioField!
 /// </summary>
-public class IoFields : MonoBehaviour {
-    public List<InField> InFields;
-    public List<OutField> OutFields;
+public class IoFieldsGenerator : MonoBehaviour {
 
     [SerializeField]
     private GameObject inFieldPrefab;
@@ -20,12 +18,10 @@ public class IoFields : MonoBehaviour {
     [SerializeField]
     private GameObject outFieldsGroup;
 
-    //private IoPort[] ioPorts;
+    private IoPort[] ioPorts;
 
     private void Awake() {
-        InFields = new List<InField>();
-        OutFields = new List<OutField>();
-        //ioPorts = FindObjectsOfType<IoPort>();
+        ioPorts = FindObjectsOfType<IoPort>();
     }
 
     private void Start() {
@@ -36,14 +32,12 @@ public class IoFields : MonoBehaviour {
         // init inFields, add 3 fields for test
         for (int i = 0; i < 3; i++) {
             var (obj, field) = GenerateInField();
-            InFields.Add(field);
             field.transform.SetParent(inFieldsGroup.transform);
             field.enabled = false;
         }
         // init outFields, add 20 fields for test
         for (int i = 0; i < 5; i++) {
             var (obj, field) = GenerateOutField();
-            OutFields.Add(field);
             field.transform.SetParent(outFieldsGroup.transform);
             field.enabled = false;
         }
@@ -62,8 +56,7 @@ public class IoFields : MonoBehaviour {
     }
 
     private void setFieldActive(IoField field) {
-        if (field is InField) InFields.Remove((InField)field);
-        if (field is OutField) OutFields.Remove((OutField)field);
+        field.Port.FieldsBuffer.Remove(field);
         field.gameObject.SetActive(true);
     }
 
