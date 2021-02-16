@@ -69,6 +69,7 @@ public class Crane : MonoBehaviour {
                 break;
             case "container_stacked":
                 // move in / out or rearrange
+                stateMachine.TriggerByState(other.GetComponent<Container>() == containerToPick ? "MoveOut" : "Rearrange");
                 break;
             default:
                 throw new Exception("illegal crane touch");
@@ -142,8 +143,6 @@ public class Crane : MonoBehaviour {
     /// relationship between the vector2.y here and position.z
     /// </remarks>
     private void moveTo(Vector2 destination, bool isLoaded) {
-        // fixedUpdate time span is 0.02f
-        float timeSpan = 0.02f;
         Vector3 step = new Vector3();
         switch (moveState(destination)) {
             case Movement.up:
@@ -159,7 +158,7 @@ public class Crane : MonoBehaviour {
                 step.y = -(isLoaded ? Parameters.Vy_Loaded : Parameters.Vy_Unloaded);
                 break;
         }
-        transform.position += step * timeSpan;
+        transform.position += step * Time.deltaTime;
     }
 
     private void moveTo(Vector3 position, bool isLoaded) {
@@ -203,6 +202,7 @@ public class Crane : MonoBehaviour {
         var state = stateMachine.Graph.GetState("PickUp");
         state.OnEnterState.AddListener(() => {
             containerToPick = findContainerToPick();
+            if (containerToPick == null) throw new Exception("container to pick is null");
         });
     }
 
@@ -213,7 +213,12 @@ public class Crane : MonoBehaviour {
 
     private void setMoveOutEvents() {
         var state = stateMachine.Graph.GetState("MoveOut");
-        state.OnEnterState.AddListener(() => { });
+        state.OnEnterState.AddListener(() => {
+            containerCarrying = containerToPick;
+            containerToPick = null;
+
+            containerCarrying.RemoveFromGround();
+        });
     }
 
     private void setRearrangeEvents() {
