@@ -4,6 +4,7 @@ using UnityEngine;
 using System;
 using System.Linq;
 using System.Text;
+using Ilumisoft.VisualStateMachine;
 
 /// <summary>
 /// this class stricts the ioField, means which size of the field is suitable for the port

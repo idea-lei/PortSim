@@ -68,6 +68,22 @@ public abstract class Field : MonoBehaviour {
         throw new NotImplementedException();
     }
 
+    public IndexInStack FindAvailableIndexToStack() {
+        var index = new IndexInStack();
+        if (IsGroundFull) return index;
+        for (int x = 0; x < DimX; x++) {
+            for (int z = 0; z < DimZ; z++) {
+                if (Ground[x, z].Count < MaxLayer) {
+                    index.x = x;
+                    index.z = z;
+                    index.IsValid = true;
+                    return index;
+                }
+            }
+        }
+        return index;
+    }
+
     public virtual void AddToGround(Container container, IndexInStack index) {
         if (!IsAbleToAddContainerToIndex(index)) {
             throw new Exception("can not add container to index!");
@@ -98,10 +114,6 @@ public abstract class Field : MonoBehaviour {
 
         c_wanted.tag = "container_out";
         return c_wanted;
-    }
-
-    public virtual void RearrangeContainer(Container container) {
-        throw new NotImplementedException();
     }
 
     /// <summary>

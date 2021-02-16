@@ -15,6 +15,8 @@ public class OutField : IoField
 
     public override bool IsGroundFull => incomingContainers.Count + Count >= MaxCount;
 
+    public bool IsStackable => IsGroundFull;
+
     private void Awake() {
         initField();
     }

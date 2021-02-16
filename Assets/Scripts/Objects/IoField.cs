@@ -37,6 +37,7 @@ public abstract class IoField : Field {
         Port = ports[UnityEngine.Random.Range(0, ports.Length)];
         Port.FieldsBuffer.Add(this);
     }
+
     protected virtual void updateState(bool state) {
         GetComponent<MeshRenderer>().enabled = state;
         GetComponent<MeshCollider>().enabled = state;

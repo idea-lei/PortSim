@@ -460,6 +460,7 @@ GameObject:
   - component: {fileID: 965408258}
   - component: {fileID: 965408262}
   - component: {fileID: 965408263}
+  - component: {fileID: 965408264}
   m_Layer: 0
   m_Name: Crane
   m_TagString: crane
@@ -624,7 +625,7 @@ MonoBehaviour:
           m_Calls: []
     anyStates: []
     transitions:
-    - id: Transition
+    - id: Wait2PickUp
       label: 
       originID: Wait
       targetID: PickUp
@@ -636,7 +637,7 @@ MonoBehaviour:
           m_Calls: []
       duration: 0
       timeMode: 0
-    - id: Transition 1
+    - id: PickUp2MoveIn
       label: 
       originID: PickUp
       targetID: MoveIn
@@ -648,7 +649,7 @@ MonoBehaviour:
           m_Calls: []
       duration: 0
       timeMode: 0
-    - id: Transition 2
+    - id: PickUp2MoveOut
       label: 
       originID: PickUp
       targetID: MoveOut
@@ -660,7 +661,7 @@ MonoBehaviour:
           m_Calls: []
       duration: 0
       timeMode: 0
-    - id: Transition 3
+    - id: PickUp2Rearrange
       label: 
       originID: PickUp
       targetID: Rearrange
@@ -672,7 +673,7 @@ MonoBehaviour:
           m_Calls: []
       duration: 0
       timeMode: 0
-    - id: Transition 4
+    - id: MoveIn2PickUp
       label: 
       originID: MoveIn
       targetID: PickUp
@@ -684,7 +685,7 @@ MonoBehaviour:
           m_Calls: []
       duration: 0
       timeMode: 0
-    - id: Transition 5
+    - id: MoveIn2Wait
       label: 
       originID: MoveIn
       targetID: Wait
@@ -696,7 +697,7 @@ MonoBehaviour:
           m_Calls: []
       duration: 0
       timeMode: 0
-    - id: Transition 6
+    - id: Rearrange2PickUp
       label: 
       originID: Rearrange
       targetID: PickUp
@@ -708,7 +709,7 @@ MonoBehaviour:
           m_Calls: []
       duration: 0
       timeMode: 0
-    - id: Transition 7
+    - id: MoveOut2PickUp
       label: 
       originID: MoveOut
       targetID: PickUp
@@ -720,7 +721,7 @@ MonoBehaviour:
           m_Calls: []
       duration: 0
       timeMode: 0
-    - id: Transition 8
+    - id: MoveOut2Wait
       label: 
       originID: MoveOut
       targetID: Wait
@@ -742,6 +743,18 @@ MonoBehaviour:
       labelSettings:
         isEnabled: 1
     entryState: Wait
+--- !u!114 &965408264
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 965408257}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 518673691a866e446968d4ec4fc4e653, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1225991709
 GameObject:
   m_ObjectHideFlags: 0
@@ -896,7 +909,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1544357562}
   - component: {fileID: 1544357561}
-  - component: {fileID: 1544357560}
   m_Layer: 0
   m_Name: Scripts
   m_TagString: Untagged
@@ -904,18 +916,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1544357560
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1544357559}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8c1c8e3a9d81f274e93a337abb7e7d95, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &1544357561
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -2,41 +2,136 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
-public class Crane : MonoBehaviour
-{
+public enum CraneState {
+    Wait,
+    PickUp,
+    MoveIn,
+    MoveOut,
+    Rearrange
+}
+public class Crane : MonoBehaviour {
+    private StackField stackField;
+    private HashSet<Container> containersToMove = new HashSet<Container>();
+    private List<Container> containersToMoveList => containersToMove.ToList();
+    private Container containerToPick;
+    private Container containerCarrying;
+    private IoPort[] ioPorts;
     private StateMachine stateMachine;
-    private Container containerCarry;
-    private Container containerWant;
-    private void Awake() {
-        stateMachine = FindObjectOfType<StateMachine>();
+
+    private bool hasIoField {
+        get {
+            foreach (var port in ioPorts) {
+                if (port.CurrentField.enabled) return true;
+            }
+            return false;
+        }
     }
+    private bool hasOutField {
+        get {
+            bool res = false;
+            foreach (var port in ioPorts) {
+                if (port.CurrentField.isActiveAndEnabled && port.CurrentField is OutField) res = true;
+            }
+            return res;
+        }
+    }
+    private bool canPickUp {
+        get {
+            if (containersToMove.Count <= 0) return false;
+            if (!hasIoField) return false;
+            if (!stackField.NeedRearrange.Item1) return false;
+            return true;
+        }
+    }
+    private void Awake() {
+        stackField = FindObjectOfType<StackField>();
+        ioPorts = FindObjectsOfType<IoPort>();
+        stateMachine = GetComponent<StateMachine>();
+
+        setWaitEvents();
+        setPickUpEvents();
+        setMoveInEvents();
+        setMoveOutEvents();
+        setRearrangeEvents();
+    }
+
+    private void Start() {
+        addContainersToSet(stackField.Ground);
+    }
+
     private void OnTriggerEnter(Collider other) {
         switch (other.tag) {
             case "container_in":
+                stateMachine.TriggerByState("MoveIn");
+                break;
             case "container_stacked":
-                // pickup and decide where to go
+                // move in / out or rearrange
                 break;
             default:
                 throw new Exception("illegal crane touch");
         }
     }
 
+    private void Update() {
+        if (stateMachine.CurrentState == "Wait") {
+            foreach (var port in ioPorts) {
+                if (port.CurrentField != null) {
+                    addContainersToSet(port.CurrentField.Ground);
+                }
+            }
+            if (canPickUp) {
+                stateMachine.TriggerByState("PickUp");
+            }
+            return;
+        }
+
+        if (stateMachine.CurrentState == "PickUp") {
+            moveTo(containerToPick.transform.position, false);
+        } else {
+            moveTo(containerCarrying.transform.position, true);
+        }
+    }
+
     #region private methods
+    private void addContainersToSet(Stack<Container>[,] field) {
+        foreach (var s in field) {
+            foreach (var c in s) {
+                containersToMove.Add(c);
+            }
+        }
+    }
+
+    // this function need to be trained
     /// <summary>
-    /// find container in inField or StackField to move
+    /// find container in available containerSet to move, can be movein/out or rearrange
     /// </summary>
     /// <returns></returns>
-    public Container FindContainerToPick() {
-        throw new NotImplementedException();
+    private Container findContainerToPick() {
+        Field field = null;
+
+        if (hasIoField) {
+            // first out principle
+            foreach (var port in ioPorts) {
+                if (!port.CurrentField.isActiveAndEnabled) continue;
+                field = port.CurrentField;
+                if (port.CurrentField is OutField) break;
+            }
+            return containersToMove.Where(x => {
+                return field is OutField ? x.OutField == field : x.InField == field;
+            }).First();
+        } else {
+            return stackField.NeedRearrange.Item2;
+        }
     }
 
     /// <summary>
     /// move container from inField to stackField, not for outField
     /// </summary>
     /// <returns>available index in stackField</returns>
-    public IndexInStack FindIndexToStack() {
+    private IndexInStack findIndexToStack() {
         throw new NotImplementedException();
     }
     /// <summary>
@@ -67,6 +162,11 @@ public class Crane : MonoBehaviour
         transform.position += step * timeSpan;
     }
 
+    private void moveTo(Vector3 position, bool isLoaded) {
+        var vec2 = new Vector2(position.x, position.z);
+        moveTo(vec2, isLoaded);
+    }
+
     /// <summary>
     /// this function is to determine the movement state of hook
     /// </summary>
@@ -88,5 +188,37 @@ public class Crane : MonoBehaviour
         down
     }
 
+    #endregion
+
+    #region statemachine events
+    /// <summary>
+    /// only setup onEnter Event, don't mess up
+    /// </summary>
+    private void setWaitEvents() {
+        var state = stateMachine.Graph.GetState("Wait");
+        state.OnEnterState.AddListener(() => { });
+    }
+
+    private void setPickUpEvents() {
+        var state = stateMachine.Graph.GetState("PickUp");
+        state.OnEnterState.AddListener(() => {
+            containerToPick = findContainerToPick();
+        });
+    }
+
+    private void setMoveInEvents() {
+        var state = stateMachine.Graph.GetState("MoveIn");
+        state.OnEnterState.AddListener(() => { });
+    }
+
+    private void setMoveOutEvents() {
+        var state = stateMachine.Graph.GetState("MoveOut");
+        state.OnEnterState.AddListener(() => { });
+    }
+
+    private void setRearrangeEvents() {
+        var state = stateMachine.Graph.GetState("Rearrange");
+        state.OnEnterState.AddListener(() => { });
+    }
     #endregion
 }
