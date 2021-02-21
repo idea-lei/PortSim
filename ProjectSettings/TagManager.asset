@@ -12,6 +12,7 @@ TagManager:
   - field_out
   - crane
   - ioPort
+  - container_rearrange
   layers:
   - Default
   - TransparentFX

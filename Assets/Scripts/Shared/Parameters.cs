@@ -40,6 +40,6 @@ public static class Parameters
 
     #region Errors
     // this value should be larger than v_magnitude * deltatime
-    public static readonly float DistanceError = 0.2f;
+    public static readonly float DistanceError = 0.1f;
     #endregion
 }

@@ -98,7 +98,7 @@ public abstract class Field : MonoBehaviour {
     /// </summary>
     /// <param name="container"></param>
     public virtual void AddToGround(Container container) {
-        var index = findIndexToStack();
+        var index = LocalPositionToIndex(container.transform.localPosition);
         AddToGround(container, index);
     }
 
@@ -106,14 +106,13 @@ public abstract class Field : MonoBehaviour {
         throw new NotImplementedException();
     }
 
-    public virtual Container RemoveFromGround(Container c_wanted) {
-        var index = CoordinateToIndex(c_wanted.transform.localPosition);
-        if (Ground[index.x, index.z].Peek() == c_wanted) {
-            Ground[index.x, index.z].Pop();
+    public virtual Container RemoveFromGround(Container c) {
+        Debug.Log($"Ground Size: {Ground.GetLength(0)}, {Ground.GetLength(1)}");
+        if (Ground[c.indexInCurrentField.x, c.indexInCurrentField.z].Peek() == c) {
+            return Ground[c.indexInCurrentField.x, c.indexInCurrentField.z].Pop();
         }
 
-        c_wanted.tag = "container_out";
-        return c_wanted;
+        throw new Exception("can not remove from ground");
     }
 
     /// <summary>
@@ -145,7 +144,7 @@ public abstract class Field : MonoBehaviour {
     /// <summary>
     /// 
     /// </summary>
-    /// <returns>local position of the index</returns>
+    /// <returns>local position of the index of the specific layer</returns>
     public Vector3 IndexToLocalPosition(int x, int z, int layer) {
         float coord_x = Parameters.Gap_Container + (Parameters.ContainerLength_Long - transform.localScale.x * 10) / 2f // x=0
             + x * (Parameters.ContainerLength_Long + Parameters.Gap_Container);   // x_th container
@@ -154,15 +153,29 @@ public abstract class Field : MonoBehaviour {
             + z * (Parameters.ContainerWidth + Parameters.Gap_Container); // z_th container
         return new Vector3(coord_x, coord_y, coord_z);
     }
+
+    public Vector3 IndexToLocalPosition(IndexInStack index) {
+        return IndexToLocalPosition(index.x, index.z, Ground[index.x, index.z].Count);
+    }
     #endregion
 
     #region public minor methods
-    public Vector3 IndexToCoordinate(IndexInStack index) {
-        throw new NotImplementedException();
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="index"></param>
+    /// <returns> global coordinate</returns>
+    public Vector3 IndexToGlobalPosition(IndexInStack index) {
+        return transform.position + IndexToLocalPosition(index);
     }
 
-    public IndexInStack CoordinateToIndex(Vector3 vec) {
-        throw new NotImplementedException();
+    public IndexInStack LocalPositionToIndex(Vector3 vec) {
+        var index = new IndexInStack(
+            Mathf.RoundToInt((vec.x - (Parameters.Gap_Container + (Parameters.ContainerLength_Long - transform.localScale.x * 10) / 2f)) / (Parameters.ContainerLength_Long + Parameters.Gap_Container)),
+            Mathf.RoundToInt((vec.z - (Parameters.Gap_Container + (Parameters.ContainerWidth - transform.localScale.z * 10) / 2f)) / (Parameters.ContainerWidth + Parameters.Gap_Container))
+            );
+        
+        return index;
     }
 
     public override string ToString() {
@@ -201,8 +214,9 @@ public abstract class Field : MonoBehaviour {
         for (int x = 0; x < DimX; x++) {
             for (int z = 0; z < DimZ; z++) {
                 for (int k = 0; k <= UnityEngine.Random.Range(0, MaxLayer); k++) {
-                    var pos = IndexToLocalPosition(x, z, Ground[x, z].Count());
+                    var pos = IndexToLocalPosition(new IndexInStack(x, z));
                     var container = generateContainer(pos);
+                    container.indexInCurrentField = new IndexInStack(x, z);
                     AddToGround(container, new IndexInStack(x, z));
                 }
             }

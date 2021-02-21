@@ -20,6 +20,7 @@ public class Crane : MonoBehaviour {
     private Container containerCarrying;
     private IoPort[] ioPorts;
     private StateMachine stateMachine;
+    private Vector3 destination;
 
     private bool hasIoField {
         get {
@@ -63,17 +64,17 @@ public class Crane : MonoBehaviour {
     }
 
     private void OnTriggerEnter(Collider other) {
-        switch (other.tag) {
-            case "container_in":
-                stateMachine.TriggerByState("MoveIn");
-                break;
-            case "container_stacked":
-                // move in / out or rearrange
-                stateMachine.TriggerByState(other.GetComponent<Container>() == containerToPick ? "MoveOut" : "Rearrange");
-                break;
-            default:
-                throw new Exception("illegal crane touch");
+        if (other.CompareTag("container_in")) {
+            stateMachine.TriggerByState("MoveIn");
+            return;
         }
+        if (other.CompareTag("container_stacked")) {
+            Debug.Log("touched");
+            containerCarrying = other.GetComponent<Container>();
+            stateMachine.TriggerByState(containerCarrying == containerToPick ? "MoveOut" : "Rearrange");
+            return;
+        }
+        throw new Exception("illegal crane touch");
     }
 
     private void Update() {
@@ -92,7 +93,7 @@ public class Crane : MonoBehaviour {
         if (stateMachine.CurrentState == "PickUp") {
             moveTo(containerToPick.transform.position, false);
         } else {
-            moveTo(containerCarrying.transform.position, true);
+            moveTo(destination, true);
         }
     }
 
@@ -128,13 +129,6 @@ public class Crane : MonoBehaviour {
         }
     }
 
-    /// <summary>
-    /// move container from inField to stackField, not for outField
-    /// </summary>
-    /// <returns>available index in stackField</returns>
-    private IndexInStack findIndexToStack() {
-        throw new NotImplementedException();
-    }
     /// <summary>
     ///  
     /// </summary>
@@ -196,6 +190,7 @@ public class Crane : MonoBehaviour {
     private void setWaitEvents() {
         var state = stateMachine.Graph.GetState("Wait");
         state.OnEnterState.AddListener(() => { });
+        state.OnExitState.AddListener(() => { });
     }
 
     private void setPickUpEvents() {
@@ -204,26 +199,42 @@ public class Crane : MonoBehaviour {
             containerToPick = findContainerToPick();
             if (containerToPick == null) throw new Exception("container to pick is null");
         });
+        state.OnExitState.AddListener(() => { });
     }
 
     private void setMoveInEvents() {
         var state = stateMachine.Graph.GetState("MoveIn");
         state.OnEnterState.AddListener(() => { });
+        state.OnExitState.AddListener(() => { });
     }
 
     private void setMoveOutEvents() {
         var state = stateMachine.Graph.GetState("MoveOut");
         state.OnEnterState.AddListener(() => {
-            containerCarrying = containerToPick;
+            Debug.Log("MoveOut");
+            containerCarrying.tag = "container_out";
             containerToPick = null;
-
             containerCarrying.RemoveFromGround();
+            containerCarrying.transform.SetParent(transform);
+            destination = containerCarrying.OutField.IndexToGlobalPosition(containerCarrying.OutField.FindAvailableIndexToStack());
         });
+
+        state.OnExitState.AddListener(() => { });
     }
 
     private void setRearrangeEvents() {
         var state = stateMachine.Graph.GetState("Rearrange");
-        state.OnEnterState.AddListener(() => { });
+        state.OnEnterState.AddListener(() => {
+            Debug.Log("Rearrange");
+            containerCarrying.tag = "container_rearrange";
+            containerCarrying.RemoveFromGround();
+            containerCarrying.transform.SetParent(transform);
+            destination = stackField.IndexToGlobalPosition(stackField.FindAvailableIndexToStack());
+        });
+        state.OnExitState.AddListener(() => {
+            containerCarrying.transform.SetParent(stackField.transform);
+            stackField.AddToGround(containerCarrying);
+        });
     }
     #endregion
 }
