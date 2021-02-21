@@ -28,42 +28,14 @@ public class Container : MonoBehaviour {
         stackField = FindObjectOfType<StackField>();
     }
     private void OnTriggerEnter(Collider other) {
-        if (CompareTag("container_in")) {
-            switch (other.tag) {
-                case "container_out":
-                    // todo: check if pickup or wait
-                    stateMachine.TriggerByState("PickUp");
-                    break;
-                case "container_stacked":
-                    stateMachine.TriggerByState("PickUp");
-                    // stack onto container
-                    break;
-                case "field_out":
-                case "field_stack":
-                    // stack onto ground
-                    break;
-            }
+        if (other.tag.Contains("container")) { // container touches container, which means add to ground, finished moving
+            stateMachine.TriggerByState("PickUp");
         }
 
-        if (CompareTag("container_out")) {
-            switch (other.tag) {
-                case "container_out":
-                    // stack onto container
-                    break;
-                case "field_out":
-                    // stack onto ground
-                    break;
-            }
+        if (other.tag.Contains("field")) { // container touches container, which means add to ground, finished moving
+            stateMachine.TriggerByState("PickUp");
         }
-        if (CompareTag("container_rearrange")) {
-            if (other.CompareTag("container_stacked")) {
-                stackField.AddToGround(this);
-                return;
-            }
-            if (other.CompareTag("field_stack")) {
-                return;
-            }
-        }
+        
     }
     #endregion
 
