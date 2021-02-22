@@ -91,6 +91,7 @@ public abstract class Field : MonoBehaviour {
         //container.tag = "container_stacked";
         container.transform.SetParent(transform);
         Ground[index.x, index.z].Push(container);
+        //container.transform.localPosition = IndexToLocalPosition(index);
     }
 
     /// <summary>
@@ -107,7 +108,6 @@ public abstract class Field : MonoBehaviour {
     }
 
     public virtual Container RemoveFromGround(Container c) {
-        Debug.Log($"Ground Size: {Ground.GetLength(0)}, {Ground.GetLength(1)}");
         if (Ground[c.indexInCurrentField.x, c.indexInCurrentField.z].Peek() == c) {
             return Ground[c.indexInCurrentField.x, c.indexInCurrentField.z].Pop();
         }
@@ -155,7 +155,11 @@ public abstract class Field : MonoBehaviour {
     }
 
     public Vector3 IndexToLocalPosition(IndexInStack index) {
-        return IndexToLocalPosition(index.x, index.z, Ground[index.x, index.z].Count);
+        var localPos = IndexToLocalPosition(index.x, index.z, Ground[index.x, index.z].Count);
+        //localPos.x /= transform.localScale.x;
+        //localPos.y /= transform.localScale.y;
+        //localPos.z /= transform.localScale.z;
+        return localPos;
     }
     #endregion
 
@@ -205,22 +209,6 @@ public abstract class Field : MonoBehaviour {
             (DimX * (Parameters.ContainerLength_Long + Parameters.Gap_Container) + Parameters.Gap_Container) / 10f,
             0.00001f,
             (DimZ * (Parameters.ContainerWidth + Parameters.Gap_Container) + Parameters.Gap_Container) / 10f);
-    }
-
-    /// <summary>
-    /// to generate containers for field
-    /// </summary>
-    protected virtual void initContainers() {
-        for (int x = 0; x < DimX; x++) {
-            for (int z = 0; z < DimZ; z++) {
-                for (int k = 0; k <= UnityEngine.Random.Range(0, MaxLayer); k++) {
-                    var pos = IndexToLocalPosition(new IndexInStack(x, z));
-                    var container = generateContainer(pos);
-                    container.indexInCurrentField = new IndexInStack(x, z);
-                    AddToGround(container, new IndexInStack(x, z));
-                }
-            }
-        }
     }
 
     protected virtual Container generateContainer(Vector3 initPos) {

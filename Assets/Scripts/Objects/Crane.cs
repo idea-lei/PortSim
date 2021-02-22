@@ -69,7 +69,6 @@ public class Crane : MonoBehaviour {
             return;
         }
         if (other.CompareTag("container_stacked")) {
-            Debug.Log("touched");
             containerCarrying = other.GetComponent<Container>();
             stateMachine.TriggerByState(containerCarrying == containerToPick ? "MoveOut" : "Rearrange");
             return;
@@ -196,6 +195,7 @@ public class Crane : MonoBehaviour {
     private void setPickUpEvents() {
         var state = stateMachine.Graph.GetState("PickUp");
         state.OnEnterState.AddListener(() => {
+            Debug.Log("pickup start");
             containerToPick = findContainerToPick();
             if (containerToPick == null) throw new Exception("container to pick is null");
         });
@@ -211,15 +211,18 @@ public class Crane : MonoBehaviour {
     private void setMoveOutEvents() {
         var state = stateMachine.Graph.GetState("MoveOut");
         state.OnEnterState.AddListener(() => {
-            Debug.Log("MoveOut");
-            containerCarrying.tag = "container_out";
-            containerToPick = null;
+            Debug.Log("MoveOut start");
             containerCarrying.RemoveFromGround();
+            containerCarrying.tag = "container_out";
             containerCarrying.transform.SetParent(transform);
             destination = containerCarrying.OutField.IndexToGlobalPosition(containerCarrying.OutField.FindAvailableIndexToStack());
+            containerToPick = null;
         });
 
-        state.OnExitState.AddListener(() => { });
+        state.OnExitState.AddListener(() => {
+            Debug.Log("MoveOut finished");
+            containerCarrying.OutField.AddToGround(containerCarrying);
+        });
     }
 
     private void setRearrangeEvents() {

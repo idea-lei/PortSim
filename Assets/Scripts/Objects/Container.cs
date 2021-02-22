@@ -29,11 +29,11 @@ public class Container : MonoBehaviour {
     }
     private void OnTriggerEnter(Collider other) {
         if (other.tag.Contains("container")) { // container touches container, which means add to ground, finished moving
-            stateMachine.TriggerByState("PickUp");
+            if (stateMachine.CurrentState != "PickUp") stateMachine.TriggerByState("PickUp");
         }
 
         if (other.tag.Contains("field")) { // container touches container, which means add to ground, finished moving
-            stateMachine.TriggerByState("PickUp");
+            if (stateMachine.CurrentState != "PickUp") stateMachine.TriggerByState("PickUp");
         }
         
     }

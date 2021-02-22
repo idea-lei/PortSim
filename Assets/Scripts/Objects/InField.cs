@@ -44,15 +44,20 @@ public sealed class InField : IoField {
     }
 
     /// <summary>
-    /// assign properties for generated containers
+    /// to generate containers for field
     /// </summary>
-    protected override void initContainers() {
-        base.initContainers();
-        foreach (var s in Ground) {
-            foreach (var c in s) {
-                c.InField = this;
-                assignOutPort(c);
-                c.tag = "container_in";
+    private void initContainers() {
+        for (int x = 0; x < DimX; x++) {
+            for (int z = 0; z < DimZ; z++) {
+                for (int k = 0; k <= UnityEngine.Random.Range(0, MaxLayer); k++) {
+                    var pos = IndexToLocalPosition(new IndexInStack(x, z));
+                    var container = generateContainer(pos);
+                    container.indexInCurrentField = new IndexInStack(x, z);
+                    AddToGround(container, new IndexInStack(x, z));
+                    container.InField = this;
+                    assignOutPort(container);
+                    container.tag = "container_in";
+                }
             }
         }
         meshRenderersInChildren = GetComponentsInChildren<MeshRenderer>();
