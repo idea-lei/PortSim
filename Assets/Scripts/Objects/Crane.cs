@@ -16,7 +16,7 @@ public class Crane : MonoBehaviour {
     private StackField stackField;
     private HashSet<Container> containersToMove = new HashSet<Container>();
     private List<Container> containersToMoveList => containersToMove.ToList();
-    private Container containerToPick;
+    [SerializeField] private Container containerToPick;
     private Container containerCarrying;
     private IoPort[] ioPorts;
     private StateMachine stateMachine;
@@ -196,7 +196,7 @@ public class Crane : MonoBehaviour {
         var state = stateMachine.Graph.GetState("PickUp");
         state.OnEnterState.AddListener(() => {
             Debug.Log("pickup start");
-            containerToPick = findContainerToPick();
+            if (containerToPick == null) containerToPick = findContainerToPick();
             if (containerToPick == null) throw new Exception("container to pick is null");
         });
         state.OnExitState.AddListener(() => { });
@@ -222,6 +222,12 @@ public class Crane : MonoBehaviour {
         state.OnExitState.AddListener(() => {
             Debug.Log("MoveOut finished");
             containerCarrying.OutField.AddToGround(containerCarrying);
+            containersToMove.Remove(containerCarrying);
+
+            if (!containersToMove.Any(x => x.OutField == containerCarrying.OutField)){
+                containerCarrying.OutField.DestroyField();
+            }
+            containerCarrying = null;
         });
     }
 

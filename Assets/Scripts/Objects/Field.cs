@@ -61,6 +61,7 @@ public abstract class Field : MonoBehaviour {
     [SerializeField]
     private GameObject containerPrefab;
     private IoFieldsGenerator ioFieldsGenerator;
+    [SerializeField] private Crane crane;
     #endregion
 
     #region logic methods
@@ -70,10 +71,15 @@ public abstract class Field : MonoBehaviour {
 
     public IndexInStack FindAvailableIndexToStack() {
         var index = new IndexInStack();
-        if (IsGroundFull) return index;
+        if (IsGroundFull) {
+            Debug.LogError("ground full");
+            return index;
+        }
         for (int x = 0; x < DimX; x++) {
             for (int z = 0; z < DimZ; z++) {
-                if (Ground[x, z].Count < MaxLayer) {
+                var indexOfCrane = GlobalPositionToIndex(crane.transform.position);
+                bool resultEqualToCraneIndex = indexOfCrane.x == x && indexOfCrane.z == z;
+                if (Ground[x, z].Count < MaxLayer && !resultEqualToCraneIndex) {
                     index.x = x;
                     index.z = z;
                     index.IsValid = true;
@@ -85,13 +91,14 @@ public abstract class Field : MonoBehaviour {
     }
 
     public virtual void AddToGround(Container container, IndexInStack index) {
+        Debug.Log($"{index.x}, {index.z}, Count = {Ground[index.x, index.z].Count}");
         if (!IsAbleToAddContainerToIndex(index)) {
             throw new Exception("can not add container to index!");
         }
         //container.tag = "container_stacked";
         container.transform.SetParent(transform);
         Ground[index.x, index.z].Push(container);
-        //container.transform.localPosition = IndexToLocalPosition(index);
+        
     }
 
     /// <summary>
@@ -178,8 +185,13 @@ public abstract class Field : MonoBehaviour {
             Mathf.RoundToInt((vec.x - (Parameters.Gap_Container + (Parameters.ContainerLength_Long - transform.localScale.x * 10) / 2f)) / (Parameters.ContainerLength_Long + Parameters.Gap_Container)),
             Mathf.RoundToInt((vec.z - (Parameters.Gap_Container + (Parameters.ContainerWidth - transform.localScale.z * 10) / 2f)) / (Parameters.ContainerWidth + Parameters.Gap_Container))
             );
-        
+
         return index;
+    }
+
+    public IndexInStack GlobalPositionToIndex(Vector3 vec) {
+        var localPos = vec - transform.position;
+        return LocalPositionToIndex(localPos);
     }
 
     public override string ToString() {
