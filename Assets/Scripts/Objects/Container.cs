@@ -32,7 +32,7 @@ public class Container : MonoBehaviour, IComparable<Container> {
             if (stateMachine.CurrentState != "PickUp") stateMachine.TriggerByState("PickUp");
         }
 
-        if (other.tag.Contains("field")) { // container touches container, which means add to ground, finished moving
+        if (other.CompareTag("field_out") || other.CompareTag("field_stack")) { // container touches container, which means add to ground, finished moving
             if (stateMachine.CurrentState != "PickUp") stateMachine.TriggerByState("PickUp");
         }
         

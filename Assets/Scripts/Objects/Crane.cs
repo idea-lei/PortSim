@@ -37,7 +37,7 @@ public class Crane : MonoBehaviour {
         }
     }
     public Container ContainerToPick;
-    private Container containerCarrying;
+    [SerializeField] private Container containerCarrying;
     private IoPort[] ioPorts;
     private StateMachine stateMachine;
     private Vector3 destination;
@@ -296,14 +296,15 @@ public class Crane : MonoBehaviour {
         state.OnEnterState.AddListener(() => {
             Debug.Log("MoveIn start");
             containerCarrying.RemoveFromGround();
-            containerCarrying.InField = null;
+            
             containerCarrying.transform.SetParent(transform);
             destination = stackField.IndexToGlobalPosition(stackField.FindAvailableIndexToStack(this));
             ContainerToPick = null;
-            if (containerCarrying.InField.IsGroundEmpty) containerCarrying.InField.DestroyField();
         });
         state.OnExitState.AddListener(() => {
             stackField.AddToGround(containerCarrying);
+            if (containerCarrying.InField.IsGroundEmpty) containerCarrying.InField.DestroyField();
+            containerCarrying.InField = null;
             containerCarrying = null;
         });
     }

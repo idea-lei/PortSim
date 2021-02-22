@@ -122,6 +122,7 @@ public abstract class Field : MonoBehaviour {
     /// this function is to destory the field and containers belongs to it
     /// </summary>
     public void DestroyField() {
+        Debug.LogWarning("destroying field");
         Destroy(gameObject, Parameters.EventDelay);
     }
 
