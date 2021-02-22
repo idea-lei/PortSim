@@ -45,7 +45,7 @@ public sealed class StackField : Field {
                     var container = generateContainer(pos);
                     container.indexInCurrentField = new IndexInStack(x, z);
                     AddToGround(container, new IndexInStack(x, z));
-                    assignOutPort(container);
+                    assignOutPort(container, DateTime.Now);
                     container.tag = "container_stacked";
                 }
             }

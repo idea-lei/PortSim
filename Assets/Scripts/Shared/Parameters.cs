@@ -10,8 +10,8 @@ public static class Parameters
 
     // number of containers in z/x
     public static readonly int DimZ = 3;
-    public static readonly int DimX = 5;
-    public static readonly int MinDim = 2; // this is only for test (random generation)
+    public static readonly int DimX = 3;
+    public static readonly int MinDim = 1; // this is only for test (random generation)
 
     public static readonly float ContainerHeight = 2.5f;
     public static readonly float ContainerWidth = 2.5f;
@@ -27,12 +27,12 @@ public static class Parameters
 
     #region Movement
     // the speed of the hook in different direction
-    public static readonly float Vy_Loaded = 10f;
-    public static readonly float Vy_Unloaded = 15f;
-    public static readonly float Vx_Loaded = 10f;
-    public static readonly float Vx_Unloaded = 15f;
-    public static readonly float Vz_Loaded = 10f;
-    public static readonly float Vz_Unloaded = 15f;
+    public static readonly float Vy_Loaded = 15f;
+    public static readonly float Vy_Unloaded = 20f;
+    public static readonly float Vx_Loaded = 15f;
+    public static readonly float Vx_Unloaded = 20f;
+    public static readonly float Vz_Loaded = 15f;
+    public static readonly float Vz_Unloaded = 20f;
 
     // height of the horizontal translation of the hook
     public static readonly float TranslationHeight = 20f;
@@ -41,5 +41,9 @@ public static class Parameters
     #region Errors
     // this value should be larger than v_magnitude * deltatime
     public static readonly float DistanceError = 0.1f;
+    #endregion
+
+    #region Simulation
+    public static readonly float EventDelay = 2f;
     #endregion
 }

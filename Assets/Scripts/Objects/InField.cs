@@ -55,7 +55,7 @@ public sealed class InField : IoField {
                     container.indexInCurrentField = new IndexInStack(x, z);
                     AddToGround(container, new IndexInStack(x, z));
                     container.InField = this;
-                    assignOutPort(container);
+                    assignOutPort(container, TimePlaned);
                     container.tag = "container_in";
                 }
             }

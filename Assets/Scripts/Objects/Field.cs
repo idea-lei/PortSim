@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using UnityEngine;
 
 /// <summary>
@@ -121,7 +122,7 @@ public abstract class Field : MonoBehaviour {
     /// this function is to destory the field and containers belongs to it
     /// </summary>
     public void DestroyField() {
-        Destroy(gameObject);
+        Destroy(gameObject, Parameters.EventDelay);
     }
 
     public bool IsAbleToAddContainerToIndex(int x, int z) {
@@ -233,25 +234,21 @@ public abstract class Field : MonoBehaviour {
     /// this method assign the outFields of the containers,
     /// will generate outField if not exist
     /// </summary>
-    protected void assignOutPort(Container container) {
-        void assign(Container c, OutField f) {
-            f.incomingContainers.Add(c);
-            c.OutField = f;
-        }
-
+    protected virtual void assignOutPort(Container container, DateTime initTime) {
         if (UnityEngine.Random.Range(0, 1f) > Parameters.PossibilityOfNewOutField) {
             var outFields = FindObjectsOfType<OutField>();
             if (outFields.Length > 0) {
                 var index = UnityEngine.Random.Range(0, outFields.Length);
-                if (!outFields[index].GroundFullPlaned) {
-                    assign(container, outFields[index]);
+                if (!outFields[index].GroundFullPlaned && outFields[index].TimePlaned > initTime) {
+                    outFields[index].incomingContainers.Add(container);
+                    container.OutField = outFields[index];
                     return;
                 }
             }
-
         }
-        var (obj, field) = ioFieldsGenerator.GenerateOutField();
-        assign(container, field);
+        var field = ioFieldsGenerator.GenerateOutField();
+        field.incomingContainers.Add(container);
+        container.OutField = field;
     }
 
     private (float, float, float) genRGB() {

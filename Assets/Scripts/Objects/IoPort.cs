@@ -30,11 +30,14 @@ public class IoPort : MonoBehaviour {
         _currentField = FieldsBuffer[0];
         FieldsBuffer.RemoveAt(0);
         if (CurrentField.TimePlaned < DateTime.Now) {
-            CurrentField.enabled = true;
+            Invoke(nameof(setFieldEnabled), Parameters.EventDelay);
         } else {
             StartCoroutine(WaitUntilEnable());
         }
-        
+    }
+
+    private void setFieldEnabled() {
+        CurrentField.enabled = true;
     }
 
     public IEnumerator WaitUntilEnable() {
@@ -43,6 +46,7 @@ public class IoPort : MonoBehaviour {
             yield return null;
         }
         CurrentField.enabled = true;
+        FindObjectOfType<Crane>().ContainerToPick = null;
     }
 
     public override string ToString() {

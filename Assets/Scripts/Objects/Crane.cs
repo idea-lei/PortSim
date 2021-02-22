@@ -36,7 +36,7 @@ public class Crane : MonoBehaviour {
             return set;
         }
     }
-    [SerializeField] private Container containerToPick;
+    public Container ContainerToPick;
     private Container containerCarrying;
     private IoPort[] ioPorts;
     private StateMachine stateMachine;
@@ -104,6 +104,7 @@ public class Crane : MonoBehaviour {
 
     private void OnTriggerEnter(Collider other) {
         if (other.CompareTag("container_in")) {
+            containerCarrying = other.GetComponent<Container>();
             stateMachine.TriggerByState("MoveIn");
             return;
         }
@@ -131,11 +132,11 @@ public class Crane : MonoBehaviour {
         }
 
         if (stateMachine.CurrentState == "PickUp") {
-            if(containerToPick == null) {
-                stateMachine.TriggerByState("Wait");
+            if(ContainerToPick == null) {
+                ContainerToPick = findContainerToPick();
                 return;
             }
-            moveTo(containerToPick.transform.position, false);
+            moveTo(ContainerToPick.transform.position, false);
         } else {
             moveTo(destination, true);
         }
@@ -198,71 +199,7 @@ public class Crane : MonoBehaviour {
 
     #endregion
 
-    #region statemachine events
-    /// <summary>
-    /// only setup onEnter Event, don't mess up
-    /// </summary>
-    private void setWaitEvents() {
-        var state = stateMachine.Graph.GetState("Wait");
-        state.OnEnterState.AddListener(() => { });
-        state.OnExitState.AddListener(() => { });
-    }
-
-    private void setPickUpEvents() {
-        var state = stateMachine.Graph.GetState("PickUp");
-        state.OnEnterState.AddListener(() => {
-            if (containerToPick == null) containerToPick = findContainerToPick();
-            if (containerToPick == null) throw new Exception("container to pick is null");
-        });
-        state.OnExitState.AddListener(() => { });
-    }
-
-    private void setMoveInEvents() {
-        var state = stateMachine.Graph.GetState("MoveIn");
-        state.OnEnterState.AddListener(() => { });
-        state.OnExitState.AddListener(() => { });
-    }
-
-    private void setMoveOutEvents() {
-        var state = stateMachine.Graph.GetState("MoveOut");
-        state.OnEnterState.AddListener(() => {
-            Debug.Log("MoveOut start");
-            containerCarrying.RemoveFromGround();
-            containerCarrying.tag = "container_out";
-            containerCarrying.transform.SetParent(transform);
-            destination = containerCarrying.OutField.IndexToGlobalPosition(containerCarrying.OutField.FindAvailableIndexToStack(this));
-            containerToPick = null;
-        });
-
-        state.OnExitState.AddListener(() => {
-            Debug.Log("MoveOut finished");
-            containerCarrying.OutField.AddToGround(containerCarrying);
-
-            if (!containersToMove.Any(x => x.OutField == containerCarrying.OutField)) {
-                containerCarrying.OutField.DestroyField();
-            }
-            containerCarrying = null;
-        });
-    }
-
-    private void setRearrangeEvents() {
-        var state = stateMachine.Graph.GetState("Rearrange");
-        state.OnEnterState.AddListener(() => {
-            Debug.Log("Rearrange");
-            containerCarrying.tag = "container_rearrange";
-            containerCarrying.RemoveFromGround();
-            containerCarrying.transform.SetParent(transform);
-            destination = stackField.IndexToGlobalPosition(stackField.FindAvailableIndexToStack(this));
-        });
-        state.OnExitState.AddListener(() => {
-            containerCarrying.transform.SetParent(stackField.transform);
-            if (containerToPick == containerCarrying) containerToPick = null;
-            stackField.AddToGround(containerCarrying);
-        });
-    }
-    #endregion
-
-    #region find container to...
+    #region find container
     // this function need to be trained
     /// <summary>
     /// find container in available containerSet to move, can be movein/out or rearrange
@@ -271,9 +208,9 @@ public class Crane : MonoBehaviour {
     private Container findContainerToPick() {
         var c = findContainerToMoveOut();
         if (c != null) return c;
-        c = findContainerToRearrange();
-        if (c != null) return c;
         c = findContainerToMoveIn();
+        if (c != null) return c;
+        c = findContainerToRearrange();
         return c;
     }
 
@@ -313,7 +250,10 @@ public class Crane : MonoBehaviour {
         foreach(var s in stackField.Ground) {
             if (s.Count == 0) continue;
             var list = s.ToArray();
-            if (list.Min() != s.Peek()) return list.Min();
+            var min = list.Min();
+            if (min != s.Peek() 
+                && stackField.GlobalPositionToIndex(transform.position)!= min.indexInCurrentField) 
+                return min;
         }
         return null;
     }
@@ -329,6 +269,79 @@ public class Crane : MonoBehaviour {
             }
         }
         return null;
+    }
+    #endregion
+
+    #region statemachine events
+    /// <summary>
+    /// only setup onEnter Event, don't mess up
+    /// </summary>
+    private void setWaitEvents() {
+        var state = stateMachine.Graph.GetState("Wait");
+        state.OnEnterState.AddListener(() => { });
+        state.OnExitState.AddListener(() => { });
+    }
+
+    private void setPickUpEvents() {
+        var state = stateMachine.Graph.GetState("PickUp");
+        state.OnEnterState.AddListener(() => {
+            if (ContainerToPick == null) ContainerToPick = findContainerToPick();
+            if (ContainerToPick == null) throw new Exception("container to pick is null");
+        });
+        state.OnExitState.AddListener(() => { });
+    }
+
+    private void setMoveInEvents() {
+        var state = stateMachine.Graph.GetState("MoveIn");
+        state.OnEnterState.AddListener(() => {
+            Debug.Log("MoveIn start");
+            containerCarrying.RemoveFromGround();
+            containerCarrying.InField = null;
+            containerCarrying.transform.SetParent(transform);
+            destination = stackField.IndexToGlobalPosition(stackField.FindAvailableIndexToStack(this));
+            ContainerToPick = null;
+            if (containerCarrying.InField.IsGroundEmpty) containerCarrying.InField.DestroyField();
+        });
+        state.OnExitState.AddListener(() => {
+            stackField.AddToGround(containerCarrying);
+            containerCarrying = null;
+        });
+    }
+
+    private void setMoveOutEvents() {
+        var state = stateMachine.Graph.GetState("MoveOut");
+        state.OnEnterState.AddListener(() => {
+            Debug.Log("MoveOut start");
+            containerCarrying.RemoveFromGround();
+            containerCarrying.tag = "container_out";
+            containerCarrying.transform.SetParent(transform);
+            destination = containerCarrying.OutField.IndexToGlobalPosition(containerCarrying.OutField.FindAvailableIndexToStack(this));
+            ContainerToPick = null;
+        });
+
+        state.OnExitState.AddListener(() => {
+            containerCarrying.OutField.AddToGround(containerCarrying);
+
+            if (!containersToMove.Any(x => x.OutField == containerCarrying.OutField)) {
+                containerCarrying.OutField.DestroyField();
+            }
+            containerCarrying = null;
+        });
+    }
+
+    private void setRearrangeEvents() {
+        var state = stateMachine.Graph.GetState("Rearrange");
+        state.OnEnterState.AddListener(() => {
+            containerCarrying.tag = "container_rearrange";
+            containerCarrying.RemoveFromGround();
+            containerCarrying.transform.SetParent(transform);
+            destination = stackField.IndexToGlobalPosition(stackField.FindAvailableIndexToStack(this));
+        });
+        state.OnExitState.AddListener(() => {
+            containerCarrying.transform.SetParent(stackField.transform);
+            if (ContainerToPick == containerCarrying) ContainerToPick = null;
+            stackField.AddToGround(containerCarrying);
+        });
     }
     #endregion
 }

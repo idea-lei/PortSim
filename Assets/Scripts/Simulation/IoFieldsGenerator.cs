@@ -19,8 +19,7 @@ public class IoFieldsGenerator : MonoBehaviour {
     }
 
     private void initFields() {
-        // init inFields, add 3 fields for test
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 5; i++) {
             GenerateInField();
         }
     }
@@ -33,11 +32,11 @@ public class IoFieldsGenerator : MonoBehaviour {
         return (obj, inField);
     }
 
-    public (GameObject, OutField) GenerateOutField() {
+    public  OutField GenerateOutField() {
         var obj = Instantiate(outFieldPrefab);
         var outField = obj.GetComponent<OutField>();
         outField.transform.SetParent(outField.Port.transform);
         outField.enabled = false;
-        return (obj, outField);
+        return outField;
     }
 }
