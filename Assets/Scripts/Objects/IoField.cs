@@ -15,7 +15,7 @@ public abstract class IoField : Field {
     [NonSerialized] public IoPort Port;
 
     private void OnDestroy() {
-        if(Port.isActiveAndEnabled) Port.UpdateCurrentField();
+        if (Port.isActiveAndEnabled) Port.UpdateCurrentField();
     }
 
     #region logic methods

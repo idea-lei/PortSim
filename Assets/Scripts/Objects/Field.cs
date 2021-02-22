@@ -94,7 +94,6 @@ public abstract class Field : MonoBehaviour {
         Ground[index.x, index.z].Push(container);
         container.indexInCurrentField = new IndexInStack(index.x, index.z);
         container.transform.position = IndexToGlobalPosition(container.indexInCurrentField);
-        Debug.Log($"{index.x}, {index.z}, Count = {Ground[index.x, index.z].Count}");
     }
 
     /// <summary>

@@ -14,8 +14,28 @@ public enum CraneState {
 }
 public class Crane : MonoBehaviour {
     private StackField stackField;
-    private HashSet<Container> containersToMove = new HashSet<Container>();
-    private List<Container> containersToMoveList => containersToMove.ToList();
+    private HashSet<Container> containersToMove {
+        get {
+            var set = new HashSet<Container>();
+            foreach (var p in ioPorts) {
+                if (p.CurrentField is InField && p.CurrentField.isActiveAndEnabled) {
+                    foreach (var s in p.CurrentField.Ground) {
+                        foreach (var c in s.ToArray()) {
+                            set.Add(c);
+                        }
+                    }
+                }
+                if (p.CurrentField!=null && p.CurrentField is OutField && p.CurrentField.isActiveAndEnabled) {
+                    foreach (var s in stackField.Ground) {
+                        foreach (var c in s.ToArray()) {
+                            if (c.OutField == p.CurrentField) set.Add(c);
+                        }
+                    }
+                }
+            }
+            return set;
+        }
+    }
     [SerializeField] private Container containerToPick;
     private Container containerCarrying;
     private IoPort[] ioPorts;
@@ -25,7 +45,7 @@ public class Crane : MonoBehaviour {
     private bool hasIoField {
         get {
             foreach (var port in ioPorts) {
-                if (port.CurrentField.enabled) return true;
+                if (port.CurrentField.isActiveAndEnabled) return true;
             }
             return false;
         }
@@ -39,11 +59,30 @@ public class Crane : MonoBehaviour {
             return res;
         }
     }
+
+    private bool hasInField {
+        get {
+            bool res = false;
+            foreach (var port in ioPorts) {
+                if (port.CurrentField.isActiveAndEnabled && port.CurrentField is InField) res = true;
+            }
+            return res;
+        }
+    }
     private bool canPickUp {
         get {
-            if (containersToMove.Count <= 0) return false;
-            if (!hasIoField) return false;
-            if (!stackField.NeedRearrange.Item1) return false;
+            if (containersToMove.Count <= 0) {
+                Debug.Log("containersToMove is empty");
+                return false;
+            }
+            if (!hasIoField) {
+                Debug.Log("has no IoField");
+                return false;
+            }
+            if (!stackField.NeedRearrange.Item1) {
+                Debug.Log("no need to rearrange");
+                return false;
+            }
             return true;
         }
     }
@@ -59,9 +98,9 @@ public class Crane : MonoBehaviour {
         setRearrangeEvents();
     }
 
-    private void Start() {
-        addContainersToSet(stackField.Ground);
-    }
+    //private void Start() {
+    //    //addContainersToSet(stackField.Ground);
+    //}
 
     private void OnTriggerEnter(Collider other) {
         if (other.CompareTag("container_in")) {
@@ -70,7 +109,13 @@ public class Crane : MonoBehaviour {
         }
         if (other.CompareTag("container_stacked")) {
             containerCarrying = other.GetComponent<Container>();
-            stateMachine.TriggerByState(containerCarrying == containerToPick ? "MoveOut" : "Rearrange");
+            foreach (var p in ioPorts) {
+                if (p.CurrentField == containerCarrying.OutField) {
+                    stateMachine.TriggerByState("MoveOut");
+                    return;
+                }
+            }
+            stateMachine.TriggerByState("Rearrange");
             return;
         }
         throw new Exception("illegal crane touch");
@@ -78,18 +123,18 @@ public class Crane : MonoBehaviour {
 
     private void Update() {
         if (stateMachine.CurrentState == "Wait") {
-            foreach (var port in ioPorts) {
-                if (port.CurrentField != null) {
-                    addContainersToSet(port.CurrentField.Ground);
-                }
-            }
-            if (canPickUp) {
-                stateMachine.TriggerByState("PickUp");
+            if (hasIoField) {
+                var c = findContainerToMoveOut();
+                if (c != null) stateMachine.TriggerByState("PickUp");
             }
             return;
         }
 
         if (stateMachine.CurrentState == "PickUp") {
+            if(containerToPick == null) {
+                stateMachine.TriggerByState("Wait");
+                return;
+            }
             moveTo(containerToPick.transform.position, false);
         } else {
             moveTo(destination, true);
@@ -97,36 +142,6 @@ public class Crane : MonoBehaviour {
     }
 
     #region private methods
-    private void addContainersToSet(Stack<Container>[,] field) {
-        foreach (var s in field) {
-            foreach (var c in s) {
-                containersToMove.Add(c);
-            }
-        }
-    }
-
-    // this function need to be trained
-    /// <summary>
-    /// find container in available containerSet to move, can be movein/out or rearrange
-    /// </summary>
-    /// <returns></returns>
-    private Container findContainerToPick() {
-        Field field = null;
-
-        if (hasIoField) {
-            // first out principle
-            foreach (var port in ioPorts) {
-                if (!port.CurrentField.isActiveAndEnabled) continue;
-                field = port.CurrentField;
-                if (port.CurrentField is OutField) break;
-            }
-            return containersToMove.Where(x => {
-                return field is OutField ? x.OutField == field : x.InField == field;
-            }).First();
-        } else {
-            return stackField.NeedRearrange.Item2;
-        }
-    }
 
     /// <summary>
     ///  
@@ -167,7 +182,8 @@ public class Crane : MonoBehaviour {
     private Movement moveState(Vector2 destination) {
         var actualPos = new Vector2(transform.position.x, transform.position.z);
         if ((actualPos - destination).sqrMagnitude < Parameters.DistanceError) return Movement.down;
-        if (Mathf.Abs(transform.position.y - Parameters.TranslationHeight) > Parameters.DistanceError) return Movement.up;
+        if (Mathf.Abs(transform.position.y - Parameters.TranslationHeight) > Parameters.DistanceError
+            && transform.position.y< Parameters.TranslationHeight) return Movement.up;
         if (Mathf.Abs(transform.position.z - destination.y) > Parameters.DistanceError) return Movement.z;
         return Movement.x;
     }
@@ -195,7 +211,6 @@ public class Crane : MonoBehaviour {
     private void setPickUpEvents() {
         var state = stateMachine.Graph.GetState("PickUp");
         state.OnEnterState.AddListener(() => {
-            Debug.Log("pickup start");
             if (containerToPick == null) containerToPick = findContainerToPick();
             if (containerToPick == null) throw new Exception("container to pick is null");
         });
@@ -222,9 +237,8 @@ public class Crane : MonoBehaviour {
         state.OnExitState.AddListener(() => {
             Debug.Log("MoveOut finished");
             containerCarrying.OutField.AddToGround(containerCarrying);
-            containersToMove.Remove(containerCarrying);
 
-            if (!containersToMove.Any(x => x.OutField == containerCarrying.OutField)){
+            if (!containersToMove.Any(x => x.OutField == containerCarrying.OutField)) {
                 containerCarrying.OutField.DestroyField();
             }
             containerCarrying = null;
@@ -242,8 +256,79 @@ public class Crane : MonoBehaviour {
         });
         state.OnExitState.AddListener(() => {
             containerCarrying.transform.SetParent(stackField.transform);
+            if (containerToPick == containerCarrying) containerToPick = null;
             stackField.AddToGround(containerCarrying);
         });
+    }
+    #endregion
+
+    #region find container to...
+    // this function need to be trained
+    /// <summary>
+    /// find container in available containerSet to move, can be movein/out or rearrange
+    /// </summary>
+    /// <returns></returns>
+    private Container findContainerToPick() {
+        var c = findContainerToMoveOut();
+        if (c != null) return c;
+        c = findContainerToRearrange();
+        if (c != null) return c;
+        c = findContainerToMoveIn();
+        return c;
+    }
+
+    private Container findContainerToMoveOut() {
+        if (!hasOutField) return null;
+        foreach (var p in ioPorts) {
+            if (p.CurrentField is OutField && p.CurrentField.isActiveAndEnabled) {
+                foreach (var s in stackField.Ground) {
+                    foreach (var c in s.ToArray()) {
+                        if (c.OutField == p.CurrentField) {
+                            if (p.CurrentField.GlobalPositionToIndex(transform.position) != c.indexInCurrentField) {
+                                return c;
+                            }
+                        }
+                    }
+                }
+                foreach (var po in ioPorts) {
+                    if (p.CurrentField is InField && p.CurrentField.isActiveAndEnabled) {
+                        foreach (var s in po.CurrentField.Ground) {
+                            foreach (var c in s.ToArray()) {
+                                if (c.OutField == p.CurrentField) {
+                                    if (p.CurrentField.GlobalPositionToIndex(transform.position) != c.indexInCurrentField) {
+                                        return c;
+                                    }
+                                }
+
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    private Container findContainerToRearrange() {
+        foreach(var s in stackField.Ground) {
+            if (s.Count == 0) continue;
+            var list = s.ToArray();
+            if (list.Min() != s.Peek()) return list.Min();
+        }
+        return null;
+    }
+
+    private Container findContainerToMoveIn() {
+        if (!hasInField) return null;
+        foreach (var p in ioPorts) {
+            if (p.CurrentField is InField && p.CurrentField.isActiveAndEnabled) {
+                if (stackField.IsGroundFull) return null;
+                foreach(var s in p.CurrentField.Ground) {
+                    if (s.Count > 0) return s.Peek();
+                }
+            }
+        }
+        return null;
     }
     #endregion
 }

@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Container : MonoBehaviour {
+public class Container : MonoBehaviour, IComparable<Container> {
     #region fields
     public Guid Id;
     public OutField OutField;
@@ -47,5 +47,8 @@ public class Container : MonoBehaviour {
         return $"{name}\n" +
             $"OutField: " + (OutField == null ? "" : OutField.name) + "\n" +
             $"InField: " + (InField == null ? "" : InField.name);
+    }
+    public int CompareTo(Container other) {
+        return DateTime.Compare(OutField.TimePlaned, other.OutField.TimePlaned);
     }
 }

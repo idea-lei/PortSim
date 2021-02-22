@@ -733,11 +733,23 @@ MonoBehaviour:
           m_Calls: []
       duration: 0
       timeMode: 0
+    - id: Transition
+      label: 
+      originID: PickUp
+      targetID: Wait
+      onEnterTransition:
+        m_PersistentCalls:
+          m_Calls: []
+      onExitTransition:
+        m_PersistentCalls:
+          m_Calls: []
+      duration: 0
+      timeMode: 0
     preferences:
       zoomSettings:
         zoomFactor: 1
       dragSettings:
-        dragOffset: {x: -221.71431, y: -115.71434}
+        dragOffset: {x: -406.32907, y: -109.5605}
       gridSettings:
         isEnabled: 1
       labelSettings:

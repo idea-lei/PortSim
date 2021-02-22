@@ -25,29 +25,23 @@ public class IoPort : MonoBehaviour {
     }
 
     public void UpdateCurrentField() {
-        _currentField = FindNextField();
-        StartCoroutine(WaitUntilEnable());
-    }
-
-    /// <summary>
-    /// outfield has higher priority than inField
-    /// </summary>
-    /// <returns>next field that will be set active</returns>
-    public IoField FindNextField() {
         if (FieldsBuffer.Count == 0) throw new Exception("no available field!");
         FieldsBuffer.Sort((a, b) => a.TimePlaned < b.TimePlaned ? -1 : 1);
-        var next = FieldsBuffer[0];
+        _currentField = FieldsBuffer[0];
         FieldsBuffer.RemoveAt(0);
-        return next;
+        if (CurrentField.TimePlaned < DateTime.Now) {
+            CurrentField.enabled = true;
+        } else {
+            StartCoroutine(WaitUntilEnable());
+        }
+        
     }
 
     public IEnumerator WaitUntilEnable() {
-        Debug.Log((CurrentField is InField ? "In " : "Out ") + $"Container enable unitil {CurrentField.TimePlaned - DateTime.Now}");
+        Debug.Log((CurrentField is InField ? "In " : "Out ") + $"Field enable unitil {CurrentField.TimePlaned - DateTime.Now}");
         while (CurrentField.TimePlaned > DateTime.Now) {
             yield return null;
-
         }
-        Debug.Log("time up!");
         CurrentField.enabled = true;
     }
 

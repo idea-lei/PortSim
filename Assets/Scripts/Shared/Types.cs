@@ -15,6 +15,14 @@ public struct IndexInStack {
         z = _z;
     }
 
+    public static bool operator ==(IndexInStack a, IndexInStack b) {
+        return a.x == b.x && a.z == b.z;
+    }
+
+    public static bool operator !=(IndexInStack a, IndexInStack b) {
+        return !(a == b);
+    }
+
     public override string ToString() {
         return IsValid? $"x={x}, z = {z}": "not valid!";
     }
