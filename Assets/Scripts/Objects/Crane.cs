@@ -215,7 +215,7 @@ public class Crane : MonoBehaviour {
             containerCarrying.RemoveFromGround();
             containerCarrying.tag = "container_out";
             containerCarrying.transform.SetParent(transform);
-            destination = containerCarrying.OutField.IndexToGlobalPosition(containerCarrying.OutField.FindAvailableIndexToStack());
+            destination = containerCarrying.OutField.IndexToGlobalPosition(containerCarrying.OutField.FindAvailableIndexToStack(this));
             containerToPick = null;
         });
 
@@ -238,7 +238,7 @@ public class Crane : MonoBehaviour {
             containerCarrying.tag = "container_rearrange";
             containerCarrying.RemoveFromGround();
             containerCarrying.transform.SetParent(transform);
-            destination = stackField.IndexToGlobalPosition(stackField.FindAvailableIndexToStack());
+            destination = stackField.IndexToGlobalPosition(stackField.FindAvailableIndexToStack(this));
         });
         state.OnExitState.AddListener(() => {
             containerCarrying.transform.SetParent(stackField.transform);

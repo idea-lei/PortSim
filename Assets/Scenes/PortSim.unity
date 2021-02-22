@@ -553,6 +553,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cafe7b6a580e0c14c8960c5006d9d5b5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  containerToPick: {fileID: 0}
 --- !u!114 &965408263
 MonoBehaviour:
   m_ObjectHideFlags: 0

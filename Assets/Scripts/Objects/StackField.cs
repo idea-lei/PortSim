@@ -41,7 +41,7 @@ public sealed class StackField : Field {
         for (int x = 0; x < DimX; x++) {
             for (int z = 0; z < DimZ; z++) {
                 for (int k = 0; k <= UnityEngine.Random.Range(0, MaxLayer); k++) {
-                    var pos = IndexToLocalPosition(new IndexInStack(x, z));
+                    var pos = IndexToLocalPositionInWorldScale(new IndexInStack(x, z));
                     var container = generateContainer(pos);
                     container.indexInCurrentField = new IndexInStack(x, z);
                     AddToGround(container, new IndexInStack(x, z));

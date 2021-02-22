@@ -31,16 +31,14 @@ public abstract class Field : MonoBehaviour {
             return isEmpty;
         }
     }
-    public virtual bool IsGroundFull {
+    public bool IsGroundFull {
         get {
-            bool isFull = true;
             foreach (var stack in Ground) {
                 if (stack.Count < Parameters.MaxLayer) {
-                    isFull = false;
-                    break;
+                    return false;
                 }
             }
-            return isFull;
+            return true;
         }
     }
     public int MaxCount => DimX * DimZ * MaxLayer;
@@ -61,20 +59,17 @@ public abstract class Field : MonoBehaviour {
     [SerializeField]
     private GameObject containerPrefab;
     private IoFieldsGenerator ioFieldsGenerator;
-    [SerializeField] private Crane crane;
     #endregion
 
     #region logic methods
-    public (Container, IndexInStack) FindContainerWithIndex(Guid id) {
-        throw new NotImplementedException();
-    }
 
-    public IndexInStack FindAvailableIndexToStack() {
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="crane"> need crane position to avoid same index</param>
+    /// <returns></returns>
+    public virtual IndexInStack FindAvailableIndexToStack(Crane crane) {
         var index = new IndexInStack();
-        if (IsGroundFull) {
-            Debug.LogError("ground full");
-            return index;
-        }
         for (int x = 0; x < DimX; x++) {
             for (int z = 0; z < DimZ; z++) {
                 var indexOfCrane = GlobalPositionToIndex(crane.transform.position);
@@ -91,14 +86,15 @@ public abstract class Field : MonoBehaviour {
     }
 
     public virtual void AddToGround(Container container, IndexInStack index) {
-        Debug.Log($"{index.x}, {index.z}, Count = {Ground[index.x, index.z].Count}");
         if (!IsAbleToAddContainerToIndex(index)) {
             throw new Exception("can not add container to index!");
         }
         //container.tag = "container_stacked";
         container.transform.SetParent(transform);
         Ground[index.x, index.z].Push(container);
-        
+        container.indexInCurrentField = new IndexInStack(index.x, index.z);
+        container.transform.position = IndexToGlobalPosition(container.indexInCurrentField);
+        Debug.Log($"{index.x}, {index.z}, Count = {Ground[index.x, index.z].Count}");
     }
 
     /// <summary>
@@ -106,7 +102,7 @@ public abstract class Field : MonoBehaviour {
     /// </summary>
     /// <param name="container"></param>
     public virtual void AddToGround(Container container) {
-        var index = LocalPositionToIndex(container.transform.localPosition);
+        var index = GlobalPositionToIndex(container.transform.position);
         AddToGround(container, index);
     }
 
@@ -147,40 +143,39 @@ public abstract class Field : MonoBehaviour {
         }
         return IsAbleToAddContainerToIndex(index.x, index.z);
     }
+    #endregion
 
+    #region Tranformation between Index and Position
+    /// <summary>
+    /// calculate global position first, do not use localPosition, otherwise will face the scale problem!
+    /// </summary>
+    /// <param name="index"></param>
+    /// <returns> global coordinate</returns>
+    public Vector3 IndexToGlobalPosition(IndexInStack index) {
+        return transform.position + IndexToLocalPositionInWorldScale(index);
+    }
+    public IndexInStack GlobalPositionToIndex(Vector3 vec) {
+        var localPos = vec - transform.position;
+        return LocalPositionInWorldScaleToIndex(localPos);
+    }
     /// <summary>
     /// 
     /// </summary>
     /// <returns>local position of the index of the specific layer</returns>
-    public Vector3 IndexToLocalPosition(int x, int z, int layer) {
+    public Vector3 IndexToLocalPositionInWorldScale(int x, int z, int count) {
         float coord_x = Parameters.Gap_Container + (Parameters.ContainerLength_Long - transform.localScale.x * 10) / 2f // x=0
             + x * (Parameters.ContainerLength_Long + Parameters.Gap_Container);   // x_th container
-        float coord_y = Parameters.ContainerHeight / 2f + layer * Parameters.ContainerHeight;
+        float coord_y = count * Parameters.ContainerHeight - Parameters.ContainerHeight / 2f;
         float coord_z = Parameters.Gap_Container + (Parameters.ContainerWidth - transform.localScale.z * 10) / 2f // z=0
             + z * (Parameters.ContainerWidth + Parameters.Gap_Container); // z_th container
         return new Vector3(coord_x, coord_y, coord_z);
     }
 
-    public Vector3 IndexToLocalPosition(IndexInStack index) {
-        var localPos = IndexToLocalPosition(index.x, index.z, Ground[index.x, index.z].Count);
-        //localPos.x /= transform.localScale.x;
-        //localPos.y /= transform.localScale.y;
-        //localPos.z /= transform.localScale.z;
-        return localPos;
-    }
-    #endregion
-
-    #region public minor methods
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="index"></param>
-    /// <returns> global coordinate</returns>
-    public Vector3 IndexToGlobalPosition(IndexInStack index) {
-        return transform.position + IndexToLocalPosition(index);
+    public Vector3 IndexToLocalPositionInWorldScale(IndexInStack index) {
+        return IndexToLocalPositionInWorldScale(index.x, index.z, Ground[index.x, index.z].Count);
     }
 
-    public IndexInStack LocalPositionToIndex(Vector3 vec) {
+    public IndexInStack LocalPositionInWorldScaleToIndex(Vector3 vec) {
         var index = new IndexInStack(
             Mathf.RoundToInt((vec.x - (Parameters.Gap_Container + (Parameters.ContainerLength_Long - transform.localScale.x * 10) / 2f)) / (Parameters.ContainerLength_Long + Parameters.Gap_Container)),
             Mathf.RoundToInt((vec.z - (Parameters.Gap_Container + (Parameters.ContainerWidth - transform.localScale.z * 10) / 2f)) / (Parameters.ContainerWidth + Parameters.Gap_Container))
@@ -188,12 +183,9 @@ public abstract class Field : MonoBehaviour {
 
         return index;
     }
+    #endregion
 
-    public IndexInStack GlobalPositionToIndex(Vector3 vec) {
-        var localPos = vec - transform.position;
-        return LocalPositionToIndex(localPos);
-    }
-
+    #region public minor methods
     public override string ToString() {
         var str = new StringBuilder();
         for (int x = 0; x < DimX; x++) {
@@ -208,6 +200,12 @@ public abstract class Field : MonoBehaviour {
 
     #region private methods
     protected virtual void initField() {
+        // because the plane scale 1 means 10m
+        transform.localScale = new Vector3(
+            (DimX * (Parameters.ContainerLength_Long + Parameters.Gap_Container) + Parameters.Gap_Container) / 10f,
+            0.00001f,
+            (DimZ * (Parameters.ContainerWidth + Parameters.Gap_Container) + Parameters.Gap_Container) / 10f);
+
         ioFieldsGenerator = FindObjectOfType<IoFieldsGenerator>();
         Id = Guid.NewGuid();
         _ground = new Stack<Container>[DimX, DimZ];
@@ -216,16 +214,11 @@ public abstract class Field : MonoBehaviour {
                 Ground[x, z] = new Stack<Container>();
             }
         }
-        // because the plane scale 1 means 10m
-        transform.localScale = new Vector3(
-            (DimX * (Parameters.ContainerLength_Long + Parameters.Gap_Container) + Parameters.Gap_Container) / 10f,
-            0.00001f,
-            (DimZ * (Parameters.ContainerWidth + Parameters.Gap_Container) + Parameters.Gap_Container) / 10f);
     }
 
     protected virtual Container generateContainer(Vector3 initPos) {
         var model = Instantiate(containerPrefab);
-        model.transform.localPosition = initPos;
+        model.transform.position = initPos + transform.position;
         var (r, g, b) = genRGB();
         model.GetComponent<MeshRenderer>().material.color = new Color(r, g, b);
         model.name = "Container-" + DateTime.Now.ToString("T");
@@ -251,7 +244,7 @@ public abstract class Field : MonoBehaviour {
             var outFields = FindObjectsOfType<OutField>();
             if (outFields.Length > 0) {
                 var index = UnityEngine.Random.Range(0, outFields.Length);
-                if (!outFields[index].IsGroundFull) {
+                if (!outFields[index].GroundFullPlaned) {
                     assign(container, outFields[index]);
                     return;
                 }

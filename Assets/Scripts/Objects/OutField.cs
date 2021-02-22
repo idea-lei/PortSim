@@ -13,7 +13,7 @@ public class OutField : IoField
         } 
     }
 
-    public override bool IsGroundFull => incomingContainers.Count + Count >= MaxCount;
+    public bool GroundFullPlaned=> incomingContainers.Count + Count >= MaxCount;
 
     public bool IsStackable => IsGroundFull;
 
