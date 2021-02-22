@@ -25,7 +25,7 @@ public abstract class IoField : Field {
         MaxLayer = UnityEngine.Random.Range(1, Parameters.MaxLayer - Parameters.MinDim);
         TimePlaned = DateTime.Now + new TimeSpan(
             UnityEngine.Random.Range(0, 0),
-            UnityEngine.Random.Range(0, 2),
+            UnityEngine.Random.Range(0, 0),
             UnityEngine.Random.Range(0, 3),
             UnityEngine.Random.Range(0, 30));
         name = "Field_" + TimePlaned.ToString("G");
@@ -39,8 +39,12 @@ public abstract class IoField : Field {
     }
 
     protected virtual void updateState(bool state) {
-        GetComponent<MeshRenderer>().enabled = state;
-        GetComponent<MeshCollider>().enabled = state;
+        var collider = GetComponent<MeshCollider>();
+        var renderer = GetComponent<MeshRenderer>();
+        if (collider && renderer) {
+            renderer.enabled = state;
+            collider.enabled = state;
+        }
     }
     #endregion
 

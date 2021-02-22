@@ -553,7 +553,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cafe7b6a580e0c14c8960c5006d9d5b5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  containerToPick: {fileID: 0}
+  ContainerToPick: {fileID: 0}
+  containerCarrying: {fileID: 0}
 --- !u!114 &965408263
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -724,18 +725,6 @@ MonoBehaviour:
     - id: MoveOut2Wait
       label: 
       originID: MoveOut
-      targetID: Wait
-      onEnterTransition:
-        m_PersistentCalls:
-          m_Calls: []
-      onExitTransition:
-        m_PersistentCalls:
-          m_Calls: []
-      duration: 0
-      timeMode: 0
-    - id: Transition
-      label: 
-      originID: PickUp
       targetID: Wait
       onEnterTransition:
         m_PersistentCalls:

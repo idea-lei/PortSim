@@ -286,7 +286,7 @@ public class Crane : MonoBehaviour {
         var state = stateMachine.Graph.GetState("PickUp");
         state.OnEnterState.AddListener(() => {
             if (ContainerToPick == null) ContainerToPick = findContainerToPick();
-            if (ContainerToPick == null) throw new Exception("container to pick is null");
+            if (ContainerToPick == null) Debug.LogWarning("container to pick is null");
         });
         state.OnExitState.AddListener(() => { });
     }
@@ -296,15 +296,17 @@ public class Crane : MonoBehaviour {
         state.OnEnterState.AddListener(() => {
             Debug.Log("MoveIn start");
             containerCarrying.RemoveFromGround();
-            
+
+            var inField = containerCarrying.InField;
+            containerCarrying.InField = null;
+            if (inField.IsGroundEmpty) inField.DestroyField();
+
             containerCarrying.transform.SetParent(transform);
             destination = stackField.IndexToGlobalPosition(stackField.FindAvailableIndexToStack(this));
             ContainerToPick = null;
         });
         state.OnExitState.AddListener(() => {
             stackField.AddToGround(containerCarrying);
-            if (containerCarrying.InField.IsGroundEmpty) containerCarrying.InField.DestroyField();
-            containerCarrying.InField = null;
             containerCarrying = null;
         });
     }

@@ -26,19 +26,19 @@ public sealed class InField : IoField {
         base.updateState(state);
         if (meshRenderersInChildren != null) {
             foreach (var m in meshRenderersInChildren) {
-                m.enabled = state;
+                if (m) m.enabled = state;
             }
         }
         if (collidersInChildren != null) {
             foreach (var c in collidersInChildren) {
-                c.enabled = state;
+                if (c) c.enabled = state;
             }
         }
     }
 
     protected override void initField() {
         base.initField();
-        name = "In"+name;
+        name = "In" + name;
         initContainers();
         transform.position = Port.transform.position;
     }
@@ -62,5 +62,15 @@ public sealed class InField : IoField {
         }
         meshRenderersInChildren = GetComponentsInChildren<MeshRenderer>();
         collidersInChildren = GetComponentsInChildren<BoxCollider>();
+    }
+
+    public override void DestroyField() {
+        // don't edit this, i have no idea why directly destroy gameobject will cause deleting all containers generated from this field
+        transform.DetachChildren();
+        Destroy(GetComponent<MeshCollider>(), 0.2f);
+        Destroy(GetComponent<MeshRenderer>(), 0.6f);
+        Destroy(GetComponent<MeshFilter>(), 0.6f);
+        Destroy(this, 0.8f);
+        base.DestroyField();
     }
 }

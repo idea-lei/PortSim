@@ -11,7 +11,7 @@ public static class Parameters
     // number of containers in z/x
     public static readonly int DimZ = 3;
     public static readonly int DimX = 3;
-    public static readonly int MinDim = 1; // this is only for test (random generation)
+    public static readonly int MinDim = 0; // this is only for test (random generation)
 
     public static readonly float ContainerHeight = 2.5f;
     public static readonly float ContainerWidth = 2.5f;
