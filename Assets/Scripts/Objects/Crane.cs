@@ -243,7 +243,7 @@ public class Crane : MonoBehaviour {
                 }
             }
         }
-        return null;
+        throw new Exception("no container could be moveout");
     }
 
     private Container findContainerToRearrange() {
@@ -255,7 +255,7 @@ public class Crane : MonoBehaviour {
                 && stackField.GlobalPositionToIndex(transform.position)!= min.indexInCurrentField) 
                 return min;
         }
-        return null;
+        throw new Exception("no container could be rearranged");
     }
 
     private Container findContainerToMoveIn() {

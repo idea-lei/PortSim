@@ -44,6 +44,6 @@ public static class Parameters
     #endregion
 
     #region Simulation
-    public static readonly float EventDelay = 2f;
+    public static readonly float EventDelay = 1f;
     #endregion
 }
