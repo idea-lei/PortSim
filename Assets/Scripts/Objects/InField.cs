@@ -6,8 +6,8 @@ using System.Text;
 using UnityEngine;
 
 public sealed class InField : IoField {
-    private MeshRenderer[] meshRenderersInChildren;
-    private BoxCollider[] collidersInChildren;
+    private List<MeshRenderer> meshRenderersInChildren = new List<MeshRenderer>();
+    private List<BoxCollider> collidersInChildren = new List<BoxCollider>();
 
     #region unity life circle
     private void Awake() {
@@ -57,18 +57,19 @@ public sealed class InField : IoField {
                     container.InField = this;
                     assignOutPort(container, TimePlaned);
                     container.tag = "container_in";
+                    meshRenderersInChildren.Add(container.GetComponent<MeshRenderer>());
+                    collidersInChildren.Add(container.GetComponent<BoxCollider>());
                 }
             }
         }
-        meshRenderersInChildren = GetComponentsInChildren<MeshRenderer>();
-        collidersInChildren = GetComponentsInChildren<BoxCollider>();
     }
 
-    public override void DestroyField() {
-        // don't edit this, i have no idea why directly destroy gameobject will cause deleting all containers generated from this field
-        transform.DetachChildren();
-        Debug.Log(ToString());
-        Destroy(this, 1.7f);
-        Destroy(transform.gameObject, Parameters.EventDelay);
+    public override Container RemoveFromGround(Container c) {
+        // because of the updateState, must update the list when remove from ground
+        collidersInChildren.Remove(c.GetComponent<BoxCollider>());
+        meshRenderersInChildren.Remove(c.GetComponent<MeshRenderer>());
+        return base.RemoveFromGround(c);
     }
+
+
 }
