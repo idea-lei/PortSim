@@ -21,16 +21,17 @@ public class OutField : IoField
         initField();
     }
 
-    protected override void initField() {
-        base.initField();
-        name = "Out" + name;
-        transform.position = Port.transform.position;
-    }
     private void OnEnable() {
         updateState(true);
     }
 
     private void OnDisable() {
         updateState(false);
+    }
+
+    protected override void initField() {
+        base.initField();
+        name = "Out" + name;
+        transform.position = Port.transform.position;
     }
 }

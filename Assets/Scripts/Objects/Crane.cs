@@ -217,7 +217,7 @@ public class Crane : MonoBehaviour {
     private Container findContainerToMoveOut() {
         if (!hasOutField) return null;
         foreach (var p in ioPorts) {
-            if (p.CurrentField is OutField && p.CurrentField.isActiveAndEnabled) {
+            if (p.CurrentField is OutField && p.CurrentField.enabled) {
                 foreach (var s in stackField.Ground) {
                     foreach (var c in s.ToArray()) {
                         if (c.OutField == p.CurrentField) {
@@ -228,7 +228,7 @@ public class Crane : MonoBehaviour {
                     }
                 }
                 foreach (var po in ioPorts) {
-                    if (p.CurrentField is InField && p.CurrentField.isActiveAndEnabled) {
+                    if (p.CurrentField is InField && p.CurrentField.enabled) {
                         foreach (var s in po.CurrentField.Ground) {
                             foreach (var c in s.ToArray()) {
                                 if (c.OutField == p.CurrentField) {

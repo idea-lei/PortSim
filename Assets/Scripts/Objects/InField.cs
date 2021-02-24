@@ -67,10 +67,8 @@ public sealed class InField : IoField {
     public override void DestroyField() {
         // don't edit this, i have no idea why directly destroy gameobject will cause deleting all containers generated from this field
         transform.DetachChildren();
-        Destroy(GetComponent<MeshCollider>(), 0.2f);
-        Destroy(GetComponent<MeshRenderer>(), 0.6f);
-        Destroy(GetComponent<MeshFilter>(), 0.6f);
-        Destroy(this, 0.8f);
-        base.DestroyField();
+        Debug.Log(ToString());
+        Destroy(this, 1.7f);
+        Destroy(transform.gameObject, Parameters.EventDelay);
     }
 }
