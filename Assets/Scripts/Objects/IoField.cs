@@ -8,7 +8,7 @@ using UnityEngine;
 /// <summary>
 /// base class of the inField and outField
 /// </summary>
-public abstract class IoField : Field {
+public abstract class IoField : Field, IComparable<IoField> {
     [NonSerialized] public DateTime TimePlaned;
     [NonSerialized] public DateTime TimeReal;
     [NonSerialized] public TimeSpan EstimatedDuration;  // this estimated duration for loading / unloading process
@@ -23,12 +23,6 @@ public abstract class IoField : Field {
         DimX = UnityEngine.Random.Range(1, Parameters.DimX - Parameters.MinDim);
         DimZ = UnityEngine.Random.Range(1, Parameters.DimZ - Parameters.MinDim);
         MaxLayer = UnityEngine.Random.Range(1, Parameters.MaxLayer - Parameters.MinDim);
-        TimePlaned = DateTime.Now + new TimeSpan(
-            UnityEngine.Random.Range(0, 0),
-            UnityEngine.Random.Range(0, 0),
-            UnityEngine.Random.Range(0, 3),
-            UnityEngine.Random.Range(0, 30));
-        name = "Field_" + TimePlaned.ToString("G");
         assignPort();
         base.initField();
     }
@@ -54,6 +48,18 @@ public abstract class IoField : Field {
         str.Append($"time planed: {TimePlaned:T}\n");
         str.Append($"Ground:\n{base.ToString()}");
         return str.ToString();
+    }
+
+    public TimeSpan GenerateRandomTimeSpan() {
+        return new TimeSpan(
+            UnityEngine.Random.Range(0, 0),
+            UnityEngine.Random.Range(0, 0),
+            UnityEngine.Random.Range(0, 3),
+            UnityEngine.Random.Range(0, 30));
+    }
+
+    public int CompareTo(IoField other) {
+        return DateTime.Compare(TimePlaned, other.TimePlaned);
     }
     #endregion
 }

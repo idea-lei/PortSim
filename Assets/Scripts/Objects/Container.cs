@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Container : MonoBehaviour, IComparable<Container> {
+public class Container : MonoBehaviour {
     #region fields
     public Guid Id;
     public OutField OutField;
@@ -35,7 +35,7 @@ public class Container : MonoBehaviour, IComparable<Container> {
         if (other.CompareTag("field_out") || other.CompareTag("field_stack")) { // container touches container, which means add to ground, finished moving
             if (stateMachine.CurrentState != "PickUp") stateMachine.TriggerByState("PickUp");
         }
-        
+
     }
     #endregion
 
@@ -47,8 +47,5 @@ public class Container : MonoBehaviour, IComparable<Container> {
         return $"{name}\n" +
             $"OutField: " + (OutField == null ? "" : OutField.name) + "\n" +
             $"InField: " + (InField == null ? "" : InField.name);
-    }
-    public int CompareTo(Container other) {
-        return DateTime.Compare(OutField.TimePlaned, other.OutField.TimePlaned);
     }
 }

@@ -38,7 +38,8 @@ public sealed class InField : IoField {
 
     protected override void initField() {
         base.initField();
-        name = "In" + name;
+        TimePlaned = DateTime.Now + GenerateRandomTimeSpan();
+        name = "InField_" + TimePlaned.ToString("G"); ;
         initContainers();
         transform.position = Port.transform.position;
     }

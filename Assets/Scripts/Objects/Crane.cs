@@ -250,7 +250,7 @@ public class Crane : MonoBehaviour {
         foreach(var s in stackField.Ground) {
             if (s.Count == 0) continue;
             var list = s.ToArray();
-            var min = list.Min();
+            var min = list.First(x=>x.OutField.TimePlaned == list.Min(y => y.OutField.TimePlaned));
             if (min != s.Peek() 
                 && stackField.GlobalPositionToIndex(transform.position)!= min.indexInCurrentField) 
                 return min;
@@ -325,7 +325,7 @@ public class Crane : MonoBehaviour {
         state.OnExitState.AddListener(() => {
             containerCarrying.OutField.AddToGround(containerCarrying);
 
-            if (!containersToMove.Any(x => x.OutField == containerCarrying.OutField)) {
+            if (containerCarrying.OutField.Count == containerCarrying.OutField.IncomingContainersCount) {
                 containerCarrying.OutField.DestroyField();
             }
             containerCarrying = null;

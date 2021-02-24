@@ -221,7 +221,7 @@ public abstract class Field : MonoBehaviour {
         model.transform.position = initPos + transform.position;
         var (r, g, b) = genRGB();
         model.GetComponent<MeshRenderer>().material.color = new Color(r, g, b);
-        model.name = "Container-" + DateTime.Now.ToString("T");
+        model.name = "Container_" + DateTime.Now.ToString("G");
         model.transform.parent = transform;
 
         var container = model.GetComponent<Container>();
@@ -240,14 +240,14 @@ public abstract class Field : MonoBehaviour {
             if (outFields.Length > 0) {
                 var index = UnityEngine.Random.Range(0, outFields.Length);
                 if (!outFields[index].GroundFullPlaned && outFields[index].TimePlaned > initTime) {
-                    outFields[index].incomingContainers.Add(container);
+                    outFields[index].AddContainerToList(container);
                     container.OutField = outFields[index];
                     return;
                 }
             }
         }
         var field = ioFieldsGenerator.GenerateOutField();
-        field.incomingContainers.Add(container);
+        field.AddContainerToList(container);
         container.OutField = field;
     }
 

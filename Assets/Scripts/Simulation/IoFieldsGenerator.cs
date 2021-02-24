@@ -32,7 +32,7 @@ public class IoFieldsGenerator : MonoBehaviour {
         return (obj, inField);
     }
 
-    public  OutField GenerateOutField() {
+    public OutField GenerateOutField() {
         var obj = Instantiate(outFieldPrefab);
         var outField = obj.GetComponent<OutField>();
         outField.transform.SetParent(outField.Port.transform);
