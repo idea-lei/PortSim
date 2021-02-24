@@ -111,7 +111,7 @@ public class Crane : MonoBehaviour {
         if (other.CompareTag("container_stacked")) {
             containerCarrying = other.GetComponent<Container>();
             foreach (var p in ioPorts) {
-                if (p.CurrentField == containerCarrying.OutField) {
+                if (p.CurrentField.isActiveAndEnabled && p.CurrentField == containerCarrying.OutField) {
                     stateMachine.TriggerByState("MoveOut");
                     return;
                 }

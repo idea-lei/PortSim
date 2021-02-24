@@ -29,6 +29,7 @@ public class Container : MonoBehaviour {
     }
     private void OnTriggerEnter(Collider other) {
         if (other.tag.Contains("container")) { // container touches container, which means add to ground, finished moving
+            if (CompareTag("container_in") && other.CompareTag("container_in")) return; // this touch is because of initialization
             if (stateMachine.CurrentState != "PickUp") stateMachine.TriggerByState("PickUp");
         }
 
