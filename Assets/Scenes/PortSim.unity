@@ -569,7 +569,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   graph:
     states:
-    - position: {x: 637, y: 297}
+    - position: {x: 820, y: 395}
       id: PickUp
       onEnterState:
         m_PersistentCalls:
@@ -580,7 +580,7 @@ MonoBehaviour:
       onUpdateState:
         m_PersistentCalls:
           m_Calls: []
-    - position: {x: 802, y: 297}
+    - position: {x: 575, y: 273}
       id: Rearrange
       onEnterState:
         m_PersistentCalls:
@@ -591,7 +591,7 @@ MonoBehaviour:
       onUpdateState:
         m_PersistentCalls:
           m_Calls: []
-    - position: {x: 636, y: 184}
+    - position: {x: 724, y: 272}
       id: MoveOut
       onEnterState:
         m_PersistentCalls:
@@ -602,7 +602,7 @@ MonoBehaviour:
       onUpdateState:
         m_PersistentCalls:
           m_Calls: []
-    - position: {x: 478, y: 298}
+    - position: {x: 819, y: 172}
       id: Wait
       onEnterState:
         m_PersistentCalls:
@@ -613,7 +613,7 @@ MonoBehaviour:
       onUpdateState:
         m_PersistentCalls:
           m_Calls: []
-    - position: {x: 637, y: 399}
+    - position: {x: 428, y: 274}
       id: MoveIn
       onEnterState:
         m_PersistentCalls:
@@ -734,11 +734,23 @@ MonoBehaviour:
           m_Calls: []
       duration: 0
       timeMode: 0
+    - id: Transition
+      label: 
+      originID: Rearrange
+      targetID: Wait
+      onEnterTransition:
+        m_PersistentCalls:
+          m_Calls: []
+      onExitTransition:
+        m_PersistentCalls:
+          m_Calls: []
+      duration: 0
+      timeMode: 0
     preferences:
       zoomSettings:
         zoomFactor: 1
       dragSettings:
-        dragOffset: {x: -406.32907, y: -109.5605}
+        dragOffset: {x: -293.32907, y: -55.5605}
       gridSettings:
         isEnabled: 1
       labelSettings:
