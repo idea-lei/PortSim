@@ -83,6 +83,7 @@ public abstract class Field : MonoBehaviour {
                 }
             }
         }
+        index.IsValid = false;
         return index;
     }
 

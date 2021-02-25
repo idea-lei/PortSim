@@ -25,7 +25,10 @@ public class IoPort : MonoBehaviour {
     }
 
     public void UpdateCurrentField() {
-        if (FieldsBuffer.Count == 0) throw new Exception("no available field!");
+        if (FieldsBuffer.Count == 0) {
+            Debug.LogWarning("no available field!");
+            return;
+        }
         FieldsBuffer.Sort((a, b) => a.TimePlaned < b.TimePlaned ? -1 : 1);
         _currentField = FieldsBuffer[0];
         FieldsBuffer.RemoveAt(0);

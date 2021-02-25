@@ -6,7 +6,7 @@ public static class Parameters
 {
     #region PlayGround
     // the ground stack max layer
-    public static readonly int MaxLayer = 3;
+    public static readonly int MaxLayer = 2;
 
     // number of containers in z/x
     public static readonly int DimZ = 3;
@@ -41,6 +41,7 @@ public static class Parameters
     #region Errors
     // this value should be larger than v_magnitude * deltatime
     public static readonly float DistanceError = 0.1f;
+    public static readonly float SqrDistanceError = 0.32f; // use this to avoid the sqrt calculation
     #endregion
 
     #region Simulation
