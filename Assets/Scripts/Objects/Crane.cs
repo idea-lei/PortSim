@@ -70,23 +70,6 @@ public class Crane : MonoBehaviour {
             return res;
         }
     }
-    private bool canPickUp {
-        get {
-            if (containersToMove.Count <= 0) {
-                Debug.Log("containersToMove is empty");
-                return false;
-            }
-            if (!hasIoField) {
-                Debug.Log("has no IoField");
-                return false;
-            }
-            if (!stackField.NeedRearrange.Item1) {
-                Debug.Log("no need to rearrange");
-                return false;
-            }
-            return true;
-        }
-    }
     private void Awake() {
         stackField = FindObjectOfType<StackField>();
         ioPorts = FindObjectsOfType<IoPort>();
@@ -125,11 +108,11 @@ public class Crane : MonoBehaviour {
 
     private void Update() {
         if (stateMachine.CurrentState == "Wait") {
-            if (hasIoField) {
-                var c = findContainerToMoveOut();
-                if (c != null) stateMachine.TriggerByState("PickUp");
+            if (ContainerToPick) {
+                stateMachine.TriggerByState("PickUp");
+                return;
             }
-            return;
+            moveToWaitPosition();
         }
 
         if (stateMachine.CurrentState == "PickUp") {
@@ -146,6 +129,10 @@ public class Crane : MonoBehaviour {
     }
 
     #region private methods
+    private void moveToWaitPosition() {
+        if (Parameters.TranslationHeight - transform.position.y > Parameters.DistanceError)
+            transform.position += new Vector3(0, Parameters.Vy_Unloaded * Time.deltaTime, 0);
+    }
 
     /// <summary>
     ///  

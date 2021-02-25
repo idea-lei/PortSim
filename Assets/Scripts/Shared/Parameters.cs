@@ -40,8 +40,8 @@ public static class Parameters
 
     #region Errors
     // this value should be larger than v_magnitude * deltatime
-    public static readonly float DistanceError = 0.1f;
-    public static readonly float SqrDistanceError = 0.32f; // use this to avoid the sqrt calculation
+    public static readonly float DistanceError = 0.05f;
+    public static readonly float SqrDistanceError = 0.22f; // use this to avoid the sqrt calculation
     #endregion
 
     #region Simulation
