@@ -13,7 +13,7 @@ public class IoPort : MonoBehaviour {
     // the max dim of the ioField
     [NonSerialized] public int DimX, DimZ;
 
-    private IoField _currentField;
+    [SerializeField] private IoField _currentField;
 
     public List<IoField> FieldsBuffer = new List<IoField>();
     public IoField CurrentField {

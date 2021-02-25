@@ -6,7 +6,7 @@ public static class Parameters
 {
     #region PlayGround
     // the ground stack max layer
-    public static readonly int MaxLayer = 2;
+    public static readonly int MaxLayer = 3;
 
     // number of containers in z/x
     public static readonly int DimZ = 3;
