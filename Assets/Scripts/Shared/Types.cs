@@ -8,7 +8,11 @@ public struct IndexInStack {
     public bool IsValid; // since struct is non-nullable, so need this field to determine whether the index is valid
     public int x;
     public int z;
-
+    public IndexInStack(bool _isValid) {
+        x = 0;
+        z = 0;
+        IsValid = _isValid;
+    }
     public IndexInStack(int _x, int _z, bool _isValid = true) {
         IsValid = _isValid;
         x = _x;

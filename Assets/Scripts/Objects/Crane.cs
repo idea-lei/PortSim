@@ -37,11 +37,12 @@ public class Crane : MonoBehaviour {
         }
     }
     public Container ContainerToPick;
+    public bool CanPickUp => findContainerToPick() != null;
     [SerializeField] private Container containerCarrying;
     private IoPort[] ioPorts;
     private StateMachine stateMachine;
     private Vector3 destination;
-    private bool reachedTop; // this field is weird cuz of the move strategy, need to update this
+    [SerializeField] private bool reachedTop; // this field is weird cuz of the move strategy, need to update this
 
     private bool hasIoField {
         get {
@@ -108,20 +109,17 @@ public class Crane : MonoBehaviour {
 
     private void Update() {
         if (stateMachine.CurrentState == "Wait") {
-            if (ContainerToPick) {
+            if (ContainerToPick || CanPickUp) {
                 stateMachine.TriggerByState("PickUp");
                 return;
             }
-            moveToWaitPosition();
+            if (!reachedTop) moveToWaitPosition();
+            return;
         }
 
         if (stateMachine.CurrentState == "PickUp") {
-            if (ContainerToPick == null) {
-                ContainerToPick = findContainerToPick();
-                return;
-            }
-            if (ContainerToPick != null)
-                moveTo(ContainerToPick.transform.position, false);
+            if (!ContainerToPick) ContainerToPick = findContainerToPick();
+            if (ContainerToPick) moveTo(ContainerToPick.transform.position, false);
             else stateMachine.TriggerByState("Wait");
         } else {
             moveTo(destination, true);
@@ -132,6 +130,7 @@ public class Crane : MonoBehaviour {
     private void moveToWaitPosition() {
         if (Parameters.TranslationHeight - transform.position.y > Parameters.DistanceError)
             transform.position += new Vector3(0, Parameters.Vy_Unloaded * Time.deltaTime, 0);
+        else reachedTop = true;
     }
 
     /// <summary>
@@ -234,19 +233,19 @@ public class Crane : MonoBehaviour {
     }
 
     private Container findContainerToRearrange() {
+        if (stackField.IsGroundFull) return null;
         foreach (var s in stackField.Ground) {
             if (s.Count == 0) continue;
             var list = s.ToArray();
             var min = list.First(x => x.OutField.TimePlaned == list.Min(y => y.OutField.TimePlaned));
-            if (min != s.Peek())
-                return min;
+            if (min != s.Peek()) return min;
         }
         return null;
     }
 
     private Container findContainerToMoveIn() {
         if (!hasInField) return null;
-        if(stackField.Count + 1 >= stackField.MaxCount) return null; // avoid full stack, otherwise will be no arrange possible
+        if (stackField.Count + 1 >= stackField.MaxCount) return null; // avoid full stack, otherwise will be no arrange possible
         foreach (var p in ioPorts) {
             if (p.CurrentField && p.CurrentField is InField && p.CurrentField.isActiveAndEnabled) {
                 if (stackField.IsGroundFull) return null;
@@ -281,6 +280,7 @@ public class Crane : MonoBehaviour {
             }
         });
         state.OnExitState.AddListener(() => {
+            ContainerToPick = null;
             reachedTop = false;
         });
     }
@@ -344,6 +344,7 @@ public class Crane : MonoBehaviour {
                 if (ContainerToPick == containerCarrying) ContainerToPick = null;
                 stackField.AddToGround(containerCarrying);
             }
+            containerCarrying = null;
             reachedTop = false;
         });
     }

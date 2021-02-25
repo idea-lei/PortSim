@@ -49,7 +49,7 @@ public class IoPort : MonoBehaviour {
             yield return null;
         }
         CurrentField.enabled = true;
-        FindObjectOfType<Crane>().ContainerToPick = null;
+        //FindObjectOfType<Crane>().ContainerToPick = null;
     }
 
     public override string ToString() {

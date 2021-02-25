@@ -746,6 +746,18 @@ MonoBehaviour:
           m_Calls: []
       duration: 0
       timeMode: 0
+    - id: Transition 1
+      label: 
+      originID: PickUp
+      targetID: Wait
+      onEnterTransition:
+        m_PersistentCalls:
+          m_Calls: []
+      onExitTransition:
+        m_PersistentCalls:
+          m_Calls: []
+      duration: 0
+      timeMode: 0
     preferences:
       zoomSettings:
         zoomFactor: 1

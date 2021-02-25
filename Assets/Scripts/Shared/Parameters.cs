@@ -46,6 +46,6 @@ public static class Parameters
 
     #region Simulation
     public static readonly float EventDelay = 1f;
-    public static readonly int InFieldNumber = 6;
+    public static readonly int InFieldNumber = 10;
     #endregion
 }
