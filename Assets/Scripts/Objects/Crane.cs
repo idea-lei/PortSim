@@ -41,6 +41,7 @@ public class Crane : MonoBehaviour {
     private IoPort[] ioPorts;
     private StateMachine stateMachine;
     private Vector3 destination;
+    private bool reachedTop; // this field is weird cuz of the move strategy, need to update this
 
     private bool hasIoField {
         get {
@@ -183,10 +184,13 @@ public class Crane : MonoBehaviour {
     /// <param name="destination">the destination.y is the Vector3.z!</param>
     /// <returns>the movement period</returns>
     private Movement moveState(Vector2 destination) {
+        if (!reachedTop) {
+            if (Parameters.TranslationHeight - transform.position.y > Parameters.DistanceError) return Movement.up;
+            else reachedTop = true;
+        }
         var actualPos = new Vector2(transform.position.x, transform.position.z);
         if ((actualPos - destination).sqrMagnitude < Parameters.DistanceError) return Movement.down;
-        if (Mathf.Abs(transform.position.y - Parameters.TranslationHeight) > Parameters.DistanceError
-            && transform.position.y < Parameters.TranslationHeight) return Movement.up;
+        //if (Parameters.TranslationHeight - transform.position.y > Parameters.DistanceError) return Movement.up;
         if (Mathf.Abs(transform.position.z - destination.y) > Parameters.DistanceError) return Movement.z;
         return Movement.x;
     }
@@ -196,7 +200,8 @@ public class Crane : MonoBehaviour {
         up,
         z,
         x,
-        down
+        down,
+        wait
     }
 
     #endregion
@@ -222,8 +227,7 @@ public class Crane : MonoBehaviour {
             if (p.CurrentField && p.CurrentField is OutField && p.CurrentField.enabled) {
                 foreach (var s in stackField.Ground) {
                     foreach (var c in s.ToArray()) {
-                        if (c.OutField == p.CurrentField
-                            && stackField.GlobalPositionToIndex(transform.position) != c.indexInCurrentField)
+                        if (c.OutField == p.CurrentField)
                             return c;
                     }
                 }
@@ -231,8 +235,7 @@ public class Crane : MonoBehaviour {
                     if (p.CurrentField is InField && p.CurrentField.enabled) {
                         foreach (var s in po.CurrentField.Ground) {
                             foreach (var c in s.ToArray()) {
-                                if (c.OutField == p.CurrentField
-                                    && po.CurrentField.GlobalPositionToIndex(transform.position) != c.indexInCurrentField)
+                                if (c.OutField == p.CurrentField)
                                     return c;
                             }
                         }
@@ -248,8 +251,7 @@ public class Crane : MonoBehaviour {
             if (s.Count == 0) continue;
             var list = s.ToArray();
             var min = list.First(x => x.OutField.TimePlaned == list.Min(y => y.OutField.TimePlaned));
-            if (min != s.Peek()
-                && stackField.GlobalPositionToIndex(transform.position) != min.indexInCurrentField)
+            if (min != s.Peek())
                 return min;
         }
         return null;
@@ -257,6 +259,7 @@ public class Crane : MonoBehaviour {
 
     private Container findContainerToMoveIn() {
         if (!hasInField) return null;
+        if(stackField.Count + 1 >= stackField.MaxCount) return null; // avoid full stack, otherwise will be no arrange possible
         foreach (var p in ioPorts) {
             if (p.CurrentField && p.CurrentField is InField && p.CurrentField.isActiveAndEnabled) {
                 if (stackField.IsGroundFull) return null;
@@ -276,7 +279,9 @@ public class Crane : MonoBehaviour {
     private void setWaitEvents() {
         var state = stateMachine.Graph.GetState("Wait");
         state.OnEnterState.AddListener(() => { });
-        state.OnExitState.AddListener(() => { });
+        state.OnExitState.AddListener(() => {
+            reachedTop = false;
+        });
     }
 
     private void setPickUpEvents() {
@@ -288,7 +293,9 @@ public class Crane : MonoBehaviour {
                 stateMachine.TriggerByState("Wait");
             }
         });
-        state.OnExitState.AddListener(() => { });
+        state.OnExitState.AddListener(() => {
+            reachedTop = false;
+        });
     }
 
     private void setMoveInEvents() {
@@ -307,6 +314,7 @@ public class Crane : MonoBehaviour {
         state.OnExitState.AddListener(() => {
             stackField.AddToGround(containerCarrying);
             containerCarrying = null;
+            reachedTop = false;
         });
     }
 
@@ -327,6 +335,7 @@ public class Crane : MonoBehaviour {
                 containerCarrying.OutField.DestroyField();
             }
             containerCarrying = null;
+            reachedTop = false;
         });
     }
 
@@ -348,6 +357,7 @@ public class Crane : MonoBehaviour {
                 if (ContainerToPick == containerCarrying) ContainerToPick = null;
                 stackField.AddToGround(containerCarrying);
             }
+            reachedTop = false;
         });
     }
     #endregion
