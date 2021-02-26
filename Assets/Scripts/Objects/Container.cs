@@ -32,19 +32,16 @@ public class Container : MonoBehaviour {
     private void OnTriggerEnter(Collider other) {
         // these touches are because of initialization
         if (tag.Contains("_stack") && other.tag.Contains("_stack")) return;
-        if (tag.Contains("_in") && other.tag.Contains("_in")) return; 
+        if (tag.Contains("_in") && other.tag.Contains("_in")) return;
 
         if (other.tag.Contains("container")) { // container touches container, which means add to ground, finished moving
             if (stateMachine.CurrentState != "PickUp") {
-                if(crane.CanPickUp) stateMachine.TriggerByState("PickUp");
-                else if(stateMachine.CurrentState!="Wait") stateMachine.TriggerByState("Wait");
+                if (crane.CanPickUp) stateMachine.TriggerByState("PickUp");
+                else if (stateMachine.CurrentState != "Wait") stateMachine.TriggerByState("Wait");
             }
         }
 
         if (other.CompareTag("field_out") || other.CompareTag("field_stack")) { // container touches field, which means add to ground, finished moving
-            if(CompareTag("container_rearrange") && other.CompareTag("field_stack")) {
-                Debug.Log("test touch");
-            }
             if (stateMachine.CurrentState != "PickUp") {
                 if (crane.CanPickUp) stateMachine.TriggerByState("PickUp");
                 else if (stateMachine.CurrentState != "Wait") stateMachine.TriggerByState("Wait");

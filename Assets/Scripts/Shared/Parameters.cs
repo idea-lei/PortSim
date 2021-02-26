@@ -11,7 +11,7 @@ public static class Parameters
     // number of containers in z/x
     public static readonly int DimZ = 2;
     public static readonly int DimX = 2;
-    public static readonly int MinDim = 0; // this is only for test (random generation)
+    public static readonly int MinDim = 1; // this is only for test (random generation)
 
     public static readonly float ContainerHeight = 2.5f;
     public static readonly float ContainerWidth = 2.5f;
@@ -46,6 +46,6 @@ public static class Parameters
 
     #region Simulation
     public static readonly float EventDelay = 1f;
-    public static readonly int InFieldNumber = 10;
+    public static readonly int InFieldNumber = 6;
     #endregion
 }

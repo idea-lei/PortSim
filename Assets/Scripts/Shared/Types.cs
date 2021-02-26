@@ -28,7 +28,17 @@ public struct IndexInStack {
     }
 
     public override string ToString() {
-        return IsValid? $"x={x}, z = {z}": "not valid!";
+        return IsValid ? $"x={x}, z = {z}" : "not valid!";
+    }
+
+    public override bool Equals(object obj) {
+        if (obj is IndexInStack)
+            return this == (IndexInStack)obj;
+        return false;
+    }
+
+    public override int GetHashCode() {
+        return base.GetHashCode();
     }
 }
 
