@@ -12,11 +12,8 @@ using UnityEngine;
 /// </summary>
 public abstract class Field : MonoBehaviour {
     #region public properties
-    public Guid Id;
-
-    // the fllowing 3 elements should be set on Awake
-    public int DimX, DimZ, MaxLayer;
-
+    public Guid Id; //do we really need a id? if we don't save it to db
+    public int DimX, DimZ, MaxLayer; // these 3 elements should be set on Awake
     public Stack<Container>[,] Ground {
         get { return _ground; }
     }
@@ -43,7 +40,6 @@ public abstract class Field : MonoBehaviour {
         }
     }
     public int MaxCount => DimX * DimZ * MaxLayer;
-
     public int Count {
         get {
             int sum = 0;
@@ -57,8 +53,7 @@ public abstract class Field : MonoBehaviour {
 
     #region private / protected properties
     private Stack<Container>[,] _ground;
-    [SerializeField]
-    private GameObject containerPrefab;
+    [SerializeField] private GameObject containerPrefab;
     private IoFieldsGenerator ioFieldsGenerator;
     #endregion
 
@@ -108,7 +103,12 @@ public abstract class Field : MonoBehaviour {
     }
 
     public virtual Container RemoveFromGround(Guid id) {
-        throw new NotImplementedException();
+        foreach(var s in Ground) {
+            if(s.Peek().Id == id) {
+                return s.Pop();
+            }
+        }
+        throw new Exception($"can not find container on peek with id: {id}");
     }
 
     public virtual Container RemoveFromGround(Container c) {
@@ -177,12 +177,13 @@ public abstract class Field : MonoBehaviour {
     }
 
     public IndexInStack LocalPositionInWorldScaleToIndex(Vector3 vec) {
-        var index = new IndexInStack(
-            Mathf.RoundToInt((vec.x - (Parameters.Gap_Container + (Parameters.ContainerLength_Long - transform.localScale.x * 10) / 2f)) / (Parameters.ContainerLength_Long + Parameters.Gap_Container)),
-            Mathf.RoundToInt((vec.z - (Parameters.Gap_Container + (Parameters.ContainerWidth - transform.localScale.z * 10) / 2f)) / (Parameters.ContainerWidth + Parameters.Gap_Container))
-            );
-
-        return index;
+        float x = (vec.x - (Parameters.Gap_Container + (Parameters.ContainerLength_Long - transform.localScale.x * 10) / 2f)) / (Parameters.ContainerLength_Long + Parameters.Gap_Container);
+        float z = (vec.z - (Parameters.Gap_Container + (Parameters.ContainerWidth - transform.localScale.z * 10) / 2f)) / (Parameters.ContainerWidth + Parameters.Gap_Container);
+        int x_round = Mathf.RoundToInt(x);
+        int z_round = Mathf.RoundToInt(z);
+        Debug.Log($"x difference: {Mathf.Abs(x - x_round)}, z difference: {Mathf.Abs(z - z_round)}\n" +
+            $"index is {x_round}, {z_round}");
+        return new IndexInStack(x_round, z_round);
     }
     #endregion
 
@@ -257,26 +258,6 @@ public abstract class Field : MonoBehaviour {
         float g = UnityEngine.Random.Range(0f, 1f);
         float b = UnityEngine.Random.Range(0f, 1f);
         return (r, g, b);
-    }
-
-    // todo: this function need to be trained for stackField
-    /// <summary>
-    /// this function could vary between stackField and outField
-    /// </summary>
-    /// <returns></returns>
-    protected virtual IndexInStack findIndexToStack() {
-        for (int x = 0; x < DimX; x++) {
-            for (int z = 0; z < DimZ; z++) {
-                if (IsAbleToAddContainerToIndex(x, z)) {
-                    return new IndexInStack {
-                        IsValid = true,
-                        x = x,
-                        z = z
-                    };
-                }
-            }
-        }
-        return new IndexInStack();
     }
     #endregion
 }

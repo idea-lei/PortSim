@@ -44,9 +44,6 @@ public sealed class InField : IoField {
         transform.position = Port.transform.position;
     }
 
-    /// <summary>
-    /// to generate containers for field
-    /// </summary>
     private void initContainers() {
         for (int x = 0; x < DimX; x++) {
             for (int z = 0; z < DimZ; z++) {

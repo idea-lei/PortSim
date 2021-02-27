@@ -28,7 +28,7 @@ public struct IndexInStack {
     }
 
     public override string ToString() {
-        return IsValid ? $"x={x}, z = {z}" : "not valid!";
+        return "Index is " + (IsValid ? $"x={x}, z = {z}" : "not valid!");
     }
 
     public override bool Equals(object obj) {

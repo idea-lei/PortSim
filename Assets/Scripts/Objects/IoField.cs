@@ -10,7 +10,7 @@ using UnityEngine;
 /// </summary>
 public abstract class IoField : Field, IComparable<IoField> {
     [NonSerialized] public DateTime TimePlaned;
-    [NonSerialized] public DateTime TimeReal;
+    [NonSerialized] public DateTime TimeReal;   // do we need this?
     [NonSerialized] public TimeSpan EstimatedDuration;  // this estimated duration for loading / unloading process
     [NonSerialized] public IoPort Port;
 
