@@ -64,13 +64,12 @@ public abstract class Field : MonoBehaviour {
     /// </summary>
     /// <param name="crane"> need crane position to avoid same index</param>
     /// <returns></returns>
-    public virtual IndexInStack FindAvailableIndexToStack(Crane crane) {
+    public IndexInStack FindAvailableIndexToStack(List<IndexInStack> indicesToAvoid) {
         var index = new IndexInStack();
         for (int x = 0; x < DimX; x++) {
             for (int z = 0; z < DimZ; z++) {
-                var indexOfCrane = GlobalPositionToIndex(crane.transform.position);
-                bool resultEqualToCraneIndex = indexOfCrane.x == x && indexOfCrane.z == z;
-                if (Ground[x, z].Count < MaxLayer && !resultEqualToCraneIndex) {
+                if (indicesToAvoid != null && indicesToAvoid.Any(i => i.x == x && i.z == z)) continue;
+                if (Ground[x, z].Count < MaxLayer) {
                     index.x = x;
                     index.z = z;
                     index.IsValid = true;
@@ -80,6 +79,14 @@ public abstract class Field : MonoBehaviour {
         }
         index.IsValid = false;
         return index;
+    }
+
+    public IndexInStack FindAvailableIndexToStack(IndexInStack indexToAvoid) {
+        return FindAvailableIndexToStack(new List<IndexInStack> { indexToAvoid });
+    }
+
+    public IndexInStack FindAvailableIndexToStack() {
+        return FindAvailableIndexToStack(null);
     }
 
     public virtual void AddToGround(Container container, IndexInStack index) {
@@ -103,8 +110,8 @@ public abstract class Field : MonoBehaviour {
     }
 
     public virtual Container RemoveFromGround(Guid id) {
-        foreach(var s in Ground) {
-            if(s.Peek().Id == id) {
+        foreach (var s in Ground) {
+            if (s.Peek().Id == id) {
                 return s.Pop();
             }
         }
@@ -181,8 +188,6 @@ public abstract class Field : MonoBehaviour {
         float z = (vec.z - (Parameters.Gap_Container + (Parameters.ContainerWidth - transform.localScale.z * 10) / 2f)) / (Parameters.ContainerWidth + Parameters.Gap_Container);
         int x_round = Mathf.RoundToInt(x);
         int z_round = Mathf.RoundToInt(z);
-        Debug.Log($"x difference: {Mathf.Abs(x - x_round)}, z difference: {Mathf.Abs(z - z_round)}\n" +
-            $"index is {x_round}, {z_round}");
         return new IndexInStack(x_round, z_round);
     }
     #endregion

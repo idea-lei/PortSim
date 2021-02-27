@@ -312,7 +312,7 @@ public class Crane : MonoBehaviour {
             if (inField.IsGroundEmpty) inField.DestroyField();
 
             ContainerCarrying.transform.SetParent(transform);
-            destination = stackField.IndexToGlobalPosition(stackField.FindAvailableIndexToStack(this));
+            destination = stackField.IndexToGlobalPosition(stackField.FindAvailableIndexToStack());
         });
         state.OnExitState.AddListener(() => {
             stackField.AddToGround(ContainerCarrying);
@@ -325,7 +325,7 @@ public class Crane : MonoBehaviour {
             ContainerCarrying.RemoveFromGround();
             ContainerCarrying.tag = "container_out";
             ContainerCarrying.transform.SetParent(transform);
-            destination = ContainerCarrying.OutField.IndexToGlobalPosition(ContainerCarrying.OutField.FindAvailableIndexToStack(this));
+            destination = ContainerCarrying.OutField.IndexToGlobalPosition(ContainerCarrying.OutField.FindAvailableIndexToStack());
         });
 
         state.OnExitState.AddListener(() => {
@@ -343,7 +343,7 @@ public class Crane : MonoBehaviour {
             ContainerCarrying.tag = "container_rearrange";
             ContainerCarrying.RemoveFromGround();
             ContainerCarrying.transform.SetParent(transform);
-            var index = stackField.FindAvailableIndexToStack(this);
+            var index = stackField.FindAvailableIndexToStack(ContainerCarrying.indexInCurrentField);
             if (index.IsValid) destination = stackField.IndexToGlobalPosition(index);
             else stateMachine.TriggerByState("Wait");
         });
