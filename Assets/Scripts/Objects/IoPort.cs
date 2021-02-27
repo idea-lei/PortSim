@@ -21,6 +21,8 @@ public class IoPort : MonoBehaviour {
     }
 
     private void Start() {
+        transform.position = new Vector3(0, 0,
+            Mathf.Sign(transform.position.z) * (Parameters.DimZ * (Parameters.ContainerWidth + Parameters.Gap_Container) + Parameters.Gap_Field));
         UpdateCurrentField();
     }
 

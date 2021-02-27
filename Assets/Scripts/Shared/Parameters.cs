@@ -1,17 +1,13 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-public static class Parameters
+﻿public static class Parameters
 {
     #region PlayGround
     // the ground stack max layer
-    public static readonly int MaxLayer = 2;
+    public static readonly int MaxLayer = 5;
 
     // number of containers in z/x
-    public static readonly int DimZ = 2;
-    public static readonly int DimX = 2;
-    public static readonly int MinDim = 1; // this is only for test (random generation)
+    public static readonly int DimZ = 5;
+    public static readonly int DimX = 5;
+    public static readonly int MinDim = 0; // this is only for test (random generation), should be smaller than the min Dim value
 
     public static readonly float ContainerHeight = 2.5f;
     public static readonly float ContainerWidth = 2.5f;
@@ -19,10 +15,10 @@ public static class Parameters
     public static readonly float ContainerLength_Short = 6f;
 
     public static readonly float Gap_Container = 1f;
-    public static readonly float Gap_Field = 5f;
+    public static readonly float Gap_Field = 10f;
     public static readonly float SpawnInterval = 10f;
 
-    public static readonly float PossibilityOfNewOutField = 0.1f; // this is only for test (random generation)
+    public static readonly float PossibilityOfNewOutField = 0.001f; // this is only for test (random generation)
     #endregion
 
     #region Movement
@@ -46,6 +42,6 @@ public static class Parameters
 
     #region Simulation
     public static readonly float EventDelay = 1f;
-    public static readonly int InFieldNumber = 6;
+    public static readonly int InFieldNumber = 6; // this is only for test (random generation)
     #endregion
 }

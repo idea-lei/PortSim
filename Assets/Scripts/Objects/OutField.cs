@@ -10,11 +10,7 @@ public class OutField : IoField {
 
     public int IncomingContainersCount => incomingContainers.Count;
 
-    public override bool IsGroundEmpty {
-        get {
-            return base.IsGroundEmpty && incomingContainers.Count == 0;
-        }
-    }
+    public override bool IsGroundEmpty => base.IsGroundEmpty && (incomingContainers.Count == 0);
 
     public bool GroundFullPlaned => IncomingContainersCount >= MaxCount;
 
