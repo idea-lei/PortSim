@@ -13,6 +13,7 @@ public class IoFieldsGenerator : MonoBehaviour {
 
     private void Start() {
         initFields();
+        InvokeRepeating(nameof(GenerateInField), Parameters.InFieldGenerationInterval, Parameters.InFieldGenerationInterval);
     }
 
     private void initFields() {
@@ -21,12 +22,13 @@ public class IoFieldsGenerator : MonoBehaviour {
         }
     }
 
-    public (GameObject, InField) GenerateInField() {
+    public InField GenerateInField() {
+        Debug.Log("generating in field");
         var obj = Instantiate(inFieldPrefab);
         var inField = obj.GetComponent<InField>();
         inField.transform.SetParent(inField.Port.transform);
         inField.enabled = false;
-        return (obj, inField);
+        return inField;
     }
 
     public OutField GenerateOutField() {
