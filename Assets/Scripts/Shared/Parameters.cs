@@ -2,11 +2,11 @@
 {
     #region PlayGround
     // the ground stack max layer
-    public static readonly int MaxLayer = 2;
+    public static readonly int MaxLayer = 5;
 
     // number of containers in z/x
-    public static readonly int DimZ = 2;
-    public static readonly int DimX = 2;
+    public static readonly int DimZ = 6;
+    public static readonly int DimX = 8;
     public static readonly int MinDim = 0; // this is only for test (random generation), should be smaller than the min Dim value
 
     public static readonly float ContainerHeight = 2.5f;
