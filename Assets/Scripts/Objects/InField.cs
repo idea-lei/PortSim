@@ -6,6 +6,14 @@ public sealed class InField : IoField {
     private List<MeshRenderer> meshRenderersInChildren = new List<MeshRenderer>();
     private List<BoxCollider> collidersInChildren = new List<BoxCollider>();
 
+    public override DateTime TimePlaned {
+        get => base.TimePlaned;
+        set {
+            base.TimePlaned = value;
+            name = "InField_" + value.ToString("G");
+        }
+    }
+
     #region unity life circle
     private void Awake() {
         initField();
