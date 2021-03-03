@@ -767,7 +767,7 @@ MonoBehaviour:
       gridSettings:
         isEnabled: 1
       labelSettings:
-        isEnabled: 1
+        isEnabled: 0
     entryState: Wait
 --- !u!1 &1225991709
 GameObject:

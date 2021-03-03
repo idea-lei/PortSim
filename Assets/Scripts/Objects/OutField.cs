@@ -13,6 +13,14 @@ public class OutField : IoField {
 
     public bool IsStackable => IsGroundFull;
 
+    public override DateTime TimePlaned { 
+        get => base.TimePlaned; 
+        set {
+            base.TimePlaned = value;
+            name = "OutField_" + value.ToString("G");
+        }
+    }
+
     private void Awake() {
         initField();
     }
@@ -34,7 +42,6 @@ public class OutField : IoField {
         if (c.InField && c.InField.TimePlaned > TimePlaned) {
             TimePlaned = c.InField.TimePlaned + GenerateRandomTimeSpan();
         }
-        name = "OutField_" + TimePlaned.ToString("G");
     }
 
     protected override void initField() {

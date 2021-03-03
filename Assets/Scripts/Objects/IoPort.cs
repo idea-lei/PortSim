@@ -22,6 +22,7 @@ public class IoPort : MonoBehaviour {
         transform.position = new Vector3(0, 0,
             Mathf.Sign(transform.position.z) * (Parameters.DimZ * (Parameters.ContainerWidth + Parameters.Gap_Container) + Parameters.Gap_Field));
         UpdateCurrentField();
+        InvokeRepeating(nameof(delayField), Parameters.SetDelayInterval, Parameters.SetDelayInterval);
     }
 
     public void UpdateCurrentField() {
@@ -41,6 +42,28 @@ public class IoPort : MonoBehaviour {
 
     private void setFieldEnabled() {
         CurrentField.enabled = true;
+    }
+
+    private void delayField() {
+        if (UnityEngine.Random.Range(0, 1f) < Parameters.PossibilityOfDelay) {
+            if (FieldsBuffer.Count == 0) return;
+            var field = FieldsBuffer[UnityEngine.Random.Range(0, FieldsBuffer.Count)];
+            string oldName = field.name;
+            field.TimePlaned += IoField.GenerateRandomTimeSpan();
+            Debug.Log($"delay field {oldName} to {field.TimePlaned.ToString("G")}");
+            // this is to delay the outfields correspond to the inField
+            if(field is InField) {
+                var outFields = new List<OutField>();
+                foreach(var s in ((InField)field).Ground) {
+                    foreach(var c in s) {
+                        if (!outFields.Contains(c.OutField)) {
+                            outFields.Add(c.OutField);
+                            c.OutField.TimePlaned = field.TimePlaned + IoField.GenerateRandomTimeSpan();
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public IEnumerator WaitUntilEnable() {

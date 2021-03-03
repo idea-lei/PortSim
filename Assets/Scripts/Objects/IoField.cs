@@ -6,7 +6,13 @@ using UnityEngine;
 /// base class of the inField and outField
 /// </summary>
 public abstract class IoField : Field, IComparable<IoField> {
-    [NonSerialized] public DateTime TimePlaned;
+    private DateTime _timePlaned;
+    public virtual DateTime TimePlaned {
+        get => _timePlaned;
+        set {
+            _timePlaned = value;
+        }
+    }
     [NonSerialized] public DateTime TimeReal;   // do we need this?
     [NonSerialized] public TimeSpan EstimatedDuration;  // this estimated duration for loading / unloading process
     [NonSerialized] public IoPort Port;
@@ -47,7 +53,7 @@ public abstract class IoField : Field, IComparable<IoField> {
         return str.ToString();
     }
 
-    public TimeSpan GenerateRandomTimeSpan() {
+    public static TimeSpan GenerateRandomTimeSpan() {
         return new TimeSpan(
             UnityEngine.Random.Range(0, 0),
             UnityEngine.Random.Range(0, 0),
