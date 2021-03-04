@@ -210,7 +210,6 @@ public abstract class Field : MonoBehaviour {
             (DimX * (Parameters.ContainerLength_Long + Parameters.Gap_Container) + Parameters.Gap_Container) / 10f,
             0.00001f,
             (DimZ * (Parameters.ContainerWidth + Parameters.Gap_Container) + Parameters.Gap_Container) / 10f);
-
         ioFieldsGenerator = FindObjectOfType<IoFieldsGenerator>();
         Id = Guid.NewGuid();
         _ground = new Stack<Container>[DimX, DimZ];

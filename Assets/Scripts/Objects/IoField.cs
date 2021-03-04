@@ -18,7 +18,7 @@ public abstract class IoField : Field, IComparable<IoField> {
     [NonSerialized] public IoPort Port;
 
     private void OnDestroy() {
-        if (Port.isActiveAndEnabled) Port.UpdateCurrentField();
+        if (Port.isActiveAndEnabled) Port.CurrentField = null;
     }
 
     #region logic methods
@@ -26,13 +26,13 @@ public abstract class IoField : Field, IComparable<IoField> {
         DimX = UnityEngine.Random.Range(1, Parameters.DimX - Parameters.MinDim);
         DimZ = UnityEngine.Random.Range(1, Parameters.DimZ - Parameters.MinDim);
         MaxLayer = UnityEngine.Random.Range(1, Parameters.MaxLayer - Parameters.MinDim);
-        assignPort();
         base.initField();
+        assignPort();
     }
     private void assignPort() {
         var ports = FindObjectsOfType<IoPort>();
         Port = ports[UnityEngine.Random.Range(0, ports.Length)];
-        Port.FieldsBuffer.Add(this);
+        Port.AddToBuffer(this);
     }
 
     protected virtual void updateState(bool state) {
