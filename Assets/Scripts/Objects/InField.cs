@@ -45,7 +45,7 @@ public sealed class InField : IoField {
         TimePlaned = DateTime.Now + GenerateRandomTimeSpan();
         base.initField();
         initContainers();
-        transform.position = Port.transform.position;
+        assignPort();
     }
 
     private void initContainers() {
@@ -57,7 +57,7 @@ public sealed class InField : IoField {
                     container.indexInCurrentField = new IndexInStack(x, z);
                     AddToGround(container, new IndexInStack(x, z));
                     container.InField = this;
-                    assignOutPort(container, TimePlaned);
+                    assignOutField(container, TimePlaned);
                     container.tag = "container_in";
                     meshRenderersInChildren.Add(container.GetComponent<MeshRenderer>());
                     collidersInChildren.Add(container.GetComponent<BoxCollider>());

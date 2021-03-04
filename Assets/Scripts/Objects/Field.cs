@@ -238,7 +238,7 @@ public abstract class Field : MonoBehaviour {
     /// this method assign the outFields of the containers,
     /// will generate outField if not exist
     /// </summary>
-    protected virtual void assignOutPort(Container container, DateTime initTime) {
+    protected virtual void assignOutField(Container container, DateTime initTime) {
         if (UnityEngine.Random.Range(0, 1f) > Parameters.PossibilityOfNewOutField) {
             var outFields = FindObjectsOfType<OutField>();
             if (outFields.Length > 0) {

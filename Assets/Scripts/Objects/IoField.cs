@@ -26,13 +26,14 @@ public abstract class IoField : Field, IComparable<IoField> {
         DimX = UnityEngine.Random.Range(1, Parameters.DimX - Parameters.MinDim);
         DimZ = UnityEngine.Random.Range(1, Parameters.DimZ - Parameters.MinDim);
         MaxLayer = UnityEngine.Random.Range(1, Parameters.MaxLayer - Parameters.MinDim);
+        TimePlaned = DateTime.Now + GenerateRandomTimeSpan();
         base.initField();
-        assignPort();
     }
-    private void assignPort() {
+    protected void assignPort() {
         var ports = FindObjectsOfType<IoPort>();
         Port = ports[UnityEngine.Random.Range(0, ports.Length)];
         Port.AddToBuffer(this);
+        transform.position = Port.transform.position;
     }
 
     protected virtual void updateState(bool state) {

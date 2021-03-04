@@ -46,6 +46,6 @@ public class OutField : IoField {
 
     protected override void initField() {
         base.initField();
-        transform.position = Port.transform.position;
+        assignPort();
     }
 }
