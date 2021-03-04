@@ -13,21 +13,28 @@ public class IoPort : MonoBehaviour {
     [NonSerialized] public int DimX, DimZ;
 
     [SerializeField] private IoField _currentField;
+    [SerializeField] private IoField _nextField;
+    private IoField nextField {
+        get => _nextField;
+        set {
+            _nextField = value;
+            if (value) {
+                var span = value.TimePlaned - DateTime.Now;
+                if (span > TimeSpan.Zero) Debug.Log($"{name} next {value.name} has {span} to enable");
+            }
+        }
+    }
 
     [SerializeField] private List<IoField> fieldsBuffer = new List<IoField>();
-    private Coroutine coroutine;
     public IoField CurrentField {
         get { return _currentField; }
         set {
             _currentField = value;
+            nextField = null;
             if (CurrentField) {
                 fieldsBuffer.Remove(CurrentField);
                 CurrentField.enabled = true;
-                if (coroutine != null) {
-                    StopCoroutine(coroutine);
-                    coroutine = null;
-                }
-            } else UpdateCurrentField();
+            } 
         }
     }
 
@@ -35,6 +42,7 @@ public class IoPort : MonoBehaviour {
         transform.position = new Vector3(0, 0,
             Mathf.Sign(transform.position.z) * (Parameters.DimZ * (Parameters.ContainerWidth + Parameters.Gap_Container) + Parameters.Gap_Field));
         InvokeRepeating(nameof(delayField), Parameters.SetDelayInterval, Parameters.SetDelayInterval);
+        InvokeRepeating(nameof(UpdateCurrentField), 2f, 2f);
     }
 
     // do u really need to optimize it with Coroutine?
@@ -43,45 +51,52 @@ public class IoPort : MonoBehaviour {
         if (CurrentField != null) return;
 
         fieldsBuffer.Sort((a, b) => a.TimePlaned < b.TimePlaned ? -1 : 1);
-        var nextField = fieldsBuffer[0];
+        if (nextField != fieldsBuffer[0]) nextField = fieldsBuffer[0];
         if (nextField.TimePlaned < DateTime.Now) {
-            Debug.Log(nextField.TimePlaned);
-            CurrentField = nextField;
-        } else {
-            Debug.Log($"next Field {nextField.name} has {nextField.TimePlaned - DateTime.Now} to enable");
-            coroutine = StartCoroutine(nameof(waitUntilEnable), nextField);
+            Invoke(nameof(updateField), 1f);
         }
     }
 
     public void AddToBuffer(IoField field) {
         fieldsBuffer.Add(field);
-        UpdateCurrentField();
     }
 
-    private IEnumerable waitUntilEnable(IoField nextField) {
-        while (nextField.TimePlaned > DateTime.Now) {
-            yield return null;
+    // set current field if it fullfills the requirement
+    private void updateField() {
+        if(nextField is OutField) {
+            foreach(var c in ((OutField)nextField).IncomingContainers) {
+                // means the inField is still not enabled
+                if (c.CurrentField is InField && !c.CurrentField.isActiveAndEnabled) {
+                    delayField(nextField);
+                    return;
+                }
+            }
         }
         CurrentField = nextField;
     }
 
+    // randomly choose a field and delay it, for test
     private void delayField() {
         if (UnityEngine.Random.Range(0, 1f) < Parameters.PossibilityOfDelay) {
             if (fieldsBuffer.Count == 0) return;
             var field = fieldsBuffer[UnityEngine.Random.Range(0, fieldsBuffer.Count)];
-            string oldName = field.name;
-            field.TimePlaned += IoField.GenerateRandomTimeSpan();
-            UpdateCurrentField();
-            Debug.Log($"delay field {oldName} to {field.TimePlaned.ToString("G")}");
-            // this is to delay the outfields correspond to the inField
-            if (field is InField) {
-                var outFields = new List<OutField>();
-                foreach (var s in ((InField)field).Ground) {
-                    foreach (var c in s) {
-                        if (!outFields.Contains(c.OutField)) {
-                            outFields.Add(c.OutField);
-                            c.OutField.TimePlaned = field.TimePlaned + IoField.GenerateRandomTimeSpan();
-                        }
+            delayField(field);
+        }
+    }
+
+    private void delayField(IoField field) {
+        string oldName = field.name;
+        field.TimePlaned += IoField.GenerateRandomTimeSpan();
+        UpdateCurrentField();
+        Debug.Log($"delay field {oldName} to {field.TimePlaned.ToString("G")}");
+        // this is to delay the outfields correspond to the inField
+        if (field is InField) {
+            var outFields = new List<OutField>(); // avoid repetition
+            foreach (var s in ((InField)field).Ground) {
+                foreach (var c in s) {
+                    if (!outFields.Contains(c.OutField)) {
+                        outFields.Add(c.OutField);
+                        delayField(c.OutField);
                     }
                 }
             }

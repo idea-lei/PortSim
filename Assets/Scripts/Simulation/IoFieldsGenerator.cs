@@ -23,7 +23,6 @@ public class IoFieldsGenerator : MonoBehaviour {
     }
 
     public InField GenerateInField() {
-        Debug.Log("generating in field");
         var obj = Instantiate(inFieldPrefab);
         var inField = obj.GetComponent<InField>();
         inField.transform.SetParent(inField.Port.transform);
