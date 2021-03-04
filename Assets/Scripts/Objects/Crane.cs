@@ -105,7 +105,8 @@ public class Crane : MonoBehaviour {
     private void OnTriggerEnter(Collider other) {
         if (other.CompareTag("container_in")) {
             ContainerCarrying = other.GetComponent<Container>();
-            stateMachine.TriggerByState("MoveIn");
+            if (ContainerCarrying.OutField.isActiveAndEnabled) stateMachine.TriggerByState("MoveOut");
+            else stateMachine.TriggerByState("MoveIn");
             return;
         }
         if (other.CompareTag("container_stacked")) {
@@ -298,18 +299,19 @@ public class Crane : MonoBehaviour {
                 stateMachine.TriggerByState("Wait");
             }
         });
-        state.OnExitState.AddListener(() => { });
+        state.OnExitState.AddListener(() => {
+            ContainerCarrying.RemoveFromGround();
+            if (ContainerCarrying.InField != null) {
+                var inField = ContainerCarrying.InField;
+                ContainerCarrying.InField = null;
+                if (inField.IsGroundEmpty) inField.DestroyField();
+            }
+        });
     }
 
     private void setStateMoveInEvents() {
         var state = stateMachine.Graph.GetState("MoveIn");
         state.OnEnterState.AddListener(() => {
-            ContainerCarrying.RemoveFromGround();
-
-            var inField = ContainerCarrying.InField;
-            ContainerCarrying.InField = null;
-            if (inField.IsGroundEmpty) inField.DestroyField();
-
             ContainerCarrying.transform.SetParent(transform);
             destination = stackField.IndexToGlobalPosition(stackField.FindAvailableIndexToStack());
         });
@@ -321,7 +323,6 @@ public class Crane : MonoBehaviour {
     private void setStateMoveOutEvents() {
         var state = stateMachine.Graph.GetState("MoveOut");
         state.OnEnterState.AddListener(() => {
-            ContainerCarrying.RemoveFromGround();
             ContainerCarrying.tag = "container_out";
             ContainerCarrying.transform.SetParent(transform);
             destination = ContainerCarrying.OutField.IndexToGlobalPosition(ContainerCarrying.OutField.FindAvailableIndexToStack());

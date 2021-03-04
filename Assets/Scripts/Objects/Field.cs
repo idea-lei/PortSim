@@ -94,6 +94,7 @@ public abstract class Field : MonoBehaviour {
         //container.tag = "container_stacked";
         container.transform.SetParent(transform);
         Ground[index.x, index.z].Push(container);
+        container.CurrentField = this;
         container.indexInCurrentField = new IndexInStack(index.x, index.z);
         container.transform.position = IndexToGlobalPosition(container.indexInCurrentField);
     }
