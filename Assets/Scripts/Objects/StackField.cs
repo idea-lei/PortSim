@@ -10,7 +10,7 @@ public sealed class StackField : Field {
     private void Start() {
         initField();
         transform.position = new Vector3();
-        //initContainers();
+        initContainers();
     }
 
     public override void AddToGround(Container container) {

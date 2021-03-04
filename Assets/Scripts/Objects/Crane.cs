@@ -341,7 +341,6 @@ public class Crane : MonoBehaviour {
         var state = stateMachine.Graph.GetState("Rearrange");
         state.OnEnterState.AddListener(() => {
             ContainerCarrying.tag = "container_rearrange";
-            ContainerCarrying.RemoveFromGround();
             ContainerCarrying.transform.SetParent(transform);
             var index = stackField.FindAvailableIndexToStack(ContainerCarrying.indexInCurrentField);
             if (index.IsValid) destination = stackField.IndexToGlobalPosition(index);
