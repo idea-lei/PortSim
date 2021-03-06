@@ -52,9 +52,7 @@ public class IoPort : MonoBehaviour {
 
         fieldsBuffer.Sort((a, b) => a.TimePlaned < b.TimePlaned ? -1 : 1);
         if (nextField != fieldsBuffer[0]) nextField = fieldsBuffer[0];
-        if (nextField.TimePlaned < DateTime.Now) {
-            Invoke(nameof(updateField), 1f);
-        }
+        if (nextField.TimePlaned < DateTime.Now) updateField();
     }
 
     public void AddToBuffer(IoField field) {

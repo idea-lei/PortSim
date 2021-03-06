@@ -64,8 +64,9 @@ public abstract class Field : MonoBehaviour {
     /// <returns></returns>
     public IndexInStack FindAvailableIndexToStack(List<IndexInStack> indicesToAvoid) {
         var index = new IndexInStack();
-        for (int x = 0; x < DimX; x++) {
-            for (int z = 0; z < DimZ; z++) {
+        var rnd = new System.Random();
+        foreach(int x in Enumerable.Range(0, DimX).OrderBy(_x => rnd.Next())) {
+            foreach (int z in Enumerable.Range(0, DimZ).OrderBy(_z => rnd.Next())) {
                 if (indicesToAvoid != null && indicesToAvoid.Any(i => i.x == x && i.z == z)) continue;
                 if (Ground[x, z].Count < MaxLayer) {
                     index.x = x;
@@ -123,13 +124,6 @@ public abstract class Field : MonoBehaviour {
         }
 
         throw new Exception("can not remove from ground");
-    }
-
-    /// <summary>
-    /// this function is to destory the field and containers belongs to it
-    /// </summary>
-    public virtual void DestroyField() {
-        Destroy(gameObject, Parameters.EventDelay);
     }
 
     public bool IsAbleToAddContainerToIndex(int x, int z) {
