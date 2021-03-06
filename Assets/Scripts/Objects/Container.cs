@@ -10,13 +10,7 @@ public class Container : MonoBehaviour {
     private StackField stackField;
     private StateMachine stateMachine;
     private Crane crane;
-    public Field CurrentField {
-        get {
-            if (CompareTag("container_in")) return InField;
-            if (CompareTag("container_out")) return OutField;
-            return stackField;
-        }
-    }
+    public Field CurrentField;
     public IndexInStack indexInCurrentField;
     #endregion
 
@@ -51,6 +45,7 @@ public class Container : MonoBehaviour {
 
     public void RemoveFromGround() {
         CurrentField.RemoveFromGround(this);
+        CurrentField = null;
     }
 
     public override string ToString() {

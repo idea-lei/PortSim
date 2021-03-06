@@ -2,11 +2,11 @@
 {
     #region PlayGround
     // the ground stack max layer
-    public static readonly int MaxLayer = 2;
+    public static readonly int MaxLayer = 3;
 
     // number of containers in z/x
-    public static readonly int DimZ = 2;
-    public static readonly int DimX = 2;
+    public static readonly int DimZ = 3;
+    public static readonly int DimX = 3;
     public static readonly int MinDim = 0; // this is only for test (random generation), should be smaller than the min Dim value
 
     public static readonly float ContainerHeight = 2.5f;
@@ -23,12 +23,12 @@
 
     #region Movement
     // the speed of the hook in different direction
-    public static readonly float Vy_Loaded = 15f;
-    public static readonly float Vy_Unloaded = 20f;
-    public static readonly float Vx_Loaded = 15f;
-    public static readonly float Vx_Unloaded = 20f;
-    public static readonly float Vz_Loaded = 15f;
-    public static readonly float Vz_Unloaded = 20f;
+    public static readonly float Vy_Loaded = 25f;
+    public static readonly float Vy_Unloaded = 40f;
+    public static readonly float Vx_Loaded = 25f;
+    public static readonly float Vx_Unloaded = 40f;
+    public static readonly float Vz_Loaded = 25f;
+    public static readonly float Vz_Unloaded = 40f;
 
     // height of the horizontal translation of the hook
     public static readonly float TranslationHeight = 20f;
@@ -36,14 +36,14 @@
 
     #region Errors
     // this value should be larger than v_magnitude * deltatime
-    public static readonly float DistanceError = 0.05f;
-    public static readonly float SqrDistanceError = 0.22f; // use this to avoid the sqrt calculation
+    public static readonly float DistanceError = 0.1f;
+    public static readonly float SqrDistanceError = 0.316f; // use this to avoid the sqrt calculation
     #endregion
 
     #region Simulation
     public static readonly float EventDelay = 1f;
-    public static readonly int InFieldNumber = 6; // this is only for test (random generation)
-    public static float InFieldGenerationInterval => DimZ * DimX * MaxLayer * 5f; // this is only for test (random generation)
+    public static readonly int InFieldNumber = 2; // this is only for test (random generation)
+    public static float InFieldGenerationInterval => DimZ * DimX * MaxLayer * 1f; // this is only for test (random generation)
     public static readonly float PossibilityOfDelay = 0.2f;
     public static float SetDelayInterval => DimZ * DimX * MaxLayer * 3f;
     #endregion

@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class OutField : IoField {
-    [SerializeField] private List<Container> incomingContainers = new List<Container>();
+    public List<Container> IncomingContainers = new List<Container>();
 
-    public int IncomingContainersCount => incomingContainers.Count;
+    public int IncomingContainersCount => IncomingContainers.Count;
 
-    public override bool IsGroundEmpty => base.IsGroundEmpty && (incomingContainers.Count == 0);
+    public override bool IsGroundEmpty => base.IsGroundEmpty && (IncomingContainers.Count == 0);
 
     public bool GroundFullPlaned => IncomingContainersCount >= MaxCount;
 
@@ -25,16 +25,8 @@ public class OutField : IoField {
         initField();
     }
 
-    private void OnEnable() {
-        updateState(true);
-    }
-
-    private void OnDisable() {
-        updateState(false);
-    }
-
     public void AddContainerToList(Container c) {
-        incomingContainers.Add(c);
+        IncomingContainers.Add(c);
         if(!c.InField && TimePlaned < DateTime.Now) {
             TimePlaned = DateTime.Now + GenerateRandomTimeSpan();
         }
@@ -46,6 +38,6 @@ public class OutField : IoField {
 
     protected override void initField() {
         base.initField();
-        transform.position = Port.transform.position;
+        assignPort();
     }
 }

@@ -64,8 +64,9 @@ public abstract class Field : MonoBehaviour {
     /// <returns></returns>
     public IndexInStack FindAvailableIndexToStack(List<IndexInStack> indicesToAvoid) {
         var index = new IndexInStack();
-        for (int x = 0; x < DimX; x++) {
-            for (int z = 0; z < DimZ; z++) {
+        var rnd = new System.Random();
+        foreach(int x in Enumerable.Range(0, DimX).OrderBy(_x => rnd.Next())) {
+            foreach (int z in Enumerable.Range(0, DimZ).OrderBy(_z => rnd.Next())) {
                 if (indicesToAvoid != null && indicesToAvoid.Any(i => i.x == x && i.z == z)) continue;
                 if (Ground[x, z].Count < MaxLayer) {
                     index.x = x;
@@ -94,6 +95,7 @@ public abstract class Field : MonoBehaviour {
         //container.tag = "container_stacked";
         container.transform.SetParent(transform);
         Ground[index.x, index.z].Push(container);
+        container.CurrentField = this;
         container.indexInCurrentField = new IndexInStack(index.x, index.z);
         container.transform.position = IndexToGlobalPosition(container.indexInCurrentField);
     }
@@ -122,13 +124,6 @@ public abstract class Field : MonoBehaviour {
         }
 
         throw new Exception("can not remove from ground");
-    }
-
-    /// <summary>
-    /// this function is to destory the field and containers belongs to it
-    /// </summary>
-    public virtual void DestroyField() {
-        Destroy(gameObject, Parameters.EventDelay);
     }
 
     public bool IsAbleToAddContainerToIndex(int x, int z) {
@@ -210,7 +205,6 @@ public abstract class Field : MonoBehaviour {
             (DimX * (Parameters.ContainerLength_Long + Parameters.Gap_Container) + Parameters.Gap_Container) / 10f,
             0.00001f,
             (DimZ * (Parameters.ContainerWidth + Parameters.Gap_Container) + Parameters.Gap_Container) / 10f);
-
         ioFieldsGenerator = FindObjectOfType<IoFieldsGenerator>();
         Id = Guid.NewGuid();
         _ground = new Stack<Container>[DimX, DimZ];
@@ -239,7 +233,7 @@ public abstract class Field : MonoBehaviour {
     /// this method assign the outFields of the containers,
     /// will generate outField if not exist
     /// </summary>
-    protected virtual void assignOutPort(Container container, DateTime initTime) {
+    protected virtual void assignOutField(Container container, DateTime initTime) {
         if (UnityEngine.Random.Range(0, 1f) > Parameters.PossibilityOfNewOutField) {
             var outFields = FindObjectsOfType<OutField>();
             if (outFields.Length > 0) {

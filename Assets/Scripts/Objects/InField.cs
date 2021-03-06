@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public sealed class InField : IoField {
-    private List<MeshRenderer> meshRenderersInChildren = new List<MeshRenderer>();
-    private List<BoxCollider> collidersInChildren = new List<BoxCollider>();
 
     public override DateTime TimePlaned {
         get => base.TimePlaned;
@@ -18,35 +16,13 @@ public sealed class InField : IoField {
     private void Awake() {
         initField();
     }
-    private void OnEnable() {
-        updateState(true);
-    }
-
-    private void OnDisable() {
-        updateState(false);
-    }
     #endregion
 
-    protected override void updateState(bool state) {
-        base.updateState(state);
-        if (meshRenderersInChildren != null) {
-            foreach (var m in meshRenderersInChildren) {
-                if (m) m.enabled = state;
-            }
-        }
-        if (collidersInChildren != null) {
-            foreach (var c in collidersInChildren) {
-                if (c) c.enabled = state;
-            }
-        }
-    }
-
     protected override void initField() {
-        base.initField();
         TimePlaned = DateTime.Now + GenerateRandomTimeSpan();
-        name = "InField_" + TimePlaned.ToString("G"); ;
+        base.initField();
         initContainers();
-        transform.position = Port.transform.position;
+        assignPort();
     }
 
     private void initContainers() {
@@ -58,21 +34,10 @@ public sealed class InField : IoField {
                     container.indexInCurrentField = new IndexInStack(x, z);
                     AddToGround(container, new IndexInStack(x, z));
                     container.InField = this;
-                    assignOutPort(container, TimePlaned);
+                    assignOutField(container, TimePlaned);
                     container.tag = "container_in";
-                    meshRenderersInChildren.Add(container.GetComponent<MeshRenderer>());
-                    collidersInChildren.Add(container.GetComponent<BoxCollider>());
                 }
             }
         }
     }
-
-    public override Container RemoveFromGround(Container c) {
-        // because of the updateState, must update the list when remove from ground
-        collidersInChildren.Remove(c.GetComponent<BoxCollider>());
-        meshRenderersInChildren.Remove(c.GetComponent<MeshRenderer>());
-        return base.RemoveFromGround(c);
-    }
-
-
 }

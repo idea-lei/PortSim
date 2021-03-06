@@ -29,7 +29,7 @@ public sealed class StackField : Field {
                     var container = generateContainer(pos);
                     container.indexInCurrentField = new IndexInStack(x, z);
                     AddToGround(container, new IndexInStack(x, z));
-                    assignOutPort(container, DateTime.Now);
+                    assignOutField(container, DateTime.Now);
                     container.tag = "container_stacked";
                 }
             }
