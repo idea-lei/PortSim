@@ -25,14 +25,6 @@ public class OutField : IoField {
         initField();
     }
 
-    private void OnEnable() {
-        updateState(true);
-    }
-
-    private void OnDisable() {
-        updateState(false);
-    }
-
     public void AddContainerToList(Container c) {
         IncomingContainers.Add(c);
         if(!c.InField && TimePlaned < DateTime.Now) {

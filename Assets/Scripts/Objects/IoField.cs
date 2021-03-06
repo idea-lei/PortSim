@@ -16,6 +16,13 @@ public abstract class IoField : Field, IComparable<IoField> {
     [NonSerialized] public DateTime TimeReal;   // do we need this?
     [NonSerialized] public TimeSpan EstimatedDuration;  // this estimated duration for loading / unloading process
     [NonSerialized] public IoPort Port;
+    private void OnEnable() {
+        updateState(true);
+    }
+
+    private void OnDisable() {
+        updateState(false);
+    }
 
     private void OnDestroy() {
         if (Port.isActiveAndEnabled) Port.CurrentField = null;
@@ -42,6 +49,12 @@ public abstract class IoField : Field, IComparable<IoField> {
         if (collider && renderer) {
             renderer.enabled = state;
             collider.enabled = state;
+        }
+        foreach (var m in GetComponentsInChildren<MeshRenderer>()) {
+            if (m) m.enabled = state;
+        }
+        foreach (var c in GetComponentsInChildren<BoxCollider>()) {
+            if (c) c.enabled = state;
         }
     }
 
