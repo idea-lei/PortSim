@@ -16,16 +16,16 @@ public class Crane : MonoBehaviour {
     [SerializeField] private Container _containerToPick;
     public Container ContainerToPick {
         get => _containerToPick;
-        set {
+        private set {
             if (value) ContainerCarrying = null;
             _containerToPick = value;
         }
     }
 
     [SerializeField] private Container _containerCarrying;
-    private Container ContainerCarrying {
+    public Container ContainerCarrying {
         get => _containerCarrying;
-        set {
+        private set {
             if (value && value == ContainerToPick) ContainerToPick = null;
             _containerCarrying = value;
         }
@@ -98,7 +98,7 @@ public class Crane : MonoBehaviour {
                     stateMachine.TriggerByState("MoveOut");
                     return;
                 }
-            } 
+            }
             if (stackField.StackableIndex(ContainerCarrying.StackedIndices).IsValid) {
                 stateMachine.TriggerByState("Rearrange");
             } else {

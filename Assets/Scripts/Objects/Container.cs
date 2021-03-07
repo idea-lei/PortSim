@@ -8,7 +8,16 @@ public class Container : MonoBehaviour {
     public Guid Id;
     public OutField OutField;
     public InField InField;
-    public Field CurrentField;
+    private Field _currentField;
+    public Field CurrentField {
+        get => _currentField;
+        set {
+            if (value && value != _currentField) {
+                _currentField = value;
+                StackedIndices.Clear();
+            }
+        }
+    }
     public IndexInStack IndexInCurrentField;
     public List<IndexInStack> StackedIndices = new List<IndexInStack>();
 

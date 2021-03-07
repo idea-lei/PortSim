@@ -18,6 +18,7 @@ public class IoPort : MonoBehaviour {
     private StackField stackField;
     private TempField[] tempFields;
     private IoPort[] ioPorts;
+    private Crane crane;
     private IoField nextField {
         get => _nextField;
         set {
@@ -46,7 +47,7 @@ public class IoPort : MonoBehaviour {
         stackField = FindObjectOfType<StackField>();
         tempFields = FindObjectsOfType<TempField>();
         ioPorts = FindObjectsOfType<IoPort>();
-
+        crane = FindObjectOfType<Crane>();
         transform.position = new Vector3(0, 0,
             Mathf.Sign(transform.position.z) * ((Parameters.DimZ + 2) * (Parameters.ContainerWidth + Parameters.Gap_Container) + Parameters.Gap_Field));
         InvokeRepeating(nameof(delayField), Parameters.SetDelayInterval, Parameters.SetDelayInterval);
@@ -61,6 +62,7 @@ public class IoPort : MonoBehaviour {
         fieldsBuffer.Sort((a, b) => a.TimePlaned < b.TimePlaned ? -1 : 1);
         // calculate sum count of containers
         int sumCount = stackField.Count;
+        if (crane.ContainerCarrying) sumCount++;
         foreach (var t in tempFields) sumCount += t.Count;
         foreach (var i in ioPorts) if (i.CurrentField is InField) sumCount += i.CurrentField.Count;
 
