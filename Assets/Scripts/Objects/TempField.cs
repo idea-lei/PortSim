@@ -22,6 +22,6 @@ public class TempField : Field {
 
     public override void AddToGround(Container container) {
         base.AddToGround(container);
-        container.tag = "container_stacked_temp";
+        container.tag = "container_temp";
     }
 }

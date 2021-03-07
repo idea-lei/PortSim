@@ -145,9 +145,12 @@ public abstract class Field : MonoBehaviour {
     }
 
     public IndexInStack StackableIndex(List<IndexInStack> indicesToAvoid) {
-        foreach (var s in Ground) {
-            if (s.Count < Parameters.MaxLayer && indicesToAvoid != null && !indicesToAvoid.Any(i => i == s.Peek().indexInCurrentField))
-                return s.Peek().indexInCurrentField;
+        for(int x = 0; x < DimX; x++) {
+            for (int z = 0; z < DimZ; z++) {
+                var idx = new IndexInStack(x, z);
+                if (Ground[x, z].Count < Parameters.MaxLayer && !indicesToAvoid.Any(i => i == idx))
+                    return idx;
+            }
         }
         return new IndexInStack(false);
     }

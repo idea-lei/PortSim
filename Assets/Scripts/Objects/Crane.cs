@@ -70,6 +70,7 @@ public class Crane : MonoBehaviour {
         stateMachine = GetComponent<StateMachine>();
         tempFields = FindObjectsOfType<TempField>();
 
+        setStateMachineGeneralEvents();
         setStateWaitEvents();
         setStatePickUpEvents();
         setStateMoveInEvents();
@@ -83,6 +84,7 @@ public class Crane : MonoBehaviour {
     //}
 
     private void OnTriggerEnter(Collider other) {
+        reachedTop = false;
         if (other.CompareTag("container_in") || other.CompareTag("container_temp")) {
             ContainerCarrying = other.GetComponent<Container>();
             if (ContainerCarrying.OutField.isActiveAndEnabled) stateMachine.TriggerByState("MoveOut");
@@ -91,14 +93,13 @@ public class Crane : MonoBehaviour {
         }
         if (other.CompareTag("container_stacked")) {
             ContainerCarrying = other.GetComponent<Container>();
-            if (ContainerToPick == null) { //check the property method to find out why
-                foreach (var p in ioPorts) {
-                    if (p.CurrentField && p.CurrentField.isActiveAndEnabled && p.CurrentField == ContainerCarrying.OutField) {
-                        stateMachine.TriggerByState("MoveOut");
-                        return;
-                    }
+            foreach (var p in ioPorts) {
+                if (p.CurrentField && p.CurrentField.isActiveAndEnabled && p.CurrentField == ContainerCarrying.OutField) {
+                    stateMachine.TriggerByState("MoveOut");
+                    return;
                 }
-            } else if (stackField.StackableIndex(ContainerCarrying.indexInCurrentField).IsValid) {
+            } 
+            if (stackField.StackableIndex(ContainerCarrying.indexInCurrentField).IsValid) {
                 stateMachine.TriggerByState("Rearrange");
             } else {
                 stateMachine.TriggerByState("MoveTemp");
@@ -248,7 +249,7 @@ public class Crane : MonoBehaviour {
         foreach (var t in tempFields) {
             if (t.IsGroundEmpty) continue;
             foreach (var s in t.Ground) {
-                if (s.Count > 0) return t.RemoveFromGround(s.Peek());
+                if (s.Count > 0) return s.Peek();
             }
         }
         if (!hasInField) return null;
@@ -267,6 +268,10 @@ public class Crane : MonoBehaviour {
     #endregion
 
     #region statemachine events
+    private void setStateMachineGeneralEvents() {
+        stateMachine.OnEnterState += _ => { reachedTop = false; };
+    }
+
     private void setStateWaitEvents() {
         var state = stateMachine.Graph.GetState("Wait");
         state.OnEnterState.AddListener(() => { });
@@ -314,10 +319,10 @@ public class Crane : MonoBehaviour {
 
         state.OnExitState.AddListener(() => {
             ContainerCarrying.OutField.AddToGround(ContainerCarrying);
-            ContainerCarrying = null;
             if (ContainerCarrying.OutField.Count == ContainerCarrying.OutField.IncomingContainersCount) {
                 ContainerCarrying.OutField.DestroyField();
             }
+            ContainerCarrying = null;
         });
     }
 
@@ -337,6 +342,7 @@ public class Crane : MonoBehaviour {
                 ContainerCarrying.transform.SetParent(stackField.transform);
                 stackField.AddToGround(ContainerCarrying);
                 ContainerCarrying = null;
+                ContainerToPick = null;
             }
         });
     }

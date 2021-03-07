@@ -2,8 +2,6 @@
 {
     using System;
     using System.Collections;
-    using System.Collections.Generic;
-    using System.Linq;
     using UnityEngine;
     using UnityEngine.Events;
 
@@ -28,6 +26,34 @@
         /// Gets the ID of the entry state
         /// </summary>
         public string EntryState => this.graph.EntryStateID;
+
+        #region Callbacks
+        /// <summary>
+        /// Callback invoked when a state is entered
+        /// </summary>
+        public UnityAction<State> OnEnterState = null;
+
+        /// <summary>
+        /// Callback invoked when a state is left
+        /// </summary>
+        public UnityAction<State> OnExitState = null;
+
+        /// <summary>
+        /// Callback invoked when a transition is triggered.
+        /// Event Order: OnTriggerTransition->OnExitState->OnEnterTransition->OnExitTransition->OnEnterState
+        /// </summary>
+        public UnityAction<Transition> OnTriggerTransition = null;
+
+        /// <summary>
+        /// Callback invoked when a transition is entered
+        /// </summary>
+        public UnityAction<Transition> OnEnterTransition = null;
+
+        /// <summary>
+        /// Callback invoked when a transition is left
+        /// </summary>
+        public UnityAction<Transition> OnExitTransition = null;
+        #endregion
 
         public void Start()
         {
@@ -61,6 +87,7 @@
             {
                 if (node is State state)
                 {
+                    OnEnterState?.Invoke(state);
                     state.OnEnterState.Invoke();
                 }
             }
@@ -82,6 +109,8 @@
                 if (targetNode is State state)
                 {
                     this.CurrentState = state.ID;
+
+                    OnEnterState?.Invoke(state);
 
                     state.OnEnterState.Invoke();
 
@@ -268,6 +297,8 @@
                 return;
             }
 
+            OnTriggerTransition?.Invoke(transition);
+
             // Use a coroutine to execute the transition if the transition has a duration > 0 seconds
             if (transition.Duration > 0.0f)
             {
@@ -290,8 +321,10 @@
         {
             TryExitTransitionOriginState(transition);
 
+            OnEnterTransition?.Invoke(transition);
             transition.OnEnterTransition.Invoke();
 
+            OnExitTransition?.Invoke(transition);
             transition.OnExitTransition.Invoke();
 
             TryEnterTransitionTargetState(transition);
@@ -306,10 +339,12 @@
         {
             TryExitTransitionOriginState(transition);
 
+            OnEnterTransition?.Invoke(transition);
             transition.OnEnterTransition.Invoke();
 
             yield return WaitForTransitionDuration(transition);
 
+            OnExitTransition?.Invoke(transition);
             transition.OnExitTransition.Invoke();
 
             TryEnterTransitionTargetState(transition);
@@ -338,6 +373,7 @@
             {
                 if (originNode is State state && state.ID == this.CurrentState)
                 {
+                    OnExitState?.Invoke(state);
                     state.OnExitState.Invoke();
                 }
                 else if (originNode is AnyState anyState)
@@ -346,6 +382,7 @@
                     {
                         if (activeState is State)
                         {
+                            OnExitState?.Invoke((State)activeState);
                             ((State)activeState).OnExitState.Invoke();
                         }
                     }
@@ -377,6 +414,7 @@
                 {
                     this.CurrentState = state.ID;
 
+                    OnEnterState?.Invoke(state);
                     state.OnEnterState.Invoke();
 
                     return true;

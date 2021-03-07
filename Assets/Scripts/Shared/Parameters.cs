@@ -23,12 +23,12 @@
 
     #region Movement
     // the speed of the hook in different direction
-    public static readonly float Vy_Loaded = 10f;
-    public static readonly float Vy_Unloaded = 20f;
-    public static readonly float Vx_Loaded = 10f;
-    public static readonly float Vx_Unloaded = 20f;
-    public static readonly float Vz_Loaded = 10f;
-    public static readonly float Vz_Unloaded = 20f;
+    public static readonly float Vy_Loaded = 20f;
+    public static readonly float Vy_Unloaded = 30f;
+    public static readonly float Vx_Loaded = 20f;
+    public static readonly float Vx_Unloaded = 30f;
+    public static readonly float Vz_Loaded = 20f;
+    public static readonly float Vz_Unloaded = 30f;
 
     // height of the horizontal translation of the hook
     public static readonly float TranslationHeight = 20f;

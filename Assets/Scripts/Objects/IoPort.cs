@@ -14,6 +14,10 @@ public class IoPort : MonoBehaviour {
 
     [SerializeField] private IoField _currentField;
     [SerializeField] private IoField _nextField;
+
+    private StackField stackField;
+    private TempField[] tempFields;
+    private IoPort[] ioPorts;
     private IoField nextField {
         get => _nextField;
         set {
@@ -34,11 +38,15 @@ public class IoPort : MonoBehaviour {
             if (CurrentField) {
                 fieldsBuffer.Remove(CurrentField);
                 CurrentField.enabled = true;
-            } 
+            }
         }
     }
 
     private void Start() {
+        stackField = FindObjectOfType<StackField>();
+        tempFields = FindObjectsOfType<TempField>();
+        ioPorts = FindObjectsOfType<IoPort>();
+
         transform.position = new Vector3(0, 0,
             Mathf.Sign(transform.position.z) * ((Parameters.DimZ + 2) * (Parameters.ContainerWidth + Parameters.Gap_Container) + Parameters.Gap_Field));
         InvokeRepeating(nameof(delayField), Parameters.SetDelayInterval, Parameters.SetDelayInterval);
@@ -48,29 +56,39 @@ public class IoPort : MonoBehaviour {
     // do u really need to optimize it with Coroutine?
     public void UpdateCurrentField() {
         if (fieldsBuffer.Count == 0) return;
-        if (CurrentField != null) return;
 
         fieldsBuffer.Sort((a, b) => a.TimePlaned < b.TimePlaned ? -1 : 1);
-        if (nextField != fieldsBuffer[0]) nextField = fieldsBuffer[0];
-        if (nextField.TimePlaned < DateTime.Now) updateField();
+        // calculate sum count of containers
+        int sumCount = stackField.Count;
+        foreach (var t in tempFields) sumCount += t.Count;
+        foreach(var i in ioPorts) if (i.CurrentField is InField) sumCount += i.CurrentField.Count;
+
+        if (sumCount >= stackField.MaxCount) {
+            if(CurrentField is InField) {
+                CurrentField.enabled = false;
+                CurrentField = null;
+            }
+            nextField = fieldsBuffer.Find(f => f is OutField);
+        } else {
+            nextField = fieldsBuffer[0];
+        }
+
+        if (nextField.TimePlaned < DateTime.Now) {
+            if (nextField is OutField) {
+                foreach (var c in ((OutField)nextField).IncomingContainers) {
+                    // means the inField is still not enabled
+                    if (c.CurrentField is InField && !c.CurrentField.isActiveAndEnabled) {
+                        delayField(nextField);
+                        return;
+                    }
+                }
+            }
+            CurrentField = nextField;
+        }
     }
 
     public void AddToBuffer(IoField field) {
         fieldsBuffer.Add(field);
-    }
-
-    // set current field if it fullfills the requirement
-    private void updateField() {
-        if(nextField is OutField) {
-            foreach(var c in ((OutField)nextField).IncomingContainers) {
-                // means the inField is still not enabled
-                if (c.CurrentField is InField && !c.CurrentField.isActiveAndEnabled) {
-                    delayField(nextField);
-                    return;
-                }
-            }
-        }
-        CurrentField = nextField;
     }
 
     // randomly choose a field and delay it, for test
