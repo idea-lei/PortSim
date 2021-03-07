@@ -65,7 +65,7 @@ public abstract class Field : MonoBehaviour {
     public IndexInStack FindIndexToStack(List<IndexInStack> indicesToAvoid) {
         var index = new IndexInStack();
         var rnd = new System.Random();
-        foreach(int x in Enumerable.Range(0, DimX).OrderBy(_x => rnd.Next())) {
+        foreach (int x in Enumerable.Range(0, DimX).OrderBy(_x => rnd.Next())) {
             foreach (int z in Enumerable.Range(0, DimZ).OrderBy(_z => rnd.Next())) {
                 if (indicesToAvoid != null && indicesToAvoid.Any(i => i.x == x && i.z == z)) continue;
                 if (Ground[x, z].Count < MaxLayer) {
@@ -92,7 +92,6 @@ public abstract class Field : MonoBehaviour {
         if (!IsAbleToAddContainerToIndex(index)) {
             throw new Exception("can not add container to index!");
         }
-        //container.tag = "container_stacked";
         container.transform.SetParent(transform);
         Ground[index.x, index.z].Push(container);
         container.CurrentField = this;
@@ -143,6 +142,22 @@ public abstract class Field : MonoBehaviour {
             return false;
         }
         return IsAbleToAddContainerToIndex(index.x, index.z);
+    }
+
+    public IndexInStack StackableIndex(List<IndexInStack> indicesToAvoid) {
+        foreach (var s in Ground) {
+            if (s.Count < Parameters.MaxLayer && indicesToAvoid != null && !indicesToAvoid.Any(i => i == s.Peek().indexInCurrentField))
+                return s.Peek().indexInCurrentField;
+        }
+        return new IndexInStack(false);
+    }
+
+    public IndexInStack StackableIndex(IndexInStack indexToAvoid) {
+        return StackableIndex(new List<IndexInStack> { indexToAvoid });
+    }
+
+    public IndexInStack StackableIndex() {
+        return StackableIndex(null);
     }
     #endregion
 

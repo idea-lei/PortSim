@@ -40,7 +40,7 @@ public class Container : MonoBehaviour {
             }
         }
 
-        if (other.CompareTag("field_out") || other.CompareTag("field_stack")) { // container touches field, which means add to ground, finished moving
+        if (other.CompareTag("field_out") || other.CompareTag("field_stack") || other.CompareTag("field_temp")) { // container touches field, which means add to ground, finished moving
             if (stateMachine.CurrentState != "PickUp") {
                 if (crane.CanPickUp) stateMachine.TriggerByState("PickUp");
                 else if (stateMachine.CurrentState != "Wait") stateMachine.TriggerByState("Wait");
