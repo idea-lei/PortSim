@@ -44,7 +44,7 @@
     public static readonly float EventDelay = 1f;
     public static readonly int InFieldNumber = 10; // this is only for test (random generation)
     public static float InFieldGenerationInterval => DimZ * DimX * MaxLayer * 1f; // this is only for test (random generation)
-    public static readonly float PossibilityOfDelay = 0.2f;
+    public static readonly float PossibilityOfDelay = 0.05f;
     public static float SetDelayInterval => DimZ * DimX * MaxLayer * 3f;
     #endregion
 }

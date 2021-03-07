@@ -56,22 +56,16 @@ public class IoPort : MonoBehaviour {
     // do u really need to optimize it with Coroutine?
     public void UpdateCurrentField() {
         if (fieldsBuffer.Count == 0) return;
+        if (CurrentField) return;
 
         fieldsBuffer.Sort((a, b) => a.TimePlaned < b.TimePlaned ? -1 : 1);
         // calculate sum count of containers
         int sumCount = stackField.Count;
         foreach (var t in tempFields) sumCount += t.Count;
-        foreach(var i in ioPorts) if (i.CurrentField is InField) sumCount += i.CurrentField.Count;
+        foreach (var i in ioPorts) if (i.CurrentField is InField) sumCount += i.CurrentField.Count;
 
-        if (sumCount >= stackField.MaxCount) {
-            if(CurrentField is InField) {
-                CurrentField.enabled = false;
-                CurrentField = null;
-            }
-            nextField = fieldsBuffer.Find(f => f is OutField);
-        } else {
-            nextField = fieldsBuffer[0];
-        }
+        IoField next = sumCount >= stackField.MaxCount ? fieldsBuffer.Find(f => f is OutField) : fieldsBuffer[0];
+        if(nextField != next) nextField = next;
 
         if (nextField.TimePlaned < DateTime.Now) {
             if (nextField is OutField) {

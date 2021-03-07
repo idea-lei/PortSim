@@ -31,7 +31,7 @@ public sealed class InField : IoField {
                 for (int k = 0; k <= UnityEngine.Random.Range(0, MaxLayer); k++) {
                     var pos = IndexToLocalPositionInWorldScale(new IndexInStack(x, z));
                     var container = generateContainer(pos);
-                    container.indexInCurrentField = new IndexInStack(x, z);
+                    container.IndexInCurrentField = new IndexInStack(x, z);
                     AddToGround(container, new IndexInStack(x, z));
                     container.InField = this;
                     assignOutField(container, TimePlaned);

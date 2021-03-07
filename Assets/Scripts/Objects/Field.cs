@@ -95,8 +95,9 @@ public abstract class Field : MonoBehaviour {
         container.transform.SetParent(transform);
         Ground[index.x, index.z].Push(container);
         container.CurrentField = this;
-        container.indexInCurrentField = new IndexInStack(index.x, index.z);
-        container.transform.position = IndexToGlobalPosition(container.indexInCurrentField);
+        container.IndexInCurrentField = new IndexInStack(index.x, index.z);
+        container.transform.position = IndexToGlobalPosition(container.IndexInCurrentField);
+        container.StackedIndices.Add(index);
     }
 
     /// <summary>
@@ -118,8 +119,8 @@ public abstract class Field : MonoBehaviour {
     }
 
     public virtual Container RemoveFromGround(Container c) {
-        if (Ground[c.indexInCurrentField.x, c.indexInCurrentField.z].Peek() == c) {
-            return Ground[c.indexInCurrentField.x, c.indexInCurrentField.z].Pop();
+        if (Ground[c.IndexInCurrentField.x, c.IndexInCurrentField.z].Peek() == c) {
+            return Ground[c.IndexInCurrentField.x, c.IndexInCurrentField.z].Pop();
         }
 
         throw new Exception("can not remove from ground");

@@ -99,7 +99,7 @@ public class Crane : MonoBehaviour {
                     return;
                 }
             } 
-            if (stackField.StackableIndex(ContainerCarrying.indexInCurrentField).IsValid) {
+            if (stackField.StackableIndex(ContainerCarrying.StackedIndices).IsValid) {
                 stateMachine.TriggerByState("Rearrange");
             } else {
                 stateMachine.TriggerByState("MoveTemp");
@@ -211,19 +211,19 @@ public class Crane : MonoBehaviour {
 
     private Container findContainerToMoveOut() {
         if (!hasOutField) return null;
-        foreach (var p in ioPorts) {
-            if (p.CurrentField && p.CurrentField is OutField && p.CurrentField.enabled) {
+        foreach (var outP in ioPorts) {
+            if (outP.CurrentField is OutField && outP.CurrentField.enabled) {
                 foreach (var s in stackField.Ground) {
                     foreach (var c in s.ToArray()) {
-                        if (c.OutField == p.CurrentField)
+                        if (c.OutField == outP.CurrentField)
                             return c;
                     }
                 }
-                foreach (var po in ioPorts) {
-                    if (p.CurrentField is InField && p.CurrentField.enabled) {
-                        foreach (var s in po.CurrentField.Ground) {
+                foreach (var inP in ioPorts) {
+                    if (inP.CurrentField is InField && inP.CurrentField.enabled) {
+                        foreach (var s in inP.CurrentField.Ground) {
                             foreach (var c in s.ToArray()) {
-                                if (c.OutField == p.CurrentField)
+                                if (c.OutField == outP.CurrentField)
                                     return c;
                             }
                         }
@@ -331,7 +331,7 @@ public class Crane : MonoBehaviour {
         state.OnEnterState.AddListener(() => {
             ContainerCarrying.tag = "container_rearrange";
             ContainerCarrying.transform.SetParent(transform);
-            var index = stackField.FindIndexToStack(ContainerCarrying.indexInCurrentField);
+            var index = stackField.FindIndexToStack(ContainerCarrying.StackedIndices);
             if (index.IsValid) destination = stackField.IndexToGlobalPosition(index);
             else stateMachine.TriggerByState("Wait");
         });
