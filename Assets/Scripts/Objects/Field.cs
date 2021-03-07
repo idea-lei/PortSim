@@ -62,10 +62,10 @@ public abstract class Field : MonoBehaviour {
     /// </summary>
     /// <param name="crane"> need crane position to avoid same index</param>
     /// <returns></returns>
-    public IndexInStack FindAvailableIndexToStack(List<IndexInStack> indicesToAvoid) {
+    public IndexInStack FindIndexToStack(List<IndexInStack> indicesToAvoid) {
         var index = new IndexInStack();
         var rnd = new System.Random();
-        foreach(int x in Enumerable.Range(0, DimX).OrderBy(_x => rnd.Next())) {
+        foreach (int x in Enumerable.Range(0, DimX).OrderBy(_x => rnd.Next())) {
             foreach (int z in Enumerable.Range(0, DimZ).OrderBy(_z => rnd.Next())) {
                 if (indicesToAvoid != null && indicesToAvoid.Any(i => i.x == x && i.z == z)) continue;
                 if (Ground[x, z].Count < MaxLayer) {
@@ -80,24 +80,24 @@ public abstract class Field : MonoBehaviour {
         return index;
     }
 
-    public IndexInStack FindAvailableIndexToStack(IndexInStack indexToAvoid) {
-        return FindAvailableIndexToStack(new List<IndexInStack> { indexToAvoid });
+    public IndexInStack FindIndexToStack(IndexInStack indexToAvoid) {
+        return FindIndexToStack(new List<IndexInStack> { indexToAvoid });
     }
 
-    public IndexInStack FindAvailableIndexToStack() {
-        return FindAvailableIndexToStack(null);
+    public IndexInStack FindIndexToStack() {
+        return FindIndexToStack(null);
     }
 
     public virtual void AddToGround(Container container, IndexInStack index) {
         if (!IsAbleToAddContainerToIndex(index)) {
             throw new Exception("can not add container to index!");
         }
-        //container.tag = "container_stacked";
         container.transform.SetParent(transform);
         Ground[index.x, index.z].Push(container);
         container.CurrentField = this;
-        container.indexInCurrentField = new IndexInStack(index.x, index.z);
-        container.transform.position = IndexToGlobalPosition(container.indexInCurrentField);
+        container.IndexInCurrentField = new IndexInStack(index.x, index.z);
+        container.transform.position = IndexToGlobalPosition(container.IndexInCurrentField);
+        container.StackedIndices.Add(index);
     }
 
     /// <summary>
@@ -119,8 +119,8 @@ public abstract class Field : MonoBehaviour {
     }
 
     public virtual Container RemoveFromGround(Container c) {
-        if (Ground[c.indexInCurrentField.x, c.indexInCurrentField.z].Peek() == c) {
-            return Ground[c.indexInCurrentField.x, c.indexInCurrentField.z].Pop();
+        if (Ground[c.IndexInCurrentField.x, c.IndexInCurrentField.z].Peek() == c) {
+            return Ground[c.IndexInCurrentField.x, c.IndexInCurrentField.z].Pop();
         }
 
         throw new Exception("can not remove from ground");
@@ -143,6 +143,25 @@ public abstract class Field : MonoBehaviour {
             return false;
         }
         return IsAbleToAddContainerToIndex(index.x, index.z);
+    }
+
+    public IndexInStack StackableIndex(List<IndexInStack> indicesToAvoid) {
+        for(int x = 0; x < DimX; x++) {
+            for (int z = 0; z < DimZ; z++) {
+                var idx = new IndexInStack(x, z);
+                if (Ground[x, z].Count < Parameters.MaxLayer && !indicesToAvoid.Any(i => i == idx))
+                    return idx;
+            }
+        }
+        return new IndexInStack(false);
+    }
+
+    public IndexInStack StackableIndex(IndexInStack indexToAvoid) {
+        return StackableIndex(new List<IndexInStack> { indexToAvoid });
+    }
+
+    public IndexInStack StackableIndex() {
+        return StackableIndex(null);
     }
     #endregion
 
