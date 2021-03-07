@@ -62,7 +62,7 @@ public abstract class Field : MonoBehaviour {
     /// </summary>
     /// <param name="crane"> need crane position to avoid same index</param>
     /// <returns></returns>
-    public IndexInStack FindAvailableIndexToStack(List<IndexInStack> indicesToAvoid) {
+    public IndexInStack FindIndexToStack(List<IndexInStack> indicesToAvoid) {
         var index = new IndexInStack();
         var rnd = new System.Random();
         foreach(int x in Enumerable.Range(0, DimX).OrderBy(_x => rnd.Next())) {
@@ -80,12 +80,12 @@ public abstract class Field : MonoBehaviour {
         return index;
     }
 
-    public IndexInStack FindAvailableIndexToStack(IndexInStack indexToAvoid) {
-        return FindAvailableIndexToStack(new List<IndexInStack> { indexToAvoid });
+    public IndexInStack FindIndexToStack(IndexInStack indexToAvoid) {
+        return FindIndexToStack(new List<IndexInStack> { indexToAvoid });
     }
 
-    public IndexInStack FindAvailableIndexToStack() {
-        return FindAvailableIndexToStack(null);
+    public IndexInStack FindIndexToStack() {
+        return FindIndexToStack(null);
     }
 
     public virtual void AddToGround(Container container, IndexInStack index) {

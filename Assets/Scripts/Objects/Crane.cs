@@ -13,28 +13,6 @@ public enum CraneState {
 }
 public class Crane : MonoBehaviour {
     private StackField stackField;
-    private HashSet<Container> containersToMove {
-        get {
-            var set = new HashSet<Container>();
-            foreach (var p in ioPorts) {
-                if (p.CurrentField is InField && p.CurrentField.isActiveAndEnabled) {
-                    foreach (var s in p.CurrentField.Ground) {
-                        foreach (var c in s.ToArray()) {
-                            set.Add(c);
-                        }
-                    }
-                }
-                if (p.CurrentField != null && p.CurrentField is OutField && p.CurrentField.isActiveAndEnabled) {
-                    foreach (var s in stackField.Ground) {
-                        foreach (var c in s.ToArray()) {
-                            if (c.OutField == p.CurrentField) set.Add(c);
-                        }
-                    }
-                }
-            }
-            return set;
-        }
-    }
     [SerializeField] private Container _containerToPick;
     public Container ContainerToPick {
         get => _containerToPick;
@@ -54,6 +32,7 @@ public class Crane : MonoBehaviour {
     }
     public bool CanPickUp => findContainerToPick() != null;
     private IoPort[] ioPorts;
+    private TempField[] tempFields;
     private StateMachine stateMachine;
     private Vector3 destination;
     [SerializeField] private bool reachedTop; // this field is weird cuz of the move strategy, need to update this
@@ -89,6 +68,7 @@ public class Crane : MonoBehaviour {
         stackField = FindObjectOfType<StackField>();
         ioPorts = FindObjectsOfType<IoPort>();
         stateMachine = GetComponent<StateMachine>();
+        tempFields = FindObjectsOfType<TempField>();
 
         setStateMachineGeneralEvents();
         setStateWaitEvents();
@@ -261,7 +241,8 @@ public class Crane : MonoBehaviour {
 
     private Container findContainerToMoveIn() {
         if (!hasInField) return null;
-        if (stackField.Count + 1 >= stackField.MaxCount) return null; // avoid full stack, otherwise will be no arrange possible
+        /*if (stackField.Count + 1 >= stackField.MaxCount) return null;*/ // avoid full stack, otherwise will be no arrange possible
+        if (stackField.Count >= stackField.MaxCount) return null;
         foreach (var p in ioPorts) {
             if (p.CurrentField && p.CurrentField is InField && p.CurrentField.isActiveAndEnabled) {
                 if (stackField.IsGroundFull) return null;
@@ -313,7 +294,7 @@ public class Crane : MonoBehaviour {
         var state = stateMachine.Graph.GetState("MoveIn");
         state.OnEnterState.AddListener(() => {
             ContainerCarrying.transform.SetParent(transform);
-            destination = stackField.IndexToGlobalPosition(stackField.FindAvailableIndexToStack());
+            destination = stackField.IndexToGlobalPosition(stackField.FindIndexToStack());
         });
         state.OnExitState.AddListener(() => {
             stackField.AddToGround(ContainerCarrying);
@@ -325,7 +306,7 @@ public class Crane : MonoBehaviour {
         state.OnEnterState.AddListener(() => {
             ContainerCarrying.tag = "container_out";
             ContainerCarrying.transform.SetParent(transform);
-            destination = ContainerCarrying.OutField.IndexToGlobalPosition(ContainerCarrying.OutField.FindAvailableIndexToStack());
+            destination = ContainerCarrying.OutField.IndexToGlobalPosition(ContainerCarrying.OutField.FindIndexToStack());
         });
 
         state.OnExitState.AddListener(() => {
@@ -342,7 +323,7 @@ public class Crane : MonoBehaviour {
         state.OnEnterState.AddListener(() => {
             ContainerCarrying.tag = "container_rearrange";
             ContainerCarrying.transform.SetParent(transform);
-            var index = stackField.FindAvailableIndexToStack(ContainerCarrying.indexInCurrentField);
+            var index = stackField.FindIndexToStack(ContainerCarrying.indexInCurrentField);
             if (index.IsValid) destination = stackField.IndexToGlobalPosition(index);
             else stateMachine.TriggerByState("Wait");
         });
