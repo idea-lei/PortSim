@@ -19,19 +19,15 @@ public class Container : MonoBehaviour {
         }
     }
     public IndexInStack IndexInCurrentField;
-    public List<IndexInStack> StackedIndices = new List<IndexInStack>();
+    public HashSet<IndexInStack> StackedIndices = new HashSet<IndexInStack>();
 
-    private StackField stackField;
     private StateMachine stateMachine;
-    private Crane crane;
     #endregion
 
 
     #region unity methods
     private void Awake() {
         stateMachine = FindObjectOfType<StateMachine>();
-        stackField = FindObjectOfType<StackField>();
-        crane = FindObjectOfType<Crane>();
     }
     private void OnTriggerEnter(Collider other) {
         // these touches are because of initialization
@@ -40,30 +36,6 @@ public class Container : MonoBehaviour {
 
         if (other.tag.Contains("container") || other.CompareTag("field_out") || other.CompareTag("field_stack") || other.CompareTag("field_temp"))
             if (stateMachine.CurrentState != "Wait") stateMachine.TriggerByState("Wait");
-
-        //if (other.tag.Contains("container")) { // container touches container, which means add to ground, finished moving
-        //    //var oC = other.GetComponent<Container>();
-        //    //if (oC.CurrentField && oC.CurrentField.Ground[oC.IndexInCurrentField.x, oC.IndexInCurrentField.z].Count == oC.CurrentField.MaxLayer) {
-        //    //    stateMachine.TriggerByState("Wait");
-        //    //    Debug.LogError("put onto full stack!");
-        //    //    return;
-        //    //}
-
-        //    //if (stateMachine.CurrentState != "PickUp") {
-        //    //    if (crane.CanPickUp) stateMachine.TriggerByState("PickUp");
-        //    //    else if (stateMachine.CurrentState != "Wait") stateMachine.TriggerByState("Wait");
-        //    //}
-
-        //    stateMachine.TriggerByState("Wait");
-        //}
-
-        //if (other.CompareTag("field_out") || other.CompareTag("field_stack") || other.CompareTag("field_temp")) { // container touches field, which means add to ground, finished moving
-        //    //if (stateMachine.CurrentState != "PickUp") {
-        //    //    if (crane.CanPickUp) stateMachine.TriggerByState("PickUp");
-        //    //    else if (stateMachine.CurrentState != "Wait") stateMachine.TriggerByState("Wait");
-        //    //}
-        //    stateMachine.TriggerByState("Wait");
-        //}
 
     }
     #endregion

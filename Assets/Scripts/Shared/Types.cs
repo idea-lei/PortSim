@@ -29,8 +29,8 @@ public struct IndexInStack {
     }
 
     public override bool Equals(object obj) {
-        if (obj is IndexInStack)
-            return this == (IndexInStack)obj;
+        if (obj is IndexInStack stack)
+            return this == stack;
         return false;
     }
 

@@ -1,16 +1,8 @@
 ﻿using Ilumisoft.VisualStateMachine;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public enum CraneState {
-    Wait,
-    PickUp,
-    MoveIn,
-    MoveOut,
-    Rearrange
-}
 public class Crane : MonoBehaviour {
     private StackField stackField;
     [SerializeField] private Container _containerToPick;
@@ -37,14 +29,6 @@ public class Crane : MonoBehaviour {
     private Vector3 destination;
     [SerializeField] private bool reachedTop; // this field is weird cuz of the move strategy, need to update this
 
-    private bool hasIoField {
-        get {
-            foreach (var port in ioPorts) {
-                if (port.CurrentField && port.CurrentField.isActiveAndEnabled) return true;
-            }
-            return false;
-        }
-    }
     private bool hasOutField {
         get {
             bool res = false;
@@ -78,10 +62,6 @@ public class Crane : MonoBehaviour {
         setStateRearrangeEvents();
         setStateMoveTempEvents();
     }
-
-    //private void Start() {
-    //    //addContainersToSet(stackField.Ground);
-    //}
 
     private void OnTriggerEnter(Collider other) {
         reachedTop = false;
@@ -135,9 +115,6 @@ public class Crane : MonoBehaviour {
         else reachedTop = true;
     }
 
-    /// <summary>
-    ///  
-    /// </summary>
     /// <remarks>
     /// do not modify this method unless you can really figure out 
     /// relationship between the vector2.y here and position.z
