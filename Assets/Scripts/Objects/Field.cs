@@ -60,9 +60,9 @@ public abstract class Field : MonoBehaviour {
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="crane"> need crane position to avoid same index</param>
+    /// <param name="indicesToAvoid"> this arg is to avoid rearrange to old pos (repeat rearrange)</param>
     /// <returns></returns>
-    public IndexInStack FindIndexToStack(List<IndexInStack> indicesToAvoid) {
+    public IndexInStack FindIndexToStack(HashSet<IndexInStack> indicesToAvoid) {
         var index = new IndexInStack();
         var rnd = new System.Random();
         foreach (int x in Enumerable.Range(0, DimX).OrderBy(_x => rnd.Next())) {
@@ -79,11 +79,9 @@ public abstract class Field : MonoBehaviour {
         index.IsValid = false;
         return index;
     }
-
     public IndexInStack FindIndexToStack(IndexInStack indexToAvoid) {
-        return FindIndexToStack(new List<IndexInStack> { indexToAvoid });
+        return FindIndexToStack(new HashSet<IndexInStack> { indexToAvoid });
     }
-
     public IndexInStack FindIndexToStack() {
         return FindIndexToStack(null);
     }
@@ -99,7 +97,6 @@ public abstract class Field : MonoBehaviour {
         container.transform.position = IndexToGlobalPosition(container.IndexInCurrentField);
         container.StackedIndices.Add(index);
     }
-
     /// <summary>
     /// this method will automatically find a index to stack the container
     /// </summary>
@@ -117,7 +114,6 @@ public abstract class Field : MonoBehaviour {
         }
         throw new Exception($"can not find container on peek with id: {id}");
     }
-
     public virtual Container RemoveFromGround(Container c) {
         if (Ground[c.IndexInCurrentField.x, c.IndexInCurrentField.z].Peek() == c) {
             return Ground[c.IndexInCurrentField.x, c.IndexInCurrentField.z].Pop();
@@ -145,7 +141,7 @@ public abstract class Field : MonoBehaviour {
         return IsAbleToAddContainerToIndex(index.x, index.z);
     }
 
-    public IndexInStack StackableIndex(List<IndexInStack> indicesToAvoid) {
+    public IndexInStack StackableIndex(HashSet<IndexInStack> indicesToAvoid) {
         for(int x = 0; x < DimX; x++) {
             for (int z = 0; z < DimZ; z++) {
                 var idx = new IndexInStack(x, z);
@@ -155,11 +151,9 @@ public abstract class Field : MonoBehaviour {
         }
         return new IndexInStack(false);
     }
-
     public IndexInStack StackableIndex(IndexInStack indexToAvoid) {
-        return StackableIndex(new List<IndexInStack> { indexToAvoid });
+        return StackableIndex(new HashSet<IndexInStack> { indexToAvoid });
     }
-
     public IndexInStack StackableIndex() {
         return StackableIndex(null);
     }
@@ -190,11 +184,9 @@ public abstract class Field : MonoBehaviour {
             + z * (Parameters.ContainerWidth + Parameters.Gap_Container); // z_th container
         return new Vector3(coord_x, coord_y, coord_z);
     }
-
     public Vector3 IndexToLocalPositionInWorldScale(IndexInStack index) {
         return IndexToLocalPositionInWorldScale(index.x, index.z, Ground[index.x, index.z].Count);
     }
-
     public IndexInStack LocalPositionInWorldScaleToIndex(Vector3 vec) {
         float x = (vec.x - (Parameters.Gap_Container + (Parameters.ContainerLength_Long - transform.localScale.x * 10) / 2f)) / (Parameters.ContainerLength_Long + Parameters.Gap_Container);
         float z = (vec.z - (Parameters.Gap_Container + (Parameters.ContainerWidth - transform.localScale.z * 10) / 2f)) / (Parameters.ContainerWidth + Parameters.Gap_Container);

@@ -667,7 +667,7 @@ MonoBehaviour:
       onUpdateState:
         m_PersistentCalls:
           m_Calls: []
-    - position: {x: 936, y: 256}
+    - position: {x: 936, y: 258}
       id: MoveOut
       onEnterState:
         m_PersistentCalls:
@@ -689,7 +689,7 @@ MonoBehaviour:
       onUpdateState:
         m_PersistentCalls:
           m_Calls: []
-    - position: {x: 688, y: 261}
+    - position: {x: 696, y: 259}
       id: MoveIn
       onEnterState:
         m_PersistentCalls:
@@ -700,7 +700,7 @@ MonoBehaviour:
       onUpdateState:
         m_PersistentCalls:
           m_Calls: []
-    - position: {x: 897.3291, y: 336.5605}
+    - position: {x: 583.3291, y: 256.5605}
       id: MoveTemp
       onEnterState:
         m_PersistentCalls:
@@ -869,11 +869,23 @@ MonoBehaviour:
           m_Calls: []
       duration: 0
       timeMode: 0
+    - id: Transition 4
+      label: 
+      originID: MoveTemp
+      targetID: Wait
+      onEnterTransition:
+        m_PersistentCalls:
+          m_Calls: []
+      onExitTransition:
+        m_PersistentCalls:
+          m_Calls: []
+      duration: 0
+      timeMode: 0
     preferences:
       zoomSettings:
         zoomFactor: 1
       dragSettings:
-        dragOffset: {x: -630.3291, y: -122.5605}
+        dragOffset: {x: -522.3291, y: -118.5605}
       gridSettings:
         isEnabled: 1
       labelSettings:

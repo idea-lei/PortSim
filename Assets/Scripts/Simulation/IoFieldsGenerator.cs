@@ -6,10 +6,8 @@
 /// </summary>
 public class IoFieldsGenerator : MonoBehaviour {
 
-    [SerializeField]
-    private GameObject inFieldPrefab;
-    [SerializeField]
-    private GameObject outFieldPrefab;
+    [SerializeField] private GameObject inFieldPrefab;
+    [SerializeField] private GameObject outFieldPrefab;
 
     private void Start() {
         initFields();
@@ -17,7 +15,7 @@ public class IoFieldsGenerator : MonoBehaviour {
     }
 
     private void initFields() {
-        for (int i = 0; i < Parameters.InFieldNumber; i++) {
+        for (int i = 0; i < Parameters.InitInFieldNumber; i++) {
             GenerateInField();
         }
     }

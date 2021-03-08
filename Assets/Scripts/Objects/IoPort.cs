@@ -54,7 +54,7 @@ public class IoPort : MonoBehaviour {
         InvokeRepeating(nameof(UpdateCurrentField), 2f, 2f);
     }
 
-    // do u really need to optimize it with Coroutine?
+    // do u really need to write it in Coroutine form? decision making when event is triggered is much more unstable than polling
     public void UpdateCurrentField() {
         if (fieldsBuffer.Count == 0) return;
         if (CurrentField) return;
@@ -67,13 +67,13 @@ public class IoPort : MonoBehaviour {
         foreach (var i in ioPorts) if (i.CurrentField is InField) sumCount += i.CurrentField.Count;
 
         IoField next = sumCount >= stackField.MaxCount ? fieldsBuffer.Find(f => f is OutField) : fieldsBuffer[0];
-        if(nextField != next) nextField = next;
+        if (nextField != next) nextField = next;
 
         if (nextField.TimePlaned < DateTime.Now) {
             if (nextField is OutField) {
                 foreach (var c in ((OutField)nextField).IncomingContainers) {
                     // means the inField is still not enabled
-                    if (c.CurrentField is InField && !c.CurrentField.isActiveAndEnabled) {
+                    if (c.CurrentField && c.CurrentField is InField && !c.CurrentField.isActiveAndEnabled) {
                         delayField(nextField);
                         return;
                     }
