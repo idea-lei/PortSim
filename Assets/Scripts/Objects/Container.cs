@@ -38,29 +38,32 @@ public class Container : MonoBehaviour {
         if (tag.Contains("_stack") && other.tag.Contains("_stack")) return;
         if (tag.Contains("_in") && other.tag.Contains("_in")) return;
 
-        if (other.tag.Contains("container")) { // container touches container, which means add to ground, finished moving
-            //var oC = other.GetComponent<Container>();
-            //if (oC.CurrentField && oC.CurrentField.Ground[oC.IndexInCurrentField.x, oC.IndexInCurrentField.z].Count == oC.CurrentField.MaxLayer) {
-            //    stateMachine.TriggerByState("Wait");
-            //    Debug.LogError("put onto full stack!");
-            //    return;
-            //}
+        if (other.tag.Contains("container") || other.CompareTag("field_out") || other.CompareTag("field_stack") || other.CompareTag("field_temp"))
+            if (stateMachine.CurrentState != "Wait") stateMachine.TriggerByState("Wait");
 
-            //if (stateMachine.CurrentState != "PickUp") {
-            //    if (crane.CanPickUp) stateMachine.TriggerByState("PickUp");
-            //    else if (stateMachine.CurrentState != "Wait") stateMachine.TriggerByState("Wait");
-            //}
+        //if (other.tag.Contains("container")) { // container touches container, which means add to ground, finished moving
+        //    //var oC = other.GetComponent<Container>();
+        //    //if (oC.CurrentField && oC.CurrentField.Ground[oC.IndexInCurrentField.x, oC.IndexInCurrentField.z].Count == oC.CurrentField.MaxLayer) {
+        //    //    stateMachine.TriggerByState("Wait");
+        //    //    Debug.LogError("put onto full stack!");
+        //    //    return;
+        //    //}
 
-            stateMachine.TriggerByState("Wait");
-        }
+        //    //if (stateMachine.CurrentState != "PickUp") {
+        //    //    if (crane.CanPickUp) stateMachine.TriggerByState("PickUp");
+        //    //    else if (stateMachine.CurrentState != "Wait") stateMachine.TriggerByState("Wait");
+        //    //}
 
-        if (other.CompareTag("field_out") || other.CompareTag("field_stack") || other.CompareTag("field_temp")) { // container touches field, which means add to ground, finished moving
-            //if (stateMachine.CurrentState != "PickUp") {
-            //    if (crane.CanPickUp) stateMachine.TriggerByState("PickUp");
-            //    else if (stateMachine.CurrentState != "Wait") stateMachine.TriggerByState("Wait");
-            //}
-            stateMachine.TriggerByState("Wait");
-        }
+        //    stateMachine.TriggerByState("Wait");
+        //}
+
+        //if (other.CompareTag("field_out") || other.CompareTag("field_stack") || other.CompareTag("field_temp")) { // container touches field, which means add to ground, finished moving
+        //    //if (stateMachine.CurrentState != "PickUp") {
+        //    //    if (crane.CanPickUp) stateMachine.TriggerByState("PickUp");
+        //    //    else if (stateMachine.CurrentState != "Wait") stateMachine.TriggerByState("Wait");
+        //    //}
+        //    stateMachine.TriggerByState("Wait");
+        //}
 
     }
     #endregion
