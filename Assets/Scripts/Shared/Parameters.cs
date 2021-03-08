@@ -1,9 +1,9 @@
 ﻿public static class Parameters
 {
     #region PlayGround
-    public static readonly int DimZ = 2;
-    public static readonly int DimX = 2;
-    public static readonly int MaxLayer = 2;
+    public static readonly int DimZ = 3;
+    public static readonly int DimX = 3;
+    public static readonly int MaxLayer = 3;
     public static readonly int MinDim = 0; // this is only for test (random generation), should be smaller than the min Dim value
 
     public static readonly float ContainerHeight = 2.5f;
@@ -37,8 +37,9 @@
 
     #region Simulation
     public static readonly float EventDelay = 1f;
-    public static readonly int InFieldNumber = 3; // this is only for test (random generation)
-    public static float InFieldGenerationInterval => DimZ * DimX * MaxLayer * 1.5f; // this is only for test (random generation)
+    public static readonly int InitInFieldNumber = 3; // this is only for test (random generation)
+    public static float InFieldGenerationInterval => DimZ * DimX * MaxLayer * 1.3f; // this is only for test (random generation)
+    
     public static readonly float PossibilityOfDelay = 0.05f;
     public static float SetDelayInterval => DimZ * DimX * MaxLayer * 5f;
     #endregion

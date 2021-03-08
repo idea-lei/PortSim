@@ -15,7 +15,7 @@ public class IoFieldsGenerator : MonoBehaviour {
     }
 
     private void initFields() {
-        for (int i = 0; i < Parameters.InFieldNumber; i++) {
+        for (int i = 0; i < Parameters.InitInFieldNumber; i++) {
             GenerateInField();
         }
     }
