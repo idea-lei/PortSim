@@ -278,27 +278,12 @@ public class Crane : MonoBehaviour {
         var state = stateMachine.Graph.GetState("MoveIn");
         state.OnEnterState.AddListener(() => {
             ContainerCarrying.transform.SetParent(transform);
-            destination = stackField.IndexToGlobalPosition(stackField.FindIndexToStack());
+            var index = stackField.FindIndexToStack();
+            if (index.IsValid) destination = stackField.IndexToGlobalPosition(index);
+            else stateMachine.TriggerByState("Wait");
         });
         state.OnExitState.AddListener(() => {
             stackField.AddToGround(ContainerCarrying);
-            ContainerCarrying = null;
-        });
-    }
-
-    private void setStateMoveOutEvents() {
-        var state = stateMachine.Graph.GetState("MoveOut");
-        state.OnEnterState.AddListener(() => {
-            ContainerCarrying.tag = "container_out";
-            ContainerCarrying.transform.SetParent(transform);
-            destination = ContainerCarrying.OutField.IndexToGlobalPosition(ContainerCarrying.OutField.FindIndexToStack());
-        });
-
-        state.OnExitState.AddListener(() => {
-            ContainerCarrying.OutField.AddToGround(ContainerCarrying);
-            if (ContainerCarrying.OutField.Count == ContainerCarrying.OutField.IncomingContainersCount) {
-                ContainerCarrying.OutField.DestroyField();
-            }
             ContainerCarrying = null;
         });
     }
@@ -321,6 +306,23 @@ public class Crane : MonoBehaviour {
                 ContainerCarrying = null;
                 ContainerToPick = null;
             }
+        });
+    }
+
+    private void setStateMoveOutEvents() {
+        var state = stateMachine.Graph.GetState("MoveOut");
+        state.OnEnterState.AddListener(() => {
+            ContainerCarrying.tag = "container_out";
+            ContainerCarrying.transform.SetParent(transform);
+            destination = ContainerCarrying.OutField.IndexToGlobalPosition(ContainerCarrying.OutField.FindIndexToStack());
+        });
+
+        state.OnExitState.AddListener(() => {
+            ContainerCarrying.OutField.AddToGround(ContainerCarrying);
+            if (ContainerCarrying.OutField.Count == ContainerCarrying.OutField.IncomingContainersCount) {
+                ContainerCarrying.OutField.DestroyField();
+            }
+            ContainerCarrying = null;
         });
     }
 

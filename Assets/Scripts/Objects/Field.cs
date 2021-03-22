@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Unity.MLAgents;
 using UnityEngine;
 
 /// <summary>
 /// this is the base class of the fields (ioField, stackField)
 /// this class should have no unity life circle methods
 /// </summary>
-public abstract class Field : MonoBehaviour {
+public abstract class Field : Agent {
     #region public properties
     public Guid Id; //do we really need a id? if we don't save it to db
     public int DimX, DimZ, MaxLayer; // these 3 elements should be set on Awake
@@ -82,7 +83,7 @@ public abstract class Field : MonoBehaviour {
     public IndexInStack FindIndexToStack(IndexInStack indexToAvoid) {
         return FindIndexToStack(new HashSet<IndexInStack> { indexToAvoid });
     }
-    public IndexInStack FindIndexToStack() {
+    public virtual IndexInStack FindIndexToStack() {
         return FindIndexToStack(null);
     }
 
@@ -167,6 +168,9 @@ public abstract class Field : MonoBehaviour {
     /// <returns> global coordinate</returns>
     public Vector3 IndexToGlobalPosition(IndexInStack index) {
         return transform.position + IndexToLocalPositionInWorldScale(index);
+    }
+    public Vector3 IndexToGlobalPosition(int x, int z) {
+        return IndexToGlobalPosition(new IndexInStack(x, z));
     }
     public IndexInStack GlobalPositionToIndex(Vector3 vec) {
         var localPos = vec - transform.position;
