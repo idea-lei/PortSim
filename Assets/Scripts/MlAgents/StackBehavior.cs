@@ -77,9 +77,9 @@ public class StackBehavior : Agent {
 
         Debug.Assert(crane.ContainerCarrying, "ContainerCarrying null");
         handleResult();
+        stateMachine.TriggerByState(crane.ContainerCarrying.CompareTag("container_in") ? "MoveIn" : "Rearrange");
     }
 
-    private int requestTimes = 0;
     /// <summary>
     /// Reward system:
     /// 1. if the result is unavailable or already known as rearrange-needed, reward -1
@@ -87,47 +87,62 @@ public class StackBehavior : Agent {
     /// 3. 
     /// </summary>
     private void handleResult() {
-        // 0. long term no available result
-        if (requestTimes++ > stackField.DimX * stackField.DimZ) {
-            requestTimes = 0;
-            stackField.TrainingResult = stackField.FindIndexToStack();
-            AddReward(-1f);
-            return;
-        }
         // 1. if ground not full but the result is not valid
         if (stackField.TrainingResult.IsValid == false) {
-            if (!stackField.IsGroundFull) {
-                AddReward(-0.1f);
-                RequestDecision();
-            } else AddReward(1f);
-            if (stateMachine.CurrentState != "Wait") stateMachine.TriggerByState("Wait");
-            return;
+            if (stackField.IsGroundFull) {
+                AddReward(1f);
+                return;
+            }
+            if (crane.ContainerCarrying.CompareTag("container_in")) {
+                AddReward(-1f);
+                stackField.TrainingResult = stackField.FindIndexToStack();
+                return;
+            } else { //rearrange
+                for (int x = 0; x < stackField.DimX; x++) {
+                    for (int z = 0; z < stackField.DimZ; z++) {
+                        if (stackField.Ground[x, z].Count == 0 ||
+                            crane.ContainerCarrying.OutField.TimePlaned < 
+                            stackField.Ground[x, z].Peek().OutField.TimePlaned) {
+                            AddReward(-1f);
+                            stackField.TrainingResult = new IndexInStack(x, z);
+                            return;
+                        }
+                    }
+                }
+                // this means the container carrying got max outTime, index.IsValid should be false
+                AddReward(1f);
+                return;
+            }
         }
+        
         // 2.
         if (stackField.IsIndexFull(stackField.TrainingResult)) {
-            AddReward(-0.1f);
-            RequestDecision();
+            AddReward(-1f);
+            stackField.TrainingResult = stackField.FindIndexToStack();
             return;
         }
 
         // 3.
         if (stackField.IsStackNeedRearrange(stackField.Ground[stackField.TrainingResult.x, stackField.TrainingResult.z])) {
             AddReward(-0.1f);
-            RequestDecision();
             return;
         }
 
         // 4. till here, the result is available.
         if (stackField.Ground[stackField.TrainingResult.x, stackField.TrainingResult.z].Count == 0) {
             AddReward(0.5f);
-        } else {
-            AddReward((float)(
+            return;
+        }
+
+        // 5. the result is already stacked
+        if (crane.ContainerCarrying.StackedIndices.Contains(stackField.TrainingResult)) {
+            AddReward(-0.5f);
+            return;
+        }
+
+        AddReward((float)(
                 stackField.Ground[stackField.TrainingResult.x, stackField.TrainingResult.z].Peek().OutField.TimePlaned
                 - crane.ContainerCarrying.OutField.TimePlaned).TotalSeconds
                 / 300f); // this value should not smaller than the total sec in IoField GenerateRandomTimeSpan()
-        }
-
-        requestTimes = 0;
-        stateMachine.TriggerByState(crane.ContainerCarrying.CompareTag("container_in") ? "MoveIn" : "Rearrange");
     }
 }
