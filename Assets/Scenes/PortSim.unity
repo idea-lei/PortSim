@@ -656,7 +656,7 @@ MonoBehaviour:
       onUpdateState:
         m_PersistentCalls:
           m_Calls: []
-    - position: {x: 823, y: 259}
+    - position: {x: 831.2316, y: 257.8805}
       id: Rearrange
       onEnterState:
         m_PersistentCalls:
@@ -667,7 +667,7 @@ MonoBehaviour:
       onUpdateState:
         m_PersistentCalls:
           m_Calls: []
-    - position: {x: 936, y: 258}
+    - position: {x: 696, y: 258}
       id: MoveOut
       onEnterState:
         m_PersistentCalls:
@@ -689,7 +689,7 @@ MonoBehaviour:
       onUpdateState:
         m_PersistentCalls:
           m_Calls: []
-    - position: {x: 696, y: 259}
+    - position: {x: 892.1278, y: 176.00737}
       id: MoveIn
       onEnterState:
         m_PersistentCalls:
@@ -702,6 +702,17 @@ MonoBehaviour:
           m_Calls: []
     - position: {x: 583.3291, y: 256.5605}
       id: MoveTemp
+      onEnterState:
+        m_PersistentCalls:
+          m_Calls: []
+      onExitState:
+        m_PersistentCalls:
+          m_Calls: []
+      onUpdateState:
+        m_PersistentCalls:
+          m_Calls: []
+    - position: {x: 893.42145, y: 336.6068}
+      id: StackDecision
       onEnterState:
         m_PersistentCalls:
           m_Calls: []
@@ -725,34 +736,10 @@ MonoBehaviour:
           m_Calls: []
       duration: 0
       timeMode: 0
-    - id: PickUp2MoveIn
-      label: 
-      originID: PickUp
-      targetID: MoveIn
-      onEnterTransition:
-        m_PersistentCalls:
-          m_Calls: []
-      onExitTransition:
-        m_PersistentCalls:
-          m_Calls: []
-      duration: 0
-      timeMode: 0
     - id: PickUp2MoveOut
       label: 
       originID: PickUp
       targetID: MoveOut
-      onEnterTransition:
-        m_PersistentCalls:
-          m_Calls: []
-      onExitTransition:
-        m_PersistentCalls:
-          m_Calls: []
-      duration: 0
-      timeMode: 0
-    - id: PickUp2Rearrange
-      label: 
-      originID: PickUp
-      targetID: Rearrange
       onEnterTransition:
         m_PersistentCalls:
           m_Calls: []
@@ -833,11 +820,47 @@ MonoBehaviour:
           m_Calls: []
       duration: 0
       timeMode: 0
+    - id: Transition 2
+      label: 
+      originID: PickUp
+      targetID: StackDecision
+      onEnterTransition:
+        m_PersistentCalls:
+          m_Calls: []
+      onExitTransition:
+        m_PersistentCalls:
+          m_Calls: []
+      duration: 0
+      timeMode: 0
+    - id: Transition 5
+      label: 
+      originID: StackDecision
+      targetID: Rearrange
+      onEnterTransition:
+        m_PersistentCalls:
+          m_Calls: []
+      onExitTransition:
+        m_PersistentCalls:
+          m_Calls: []
+      duration: 0
+      timeMode: 0
+    - id: Transition 6
+      label: 
+      originID: StackDecision
+      targetID: MoveIn
+      onEnterTransition:
+        m_PersistentCalls:
+          m_Calls: []
+      onExitTransition:
+        m_PersistentCalls:
+          m_Calls: []
+      duration: 0
+      timeMode: 0
     preferences:
       zoomSettings:
-        zoomFactor: 1
+        zoomFactor: 0.95571434
       dragSettings:
-        dragOffset: {x: -522.3291, y: -118.5605}
+        dragOffset: {x: -488.84647, y: -120.65318}
       gridSettings:
         isEnabled: 1
       labelSettings:
@@ -927,6 +950,7 @@ GameObject:
   - component: {fileID: 1362254853}
   - component: {fileID: 1362254852}
   - component: {fileID: 1362254856}
+  - component: {fileID: 1362254858}
   - component: {fileID: 1362254857}
   m_Layer: 0
   m_Name: StackField
@@ -1022,15 +1046,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 21b3fe68f23fd6847aacd57f07739e4e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  agentParameters:
-    maxStep: 0
-  hasUpgradedFromAgentParameters: 1
-  MaxStep: 0
   DimX: 0
   DimZ: 0
   MaxLayer: 0
   containerPrefab: {fileID: 5385178441320679463, guid: f7ee619fd64211e45b386bc250c8fb5a,
     type: 3}
+  TrainingResult:
+    IsValid: 0
+    x: 0
+    z: 0
 --- !u!114 &1362254857
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1061,6 +1085,22 @@ MonoBehaviour:
   m_UseChildSensors: 1
   m_UseChildActuators: 1
   m_ObservableAttributeHandling: 0
+--- !u!114 &1362254858
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1362254851}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 747f610802de7a04c8db1b02689debd2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  agentParameters:
+    maxStep: 0
+  hasUpgradedFromAgentParameters: 1
+  MaxStep: 0
 --- !u!1 &1544357559
 GameObject:
   m_ObjectHideFlags: 0

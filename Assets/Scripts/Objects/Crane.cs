@@ -6,6 +6,7 @@ using UnityEngine;
 public class Crane : MonoBehaviour {
     private StackField stackField;
     [SerializeField] private Container _containerToPick;
+    private StackBehavior stackBehavior;
     public Container ContainerToPick {
         get => _containerToPick;
         private set {
@@ -53,11 +54,13 @@ public class Crane : MonoBehaviour {
         ioPorts = FindObjectsOfType<IoPort>();
         stateMachine = GetComponent<StateMachine>();
         tempFields = FindObjectsOfType<TempField>();
+        stackBehavior = FindObjectOfType<StackBehavior>();
 
         setStateMachineGeneralEvents();
         setStateWaitEvents();
         setStatePickUpEvents();
         setStateMoveInEvents();
+        setStackDecisionEvents();
         setStateMoveOutEvents();
         setStateRearrangeEvents();
         setStateMoveTempEvents();
@@ -68,7 +71,7 @@ public class Crane : MonoBehaviour {
         if (other.CompareTag("container_in") || other.CompareTag("container_temp")) {
             ContainerCarrying = other.GetComponent<Container>();
             if (ContainerCarrying.OutField.isActiveAndEnabled) stateMachine.TriggerByState("MoveOut");
-            else stateMachine.TriggerByState("MoveIn");
+            else stateMachine.TriggerByState("StackDecision");
             return;
         }
         if (other.CompareTag("container_stacked")) {
@@ -80,7 +83,7 @@ public class Crane : MonoBehaviour {
                 }
             }
             if (stackField.StackableIndex(ContainerCarrying.StackedIndices).IsValid) {
-                stateMachine.TriggerByState("Rearrange");
+                stateMachine.TriggerByState("StackDecision");
             } else {
                 stateMachine.TriggerByState("MoveTemp");
             }
@@ -90,21 +93,25 @@ public class Crane : MonoBehaviour {
     }
 
     private void Update() {
-        if (stateMachine.CurrentState == "Wait") {
-            if (ContainerToPick || CanPickUp) {
-                stateMachine.TriggerByState("PickUp");
-                return;
-            }
-            if (!reachedTop) moveToWaitPosition();
-            return;
-        }
 
-        if (stateMachine.CurrentState == "PickUp") {
-            if (!ContainerToPick) ContainerToPick = findContainerToPick();
-            if (ContainerToPick) moveTo(ContainerToPick.transform.position, false);
-            else stateMachine.TriggerByState("Wait");
-        } else {
-            moveTo(destination, true);
+        switch (stateMachine.CurrentState) {
+            case "Wait":
+                if (ContainerToPick || CanPickUp) {
+                    stateMachine.TriggerByState("PickUp");
+                    return;
+                }
+                if (!reachedTop) moveToWaitPosition();
+                break;
+            case "PickUp":
+                if (!ContainerToPick) ContainerToPick = findContainerToPick();
+                if (ContainerToPick) moveTo(ContainerToPick.transform.position, false);
+                else stateMachine.TriggerByState("Wait");
+                break;
+            case "StackDecision":
+                break;
+            default:
+                moveTo(destination, true);
+                break;
         }
     }
 
@@ -135,7 +142,7 @@ public class Crane : MonoBehaviour {
                 step.y = -(isLoaded ? Parameters.Vy_Loaded : Parameters.Vy_Unloaded);
                 break;
         }
-        transform.position += step * Time.deltaTime;
+        transform.position += step * Time.deltaTime / Time.timeScale;
     }
 
     private void moveTo(Vector3 position, bool isLoaded) {
@@ -274,11 +281,19 @@ public class Crane : MonoBehaviour {
         });
     }
 
+    private void setStackDecisionEvents() {
+        var state = stateMachine.Graph.GetState("StackDecision");
+        state.OnEnterState.AddListener(() => {
+            stackBehavior.RequestDecision();
+        });
+    }
+
     private void setStateMoveInEvents() {
         var state = stateMachine.Graph.GetState("MoveIn");
         state.OnEnterState.AddListener(() => {
             ContainerCarrying.transform.SetParent(transform);
-            var index = stackField.FindIndexToStack();
+            //var index = stackField.FindIndexToStack();
+            var index = stackField.TrainingResult;
             if (index.IsValid) destination = stackField.IndexToGlobalPosition(index);
             else stateMachine.TriggerByState("Wait");
         });
@@ -293,7 +308,8 @@ public class Crane : MonoBehaviour {
         state.OnEnterState.AddListener(() => {
             ContainerCarrying.tag = "container_rearrange";
             ContainerCarrying.transform.SetParent(transform);
-            var index = stackField.FindIndexToStack(ContainerCarrying.StackedIndices);
+            //var index = stackField.FindIndexToStack(ContainerCarrying.StackedIndices);
+            var index = stackField.TrainingResult;
             if (index.IsValid) destination = stackField.IndexToGlobalPosition(index);
             else stateMachine.TriggerByState("Wait");
         });

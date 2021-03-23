@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Unity.MLAgents;
+using Unity.MLAgents.Actuators;
 using UnityEngine;
 
 /// <summary>
 /// this is the base class of the fields (ioField, stackField)
 /// this class should have no unity life circle methods
 /// </summary>
-public abstract class Field : Agent {
+public abstract class Field : MonoBehaviour {
     #region public properties
     public Guid Id; //do we really need a id? if we don't save it to db
     public int DimX, DimZ, MaxLayer; // these 3 elements should be set on Awake
@@ -83,7 +84,7 @@ public abstract class Field : Agent {
     public IndexInStack FindIndexToStack(IndexInStack indexToAvoid) {
         return FindIndexToStack(new HashSet<IndexInStack> { indexToAvoid });
     }
-    public virtual IndexInStack FindIndexToStack() {
+    public IndexInStack FindIndexToStack() {
         return FindIndexToStack(null);
     }
 

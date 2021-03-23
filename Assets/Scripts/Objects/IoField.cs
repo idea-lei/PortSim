@@ -81,7 +81,7 @@ public abstract class IoField : Field, IComparable<IoField> {
             UnityEngine.Random.Range(0, 0),
             UnityEngine.Random.Range(0, 0),
             UnityEngine.Random.Range(0, 3),
-            UnityEngine.Random.Range(0, 30));
+            UnityEngine.Random.Range(0, 20));
     }
 
     public int CompareTo(IoField other) {
