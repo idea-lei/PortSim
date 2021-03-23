@@ -9,15 +9,13 @@ using Unity.MLAgents.Policies;
 using Unity.MLAgents.Sensors;
 using UnityEngine;
 
-public class StackBehavior : Agent
-{
+public class StackBehavior : Agent {
 
     private Crane crane;
     private StackField stackField;
     private StateMachine stateMachine;
     // Start is called before the first frame update
-    void Awake()
-    {
+    void Awake() {
         crane = FindObjectOfType<Crane>();
         stackField = FindObjectOfType<StackField>();
         stateMachine = FindObjectOfType<StateMachine>();
@@ -62,6 +60,14 @@ public class StackBehavior : Agent
         }
     }
 
+    public override void Heuristic(in ActionBuffers actionsOut) {
+        var result = stackField.FindIndexToStack();
+        var continuousActionsOut = actionsOut.DiscreteActions;
+        continuousActionsOut[0] = result.IsValid ? 1 : 0;
+        continuousActionsOut[1] = result.x;
+        continuousActionsOut[2] = result.z;
+    }
+
     public override void OnActionReceived(ActionBuffers actions) {
         IndexInStack idx = new IndexInStack();
         idx.IsValid = actions.DiscreteActions[0] > 0;
@@ -73,6 +79,7 @@ public class StackBehavior : Agent
         handleResult();
     }
 
+    private int requestTimes = 0;
     /// <summary>
     /// Reward system:
     /// 1. if the result is unavailable or already known as rearrange-needed, reward -1
@@ -80,24 +87,32 @@ public class StackBehavior : Agent
     /// 3. 
     /// </summary>
     private void handleResult() {
+        // 0. long term no available result
+        if (requestTimes++ > stackField.DimX * stackField.DimZ) {
+            requestTimes = 0;
+            stackField.TrainingResult = stackField.FindIndexToStack();
+            AddReward(-1f);
+            return;
+        }
         // 1. if ground not full but the result is not valid
         if (stackField.TrainingResult.IsValid == false) {
             if (!stackField.IsGroundFull) {
-                AddReward(-1f);
+                AddReward(-0.1f);
                 RequestDecision();
             } else AddReward(1f);
+            if (stateMachine.CurrentState != "Wait") stateMachine.TriggerByState("Wait");
             return;
         }
         // 2.
         if (stackField.IsIndexFull(stackField.TrainingResult)) {
-            AddReward(-1f);
+            AddReward(-0.1f);
             RequestDecision();
             return;
         }
 
         // 3.
         if (stackField.IsStackNeedRearrange(stackField.Ground[stackField.TrainingResult.x, stackField.TrainingResult.z])) {
-            AddReward(-1f);
+            AddReward(-0.1f);
             RequestDecision();
             return;
         }
@@ -111,6 +126,8 @@ public class StackBehavior : Agent
                 - crane.ContainerCarrying.OutField.TimePlaned).TotalSeconds
                 / 300f); // this value should not smaller than the total sec in IoField GenerateRandomTimeSpan()
         }
+
+        requestTimes = 0;
         stateMachine.TriggerByState(crane.ContainerCarrying.CompareTag("container_in") ? "MoveIn" : "Rearrange");
     }
 }

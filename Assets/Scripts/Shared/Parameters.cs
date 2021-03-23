@@ -26,13 +26,20 @@
     public static readonly float Vz_Loaded = 20f;
     public static readonly float Vz_Unloaded = 30f;
 
+    //public static readonly float Vy_Loaded = 10f;
+    //public static readonly float Vy_Unloaded = 20f;
+    //public static readonly float Vx_Loaded = 10f;
+    //public static readonly float Vx_Unloaded = 20f;
+    //public static readonly float Vz_Loaded = 10f;
+    //public static readonly float Vz_Unloaded = 20f;
+
     public static readonly float TranslationHeight = 20f;
     #endregion
 
     #region Errors
     // this value should be larger than v_magnitude * deltatime
-    public static readonly float DistanceError = 0.1f;
-    public static readonly float SqrDistanceError = 0.316f; // use this to avoid the sqrt calculation
+    public static readonly float DistanceError = 0.2f;
+    public static readonly float SqrDistanceError = 0.447f; // use this to avoid the sqrt calculation
     #endregion
 
     #region Simulation

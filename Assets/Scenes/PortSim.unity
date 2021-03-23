@@ -656,7 +656,7 @@ MonoBehaviour:
       onUpdateState:
         m_PersistentCalls:
           m_Calls: []
-    - position: {x: 831.2316, y: 257.8805}
+    - position: {x: 832.27783, y: 276.71442}
       id: Rearrange
       onEnterState:
         m_PersistentCalls:
@@ -678,7 +678,7 @@ MonoBehaviour:
       onUpdateState:
         m_PersistentCalls:
           m_Calls: []
-    - position: {x: 761, y: 176}
+    - position: {x: 764.139, y: 169.72195}
       id: Wait
       onEnterState:
         m_PersistentCalls:
@@ -689,7 +689,7 @@ MonoBehaviour:
       onUpdateState:
         m_PersistentCalls:
           m_Calls: []
-    - position: {x: 892.1278, y: 176.00737}
+    - position: {x: 914.1011, y: 207.39754}
       id: MoveIn
       onEnterState:
         m_PersistentCalls:
@@ -711,7 +711,7 @@ MonoBehaviour:
       onUpdateState:
         m_PersistentCalls:
           m_Calls: []
-    - position: {x: 893.42145, y: 336.6068}
+    - position: {x: 959.3405, y: 291.61404}
       id: StackDecision
       onEnterState:
         m_PersistentCalls:
@@ -848,6 +848,18 @@ MonoBehaviour:
       label: 
       originID: StackDecision
       targetID: MoveIn
+      onEnterTransition:
+        m_PersistentCalls:
+          m_Calls: []
+      onExitTransition:
+        m_PersistentCalls:
+          m_Calls: []
+      duration: 0
+      timeMode: 0
+    - id: Transition 7
+      label: 
+      originID: StackDecision
+      targetID: Wait
       onEnterTransition:
         m_PersistentCalls:
           m_Calls: []

@@ -1,6 +1,7 @@
 ﻿using Ilumisoft.VisualStateMachine;
 using System;
 using System.Linq;
+using Unity.MLAgents;
 using UnityEngine;
 
 public class Crane : MonoBehaviour {
@@ -142,7 +143,7 @@ public class Crane : MonoBehaviour {
                 step.y = -(isLoaded ? Parameters.Vy_Loaded : Parameters.Vy_Unloaded);
                 break;
         }
-        transform.position += step * Time.deltaTime / Time.timeScale;
+        transform.position += step * Time.deltaTime / (Academy.Instance.IsCommunicatorOn ? 100f : 1f); // 20 is the default training engine time scale
     }
 
     private void moveTo(Vector3 position, bool isLoaded) {
@@ -273,6 +274,7 @@ public class Crane : MonoBehaviour {
         });
         state.OnExitState.AddListener(() => {
             ContainerCarrying.RemoveFromGround();
+            ContainerCarrying.transform.SetParent(transform);
             if (ContainerCarrying.InField != null) {
                 var inField = ContainerCarrying.InField;
                 ContainerCarrying.InField = null;
@@ -291,8 +293,6 @@ public class Crane : MonoBehaviour {
     private void setStateMoveInEvents() {
         var state = stateMachine.Graph.GetState("MoveIn");
         state.OnEnterState.AddListener(() => {
-            ContainerCarrying.transform.SetParent(transform);
-            //var index = stackField.FindIndexToStack();
             var index = stackField.TrainingResult;
             if (index.IsValid) destination = stackField.IndexToGlobalPosition(index);
             else stateMachine.TriggerByState("Wait");
@@ -307,8 +307,6 @@ public class Crane : MonoBehaviour {
         var state = stateMachine.Graph.GetState("Rearrange");
         state.OnEnterState.AddListener(() => {
             ContainerCarrying.tag = "container_rearrange";
-            ContainerCarrying.transform.SetParent(transform);
-            //var index = stackField.FindIndexToStack(ContainerCarrying.StackedIndices);
             var index = stackField.TrainingResult;
             if (index.IsValid) destination = stackField.IndexToGlobalPosition(index);
             else stateMachine.TriggerByState("Wait");
@@ -329,7 +327,6 @@ public class Crane : MonoBehaviour {
         var state = stateMachine.Graph.GetState("MoveOut");
         state.OnEnterState.AddListener(() => {
             ContainerCarrying.tag = "container_out";
-            ContainerCarrying.transform.SetParent(transform);
             destination = ContainerCarrying.OutField.IndexToGlobalPosition(ContainerCarrying.OutField.FindIndexToStack());
         });
 
@@ -347,7 +344,6 @@ public class Crane : MonoBehaviour {
         var state = stateMachine.Graph.GetState("MoveTemp");
         state.OnEnterState.AddListener(() => {
             ContainerCarrying.tag = "container_temp";
-            ContainerCarrying.transform.SetParent(transform);
             tempField = tempFields[UnityEngine.Random.Range(0, tempFields.Length)];
             var index = tempField.FindIndexToStack();
             if (index.IsValid) destination = tempField.IndexToGlobalPosition(index);
