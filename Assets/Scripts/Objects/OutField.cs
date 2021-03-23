@@ -21,8 +21,9 @@ public class OutField : IoField {
         }
     }
 
-    private void Awake() {
-        initField();
+    public void Init(IoPort[] ports, IoFieldsGenerator generator) {
+        initField(generator);
+        assignPort(ports);
     }
 
     public void AddContainerToList(Container c) {
@@ -34,10 +35,5 @@ public class OutField : IoField {
         if (c.InField && c.InField.TimePlaned > TimePlaned) {
             TimePlaned = c.InField.TimePlaned + GenerateRandomTimeSpan();
         }
-    }
-
-    protected override void initField() {
-        base.initField();
-        assignPort();
     }
 }

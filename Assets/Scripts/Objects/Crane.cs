@@ -5,9 +5,25 @@ using Unity.MLAgents;
 using UnityEngine;
 
 public class Crane : MonoBehaviour {
-    private StackField stackField;
+    #region serialized fields
+    [Header("manual input fields")]
+    [SerializeField] private StackField stackField;
+    [SerializeField] private StackBehavior stackBehavior;
+    [SerializeField] private IoPort[] ioPorts;
+    [SerializeField] private TempField[] tempFields;
+    #endregion
+
+
+    #region serialized fields for test
+    // do not assign values to these fields
+    [Header("fields visible for debugging")]
+    [Space(15)]
     [SerializeField] private Container _containerToPick;
-    private StackBehavior stackBehavior;
+    [SerializeField] private Container _containerCarrying;
+    [SerializeField] private bool reachedTop; // this field is weird cuz of the move strategy, need to update this
+    #endregion
+
+
     public Container ContainerToPick {
         get => _containerToPick;
         private set {
@@ -15,8 +31,7 @@ public class Crane : MonoBehaviour {
             _containerToPick = value;
         }
     }
-
-    [SerializeField] private Container _containerCarrying;
+    
     public Container ContainerCarrying {
         get => _containerCarrying;
         private set {
@@ -25,11 +40,8 @@ public class Crane : MonoBehaviour {
         }
     }
     public bool CanPickUp => findContainerToPick() != null;
-    private IoPort[] ioPorts;
-    private TempField[] tempFields;
-    private StateMachine stateMachine;
+    
     private Vector3 destination;
-    [SerializeField] private bool reachedTop; // this field is weird cuz of the move strategy, need to update this
 
     private bool hasOutField {
         get {
@@ -50,12 +62,11 @@ public class Crane : MonoBehaviour {
             return res;
         }
     }
+
+    private StateMachine stateMachine;
+
     private void Awake() {
-        stackField = FindObjectOfType<StackField>();
-        ioPorts = FindObjectsOfType<IoPort>();
         stateMachine = GetComponent<StateMachine>();
-        tempFields = FindObjectsOfType<TempField>();
-        stackBehavior = FindObjectOfType<StackBehavior>();
 
         setStateMachineGeneralEvents();
         setStateWaitEvents();

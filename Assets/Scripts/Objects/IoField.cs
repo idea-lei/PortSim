@@ -29,15 +29,14 @@ public abstract class IoField : Field, IComparable<IoField> {
     }
 
     #region logic methods
-    protected override void initField() {
+    protected override void initField(IoFieldsGenerator generator) {
         DimX = UnityEngine.Random.Range(1, Parameters.DimX - Parameters.MinDim);
         DimZ = UnityEngine.Random.Range(1, Parameters.DimZ - Parameters.MinDim);
         MaxLayer = UnityEngine.Random.Range(1, Parameters.MaxLayer - Parameters.MinDim);
         TimePlaned = DateTime.Now + GenerateRandomTimeSpan();
-        base.initField();
+        base.initField(generator);
     }
-    protected void assignPort() {
-        var ports = FindObjectsOfType<IoPort>();
+    protected void assignPort(IoPort[] ports) {
         Port = ports[UnityEngine.Random.Range(0, ports.Length)];
         Port.AddToBuffer(this);
         transform.position = Port.transform.position;

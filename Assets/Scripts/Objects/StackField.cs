@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public sealed class StackField : Field {
@@ -13,7 +14,7 @@ public sealed class StackField : Field {
         MaxLayer = Parameters.MaxLayer;
     }
     private void Start() {
-        initField();
+        initField(GetComponentInParent<ObjectCollection>().IoFieldsGenerator);
         transform.position = new Vector3();
         initContainers();
     }

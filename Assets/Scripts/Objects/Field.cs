@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
 using UnityEngine;
@@ -144,7 +145,7 @@ public abstract class Field : MonoBehaviour {
     }
 
     public IndexInStack StackableIndex(HashSet<IndexInStack> indicesToAvoid) {
-        for(int x = 0; x < DimX; x++) {
+        for (int x = 0; x < DimX; x++) {
             for (int z = 0; z < DimZ; z++) {
                 var idx = new IndexInStack(x, z);
                 if (Ground[x, z].Count < Parameters.MaxLayer && !indicesToAvoid.Any(i => i == idx))
@@ -215,13 +216,13 @@ public abstract class Field : MonoBehaviour {
     #endregion
 
     #region private methods
-    protected virtual void initField() {
+    protected virtual void initField(IoFieldsGenerator generator) {
         // because the plane scale 1 means 10m
         transform.localScale = new Vector3(
             (DimX * (Parameters.ContainerLength_Long + Parameters.Gap_Container) + Parameters.Gap_Container) / 10f,
             0.00001f,
             (DimZ * (Parameters.ContainerWidth + Parameters.Gap_Container) + Parameters.Gap_Container) / 10f);
-        ioFieldsGenerator = FindObjectOfType<IoFieldsGenerator>();
+        ioFieldsGenerator = generator;
         Id = Guid.NewGuid();
         _ground = new Stack<Container>[DimX, DimZ];
         for (int x = 0; x < DimX; x++) {
@@ -251,7 +252,11 @@ public abstract class Field : MonoBehaviour {
     /// </summary>
     protected virtual void assignOutField(Container container, DateTime initTime) {
         if (UnityEngine.Random.Range(0, 1f) > Parameters.PossibilityOfNewOutField) {
-            var outFields = FindObjectsOfType<OutField>();
+            Debug.Assert(container.CurrentField is StackField || container.CurrentField is InField);
+            OutField[] outFields = container.CurrentField
+                .GetComponentInParent<ObjectCollection>()
+                .GetComponentsInChildren<OutField>();
+
             if (outFields.Length > 0) {
                 var index = UnityEngine.Random.Range(0, outFields.Length);
                 if (!outFields[index].GroundFullPlaned && outFields[index].TimePlaned > initTime) {

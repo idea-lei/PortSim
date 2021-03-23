@@ -11,15 +11,12 @@ using UnityEngine;
 
 public class StackBehavior : Agent {
 
-    private Crane crane;
+    [SerializeField] private Crane crane;
     private StackField stackField;
     private StateMachine stateMachine;
-    // Start is called before the first frame update
-    void Awake() {
-        crane = FindObjectOfType<Crane>();
-        stackField = FindObjectOfType<StackField>();
-        stateMachine = FindObjectOfType<StateMachine>();
-        Debug.Assert(crane != null, "crane null!");
+    private void Start() {
+        stackField = GetComponent<StackField>();
+        stateMachine = crane.GetComponent<StateMachine>();
     }
 
     public override void CollectObservations(VectorSensor sensor) {
@@ -101,7 +98,7 @@ public class StackBehavior : Agent {
                 for (int x = 0; x < stackField.DimX; x++) {
                     for (int z = 0; z < stackField.DimZ; z++) {
                         if (stackField.Ground[x, z].Count == 0 ||
-                            crane.ContainerCarrying.OutField.TimePlaned < 
+                            crane.ContainerCarrying.OutField.TimePlaned <
                             stackField.Ground[x, z].Peek().OutField.TimePlaned) {
                             AddReward(-1f);
                             stackField.TrainingResult = new IndexInStack(x, z);
@@ -114,7 +111,7 @@ public class StackBehavior : Agent {
                 return;
             }
         }
-        
+
         // 2.
         if (stackField.IsIndexFull(stackField.TrainingResult)) {
             AddReward(-1f);

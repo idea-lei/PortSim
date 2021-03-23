@@ -9,16 +9,21 @@ using System.Threading.Tasks;
 /// this class stricts the ioField, means which size of the field is suitable for the port
 /// </summary>
 public class IoPort : MonoBehaviour {
-    // the max dim of the ioField
-    [NonSerialized] public int DimX, DimZ;
-
-    [SerializeField] private IoField _currentField;
-    [SerializeField] private IoField _nextField;
-
+    #region fields get from ioFieldGenerator
     private StackField stackField;
     private TempField[] tempFields;
     private IoPort[] ioPorts;
     private Crane crane;
+    #endregion
+    // the max dim of the ioField
+    
+    [Header("fields for test")]
+    [Space(15)]
+    [SerializeField] private IoField _currentField;
+    [SerializeField] private IoField _nextField;
+
+    [NonSerialized] public int DimX, DimZ;
+
     private IoField nextField {
         get => _nextField;
         set {
@@ -44,10 +49,11 @@ public class IoPort : MonoBehaviour {
     }
 
     private void Start() {
-        stackField = FindObjectOfType<StackField>();
-        tempFields = FindObjectsOfType<TempField>();
-        ioPorts = FindObjectsOfType<IoPort>();
-        crane = FindObjectOfType<Crane>();
+        var generator = transform.parent.GetComponent<IoFieldsGenerator>();
+        stackField = generator.StackField;
+        tempFields = generator.TempFields;
+        ioPorts = generator.IoPorts;
+        crane = generator.Crane;
         transform.position = new Vector3(0, 0,
             Mathf.Sign(transform.position.z) * ((Parameters.DimZ + 2) * (Parameters.ContainerWidth + Parameters.Gap_Container) + Parameters.Gap_Field));
         InvokeRepeating(nameof(delayField), Parameters.SetDelayInterval, Parameters.SetDelayInterval);
