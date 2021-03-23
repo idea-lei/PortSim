@@ -15,7 +15,6 @@ public sealed class StackField : Field {
     }
     private void Start() {
         initField(GetComponentInParent<ObjectCollection>().IoFieldsGenerator);
-        transform.position = new Vector3();
         initContainers();
     }
 

@@ -27,7 +27,7 @@ public class IoFieldsGenerator : MonoBehaviour {
     }
 
     public InField GenerateInField() {
-        if (GetComponentsInChildren<InField>().Length > 10) return null;
+        if (GetComponentsInChildren<InField>().Length > 5) return null;
         var obj = Instantiate(inFieldPrefab);
         var inField = obj.GetComponent<InField>();
         inField.Init(IoPorts, this);

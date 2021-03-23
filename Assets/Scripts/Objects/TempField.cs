@@ -16,8 +16,8 @@ public class TempField : Field {
     }
     private void Start() {
         initField(GetComponentInParent<ObjectCollection>().IoFieldsGenerator);
-        transform.position = new Vector3(0, 0,
-            Mathf.Sign(transform.position.z) * (Parameters.DimZ / 2f * (Parameters.ContainerWidth + Parameters.Gap_Container) + Parameters.Gap_Field));
+        transform.position = GetComponentInParent<ObjectCollection>().transform.position + new Vector3(0, 0,
+            Mathf.Sign(transform.position.z - GetComponentInParent<ObjectCollection>().transform.position.z) * (Parameters.DimZ / 2f * (Parameters.ContainerWidth + Parameters.Gap_Container) + Parameters.Gap_Field));
     }
 
     public override void AddToGround(Container container) {

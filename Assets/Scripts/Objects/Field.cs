@@ -252,10 +252,7 @@ public abstract class Field : MonoBehaviour {
     /// </summary>
     protected virtual void assignOutField(Container container, DateTime initTime) {
         if (UnityEngine.Random.Range(0, 1f) > Parameters.PossibilityOfNewOutField) {
-            Debug.Assert(container.CurrentField is StackField || container.CurrentField is InField);
-            OutField[] outFields = container.CurrentField
-                .GetComponentInParent<ObjectCollection>()
-                .GetComponentsInChildren<OutField>();
+            OutField[] outFields = ioFieldsGenerator.GetComponentInParent<ObjectCollection>().GetComponentsInChildren<OutField>();
 
             if (outFields.Length > 0) {
                 var index = UnityEngine.Random.Range(0, outFields.Length);

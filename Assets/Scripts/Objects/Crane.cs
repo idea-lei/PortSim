@@ -154,7 +154,7 @@ public class Crane : MonoBehaviour {
                 step.y = -(isLoaded ? Parameters.Vy_Loaded : Parameters.Vy_Unloaded);
                 break;
         }
-        transform.position += step * Time.deltaTime / (Academy.Instance.IsCommunicatorOn ? 2f : 1f); // 20 is the default training engine time scale
+        transform.position += step * Time.deltaTime / (Academy.Instance.IsCommunicatorOn ? 3f : 1f); // 20 is the default training engine time scale
     }
 
     private void moveTo(Vector3 position, bool isLoaded) {

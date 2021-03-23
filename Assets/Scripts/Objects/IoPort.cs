@@ -16,7 +16,7 @@ public class IoPort : MonoBehaviour {
     private Crane crane;
     #endregion
     // the max dim of the ioField
-    
+
     [Header("fields for test")]
     [Space(15)]
     [SerializeField] private IoField _currentField;
@@ -54,8 +54,8 @@ public class IoPort : MonoBehaviour {
         tempFields = generator.TempFields;
         ioPorts = generator.IoPorts;
         crane = generator.Crane;
-        transform.position = new Vector3(0, 0,
-            Mathf.Sign(transform.position.z) * ((Parameters.DimZ + 2) * (Parameters.ContainerWidth + Parameters.Gap_Container) + Parameters.Gap_Field));
+        transform.position = GetComponentInParent<ObjectCollection>().transform.position + new Vector3(0, 0,
+            Mathf.Sign(transform.position.z - GetComponentInParent<ObjectCollection>().transform.position.z) * ((Parameters.DimZ + 2) * (Parameters.ContainerWidth + Parameters.Gap_Container) + Parameters.Gap_Field));
         InvokeRepeating(nameof(delayField), Parameters.SetDelayInterval, Parameters.SetDelayInterval);
         InvokeRepeating(nameof(UpdateCurrentField), 2f, 2f);
     }
