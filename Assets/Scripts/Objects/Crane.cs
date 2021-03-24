@@ -105,7 +105,7 @@ public class Crane : MonoBehaviour {
     }
 
     private void Update() {
-
+        if (Time.time < 5) return;
         switch (stateMachine.CurrentState) {
             case "Wait":
                 if (ContainerToPick || CanPickUp) {
