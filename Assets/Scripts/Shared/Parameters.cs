@@ -19,12 +19,12 @@
     #endregion
 
     #region Movement
-    public static readonly float Vy_Loaded = 20f;
-    public static readonly float Vy_Unloaded = 25f;
-    public static readonly float Vx_Loaded = 20f;
-    public static readonly float Vx_Unloaded = 25f;
-    public static readonly float Vz_Loaded = 20f;
-    public static readonly float Vz_Unloaded = 25f;
+    public static readonly float Vy_Loaded = 10f;
+    public static readonly float Vy_Unloaded = 15f;
+    public static readonly float Vx_Loaded = 10f;
+    public static readonly float Vx_Unloaded = 15f;
+    public static readonly float Vz_Loaded = 10f;
+    public static readonly float Vz_Unloaded = 15f;
 
     public static readonly float TranslationHeight = 20f;
     #endregion

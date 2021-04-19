@@ -14,4 +14,9 @@ public class ObjectCollection : MonoBehaviour
     public IoFieldsGenerator IoFieldsGenerator;
     public IoPort[] IoPorts;
     public TempField[] TempFields;
+
+    private void OnDestroy() {
+        var areaContainer = GetComponentInParent<AreaContainer>();
+        Invoke(nameof(areaContainer.GenerateArea),3);
+    }
 }

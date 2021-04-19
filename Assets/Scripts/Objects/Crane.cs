@@ -101,11 +101,10 @@ public class Crane : MonoBehaviour {
             }
             return;
         }
-        throw new Exception("illegal crane touch");
+        SimDebug.LogError(this,$"illegal crane touch with {other.name}");
     }
 
     private void Update() {
-        if (Time.time < 5) return;
         switch (stateMachine.CurrentState) {
             case "Wait":
                 if (ContainerToPick || CanPickUp) {
@@ -154,7 +153,7 @@ public class Crane : MonoBehaviour {
                 step.y = -(isLoaded ? Parameters.Vy_Loaded : Parameters.Vy_Unloaded);
                 break;
         }
-        transform.position += step * Time.deltaTime / (Academy.Instance.IsCommunicatorOn ? 3f : 1f); // 20 is the default training engine time scale
+        transform.position +=step * Time.deltaTime;
     }
 
     private void moveTo(Vector3 position, bool isLoaded) {
@@ -284,6 +283,10 @@ public class Crane : MonoBehaviour {
             }
         });
         state.OnExitState.AddListener(() => {
+            if (ContainerCarrying == null) {
+                SimDebug.LogError(this, "containerCarrying is null");
+                return;
+            }
             ContainerCarrying.RemoveFromGround();
             ContainerCarrying.transform.SetParent(transform);
             if (ContainerCarrying.InField != null) {

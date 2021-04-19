@@ -223,7 +223,7 @@ MonoBehaviour:
   agentParameters:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
-  MaxStep: 0
+  MaxStep: 100
   crane: {fileID: 2344909977460900916}
 --- !u!114 &2344909976782974523
 MonoBehaviour:
@@ -250,7 +250,7 @@ MonoBehaviour:
   m_Model: {fileID: 0}
   m_InferenceDevice: 2
   m_BehaviorType: 0
-  m_BehaviorName: StackFieldBehavior
+  m_BehaviorName: WhereToStack
   TeamId: 0
   m_UseChildSensors: 1
   m_UseChildActuators: 1

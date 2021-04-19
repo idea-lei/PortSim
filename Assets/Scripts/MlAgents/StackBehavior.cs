@@ -17,44 +17,65 @@ public class StackBehavior : Agent {
     private void Start() {
         stackField = GetComponent<StackField>();
         stateMachine = crane.GetComponent<StateMachine>();
+        Initialize();
     }
 
+    /// <remark>
+    /// 1. OutTimes: a ContainerCarrying.OutTime, b StackField.PeekOutTime(time.now + 1 day if peek is null) --dimX*dimZ+1
+    /// 2. Distance between containerCarrying and all the peeks --dimX*dimZ
+    /// 3. layers of all the the stacks --dimX*dimZ
+    /// 4. stacks need rearrange --dimX*dimZ
+    /// 5. ContainerCarrying.currentIndex (only for rearrange, to avoid stack onto same index) --2
+    /// 6. IsRearrange Process (represented by (-1,-1) of 5.) --0
+    /// 
+    /// total: dimX * dimZ * 4 + 3
+    /// </remark>
     public override void CollectObservations(VectorSensor sensor) {
-        Debug.Assert(crane.ContainerCarrying != null, "container carrying is null!");
-        var times = new List<DateTime>() { crane.ContainerCarrying.OutField.TimePlaned };
+        if (crane.ContainerCarrying == null) {
+            SimDebug.LogError(this, "container carrying is null!");
+            EndEpisode();
+            return;
+        }
+
+        var times = new List<DateTime>();
         var distances = new List<float>();
+        var layers = new List<float>();
+        var needRearrangeList = new List<bool>();
+
+        // 1. 
+        times.Add(crane.ContainerCarrying.OutField.TimePlaned);
 
         for (int x = 0; x < stackField.DimX; x++) {
             for (int z = 0; z < stackField.DimZ; z++) {
+                layers.Add(stackField.Ground[x, z].Count / (float)stackField.MaxLayer); // 3
+                needRearrangeList.Add(stackField.IsStackNeedRearrange(stackField.Ground[x, z]));
                 if (stackField.Ground[x, z].Count > 0) {
                     times.Add(stackField.Ground[x, z].Peek().OutField.TimePlaned);
                     distances.Add(Vector3.SqrMagnitude(crane.ContainerCarrying.transform.position - stackField.Ground[x, z].Peek().transform.position));
                 } else {
-                    times.Add(DateTime.MinValue);
+                    times.Add(DateTime.Now + TimeSpan.FromDays(1));
                     distances.Add(Vector3.SqrMagnitude(crane.ContainerCarrying.transform.position - stackField.IndexToGlobalPosition(x, z)));
                 }
             }
         }
 
         var maxTime = times.Max();
-        for (int i = 0; i < times.Count; i++) if (times[i] == DateTime.MinValue) times[i] = maxTime + new TimeSpan(1, 0, 0); // empty stack get 1 hour bonus
-        maxTime = times.Max();
         var minTime = times.Min();
         float diffTime = (float)(maxTime - minTime).TotalSeconds;
 
         float minDistance = distances.Min();
         float maxDistance = distances.Max();
 
-        // norm timeplaned
-        foreach (var t in times) sensor.AddObservation(Mathf.Lerp(0, diffTime, (float)(t - minTime).TotalSeconds));
-        // norm distance
-        foreach (var d in distances) sensor.AddObservation(Mathf.Lerp(minDistance, maxDistance, d));
-        foreach (var s in stackField.Ground) {
-            // norm layer of index
-            sensor.AddObservation(s.Count / (float)stackField.MaxLayer);
-            // whether the stack need to rearrange
-            sensor.AddObservation(stackField.IsStackNeedRearrange(s));
+        foreach (var t in times) sensor.AddObservation(Mathf.Lerp(0, diffTime, (float)(t - minTime).TotalSeconds)); // 1
+        foreach (var d in distances) sensor.AddObservation(Mathf.Lerp(minDistance, maxDistance, d)); // 2
+        foreach (var l in layers) sensor.AddObservation(l); // 3
+        foreach (var n in needRearrangeList) sensor.AddObservation(n); //4
+        IndexInStack index = crane.ContainerCarrying.IndexInCurrentField;
+        if(crane.ContainerCarrying.CurrentField is StackField) { //rearrange
+            index = new IndexInStack(-1, -1);
         }
+        sensor.AddObservation(index.x);
+        sensor.AddObservation(index.z);
     }
 
     public override void Heuristic(in ActionBuffers actionsOut) {
@@ -71,72 +92,66 @@ public class StackBehavior : Agent {
         idx.x = actions.DiscreteActions[1];
         idx.z = actions.DiscreteActions[2];
         stackField.TrainingResult = idx;
-        Debug.Assert(crane.ContainerCarrying, "ContainerCarrying null");
+        if (!crane.ContainerCarrying) {
+            SimDebug.LogError(this, "ContainerCarrying null");
+            EndEpisode();
+            return;
+        }
         handleResult();
-        stateMachine.TriggerByState(crane.ContainerCarrying.CompareTag("container_in") ? "MoveIn" : "Rearrange");
+        stateMachine.TriggerByState(crane.ContainerCarrying.CompareTag("container_in") || crane.ContainerCarrying.CompareTag("container_temp") ? "MoveIn" : "Rearrange");
     }
 
     /// <param name="idx">the training result</param>
     private void handleResult() {
         var resOldMethod = stackField.FindIndexToStack();
 
+        // 1. if the training result isValid is false
         if (!stackField.TrainingResult.IsValid) {
-            if (crane.ContainerCarrying.CompareTag("container_in")) {
-                if (stackField.IsGroundFull) AddReward(1f);
-                else {
-                    AddReward(-1f);
-                    stackField.TrainingResult = resOldMethod;
-                }
-            } else { //rearrange
-                for (int x = 0; x < stackField.DimX; x++) {
-                    for (int z = 0; z < stackField.DimZ; z++) {
-                        var idx = new IndexInStack(x, z);
-                        if (stackField.TrainingResult == idx) continue;
-                        if ((stackField.Ground[x, z].Count == 0
-                            || crane.ContainerCarrying.OutField.TimePlaned
-                            < stackField.Ground[x, z].Peek().OutField.TimePlaned)
-                            && !stackField.IsIndexFull(idx)) {
-                            AddReward(-1f);
-                            stackField.TrainingResult = idx;
-                            return;
-                        }
-                    }
-                }
-                AddReward(1f);// this means the container carrying got max outTime or the corresponding index is full, index.IsValid should be false
+            if (resOldMethod.IsValid == stackField.TrainingResult.IsValid) {
+                AddReward(1f);
+            } else {
+                AddReward(-1f);
+                stackField.TrainingResult = resOldMethod;
             }
             return;
         }
 
         // from here, this isValid is true
+        //time difference reward
+        if (stackField.Ground[stackField.TrainingResult.x, stackField.TrainingResult.z].Count > 0) {
+            AddReward((float)(
+        stackField.Ground[stackField.TrainingResult.x, stackField.TrainingResult.z].Peek().OutField.TimePlaned
+        - crane.ContainerCarrying.OutField.TimePlaned).TotalSeconds
+        / 300f); // this value should not smaller than the total sec in IoField GenerateRandomTimeSpan()
+        } else {
+            AddReward(1);
+        }
+
 
         // 2. this situation could not happen because of the algorithms control
         if (stackField.IsIndexFull(stackField.TrainingResult)) {
             AddReward(-1f);
-            stackField.TrainingResult = resOldMethod;
-            return;
         }
 
         // 3.
         if (stackField.IsStackNeedRearrange(stackField.Ground[stackField.TrainingResult.x, stackField.TrainingResult.z])) {
             AddReward(-0.1f);
-            return;
         }
 
         // 4. till here, the result is available.
         if (stackField.Ground[stackField.TrainingResult.x, stackField.TrainingResult.z].Count == 0) {
             AddReward(1f);
-            return;
         }
 
         // 5. the result is already stacked
         if (crane.ContainerCarrying.StackedIndices.Contains(stackField.TrainingResult)) {
-            AddReward(-0.5f);
-            return;
+            AddReward(-1f);
+            stackField.TrainingResult = resOldMethod;
         }
 
-        AddReward((float)(
-                stackField.Ground[stackField.TrainingResult.x, stackField.TrainingResult.z].Peek().OutField.TimePlaned
-                - crane.ContainerCarrying.OutField.TimePlaned).TotalSeconds
-                / 300f); // this value should not smaller than the total sec in IoField GenerateRandomTimeSpan()
+        if (StepCount > 10000) {
+            Debug.LogWarning("reset episode");
+            EndEpisode();
+        }
     }
 }

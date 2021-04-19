@@ -7,6 +7,7 @@ using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
 using UnityEngine;
 
+
 /// <summary>
 /// this is the base class of the fields (ioField, stackField)
 /// this class should have no unity life circle methods
@@ -91,7 +92,7 @@ public abstract class Field : MonoBehaviour {
 
     public virtual void AddToGround(Container container, IndexInStack index) {
         if (!IsAbleToAddContainerToIndex(index)) {
-            throw new Exception("can not add container to index!");
+            SimDebug.LogError(this,"can not add container to index!");
         }
         container.transform.SetParent(transform);
         Ground[index.x, index.z].Push(container);
@@ -115,30 +116,32 @@ public abstract class Field : MonoBehaviour {
                 return s.Pop();
             }
         }
-        throw new Exception($"can not find container on peek with id: {id}");
+        SimDebug.LogError(this,$"can not find container on peek with id: {id}");
+        return null;
     }
     public virtual Container RemoveFromGround(Container c) {
         if (Ground[c.IndexInCurrentField.x, c.IndexInCurrentField.z].Peek() == c) {
             return Ground[c.IndexInCurrentField.x, c.IndexInCurrentField.z].Pop();
         }
-
-        throw new Exception("can not remove from ground");
+        SimDebug.LogError(this,"can not remove from ground");
+        return null;
     }
 
     public bool IsAbleToAddContainerToIndex(int x, int z) {
         if (x >= DimX || z >= DimZ) {
-            Debug.LogError("dimension exceeds");
+            SimDebug.LogError(this,"dimension exceeds");
             return false;
         }
         if (Ground[x, z].Count + 1 > MaxLayer) {
-            Debug.LogError("layer exceeds");
+            SimDebug.LogError(this,"layer exceeds");
             return false;
         }
         return true;
     }
+
     public bool IsAbleToAddContainerToIndex(IndexInStack index) {
         if (!index.IsValid) {
-            Debug.LogError("not valid");
+            SimDebug.LogError(this,"not valid");
             return false;
         }
         return IsAbleToAddContainerToIndex(index.x, index.z);
