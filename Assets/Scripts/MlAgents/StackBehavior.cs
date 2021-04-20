@@ -71,7 +71,7 @@ public class StackBehavior : Agent {
         foreach (var l in layers) sensor.AddObservation(l); // 3
         foreach (var n in needRearrangeList) sensor.AddObservation(n); //4
         IndexInStack index = crane.ContainerCarrying.IndexInCurrentField;
-        if(crane.ContainerCarrying.CurrentField is StackField) { //rearrange
+        if (crane.ContainerCarrying.CurrentField is StackField) { //rearrange
             index = new IndexInStack(-1, -1);
         }
         sensor.AddObservation(index.x);
@@ -110,7 +110,7 @@ public class StackBehavior : Agent {
             if (resOldMethod.IsValid == stackField.TrainingResult.IsValid) {
                 AddReward(1f);
             } else {
-                AddReward(-1f);
+                AddReward(-0.1f);
                 stackField.TrainingResult = resOldMethod;
             }
             return;
@@ -118,38 +118,36 @@ public class StackBehavior : Agent {
 
         // from here, this isValid is true
         //time difference reward
+
         if (stackField.Ground[stackField.TrainingResult.x, stackField.TrainingResult.z].Count > 0) {
-            AddReward((float)(
-        stackField.Ground[stackField.TrainingResult.x, stackField.TrainingResult.z].Peek().OutField.TimePlaned
-        - crane.ContainerCarrying.OutField.TimePlaned).TotalSeconds
-        / 300f); // this value should not smaller than the total sec in IoField GenerateRandomTimeSpan()
-        } else {
-            AddReward(1);
-        }
+            float d = (float)(stackField.Ground[stackField.TrainingResult.x, stackField.TrainingResult.z].Peek().OutField.TimePlaned
+        - crane.ContainerCarrying.OutField.TimePlaned).TotalMinutes;
+            d = 1 - 2 * (Mathf.Exp(-d) + 1); // scaled sigmoid funciton
+            AddReward(d);
+        } else AddReward(1);
 
 
-        // 2. this situation could not happen because of the algorithms control
+        // this situation could not happen because of the algorithms control
         if (stackField.IsIndexFull(stackField.TrainingResult)) {
-            AddReward(-1f);
-        }
-
-        // 3.
-        if (stackField.IsStackNeedRearrange(stackField.Ground[stackField.TrainingResult.x, stackField.TrainingResult.z])) {
             AddReward(-0.1f);
-        }
-
-        // 4. till here, the result is available.
-        if (stackField.Ground[stackField.TrainingResult.x, stackField.TrainingResult.z].Count == 0) {
-            AddReward(1f);
-        }
-
-        // 5. the result is already stacked
-        if (crane.ContainerCarrying.StackedIndices.Contains(stackField.TrainingResult)) {
-            AddReward(-1f);
             stackField.TrainingResult = resOldMethod;
+            return;
         }
 
-        if (StepCount > 10000) {
+        if (stackField.IsStackNeedRearrange(stackField.Ground[stackField.TrainingResult.x, stackField.TrainingResult.z])) {
+            AddReward(-0.01f);
+        }
+
+        // the result is already stacked
+        if (crane.ContainerCarrying.StackedIndices.Contains(stackField.TrainingResult)) {
+            AddReward(-0.1f);
+            stackField.TrainingResult = resOldMethod;
+            return;
+        }
+
+        AddReward(1 - stackField.Ground[stackField.TrainingResult.x, stackField.TrainingResult.z].Count / (float)stackField.MaxLayer);
+
+        if (StepCount > 1000) {
             Debug.LogWarning("reset episode");
             EndEpisode();
         }

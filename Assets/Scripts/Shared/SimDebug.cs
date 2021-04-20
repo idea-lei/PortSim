@@ -9,6 +9,6 @@ public class SimDebug {
     public static void LogError(MonoBehaviour sender, string e) {
         Debug.LogError(e);
         var objectCollection = sender.GetComponentInParent<ObjectCollection>();
-        GameObject.Destroy(objectCollection.gameObject);
+        //GameObject.Destroy(objectCollection.gameObject);
     }
 }

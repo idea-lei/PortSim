@@ -31,7 +31,7 @@ public class Crane : MonoBehaviour {
             _containerToPick = value;
         }
     }
-    
+
     public Container ContainerCarrying {
         get => _containerCarrying;
         private set {
@@ -40,7 +40,7 @@ public class Crane : MonoBehaviour {
         }
     }
     public bool CanPickUp => findContainerToPick() != null;
-    
+
     private Vector3 destination;
 
     private bool hasOutField {
@@ -101,10 +101,10 @@ public class Crane : MonoBehaviour {
             }
             return;
         }
-        SimDebug.LogError(this,$"illegal crane touch with {other.name}");
+        SimDebug.LogError(this, $"illegal crane touch with {other.name}");
     }
 
-    private void Update() {
+    private void FixedUpdate() {
         switch (stateMachine.CurrentState) {
             case "Wait":
                 if (ContainerToPick || CanPickUp) {
@@ -153,7 +153,7 @@ public class Crane : MonoBehaviour {
                 step.y = -(isLoaded ? Parameters.Vy_Loaded : Parameters.Vy_Unloaded);
                 break;
         }
-        transform.position +=step * Time.deltaTime;
+        transform.position += step * Time.fixedDeltaTime;
     }
 
     private void moveTo(Vector3 position, bool isLoaded) {
@@ -300,7 +300,8 @@ public class Crane : MonoBehaviour {
     private void setStackDecisionEvents() {
         var state = stateMachine.Graph.GetState("StackDecision");
         state.OnEnterState.AddListener(() => {
-            stackBehavior.RequestDecision();
+            if (!ContainerCarrying) SimDebug.LogError(this, "container carrying is null");
+            else stackBehavior.RequestDecision();
         });
     }
 

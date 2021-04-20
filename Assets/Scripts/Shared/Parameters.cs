@@ -19,12 +19,12 @@
     #endregion
 
     #region Movement
-    public static readonly float Vy_Loaded = 10f;
-    public static readonly float Vy_Unloaded = 15f;
-    public static readonly float Vx_Loaded = 10f;
-    public static readonly float Vx_Unloaded = 15f;
-    public static readonly float Vz_Loaded = 10f;
-    public static readonly float Vz_Unloaded = 15f;
+    public static readonly float Vy_Loaded = 20f;
+    public static readonly float Vy_Unloaded = 20f;
+    public static readonly float Vx_Loaded = 20f;
+    public static readonly float Vx_Unloaded = 20f;
+    public static readonly float Vz_Loaded = 20f;
+    public static readonly float Vz_Unloaded = 20f;
 
     public static readonly float TranslationHeight = 20f;
     #endregion
@@ -38,9 +38,10 @@
     #region Simulation
     public static readonly float EventDelay = 1f;
     public static readonly int InitInFieldNumber = 2; // this is only for test (random generation)
-    public static float InFieldGenerationInterval => DimZ * DimX * MaxLayer * 1.15f; // this is only for test (random generation)
+    public static float InFieldGenerationInterval => DimZ * DimX * MaxLayer * 1.2f; // this is only for test (random generation)
     
     public static readonly float PossibilityOfDelay = 0.05f;
     public static float SetDelayInterval => DimZ * DimX * MaxLayer * 5f;
+    public static int TrainingMenge = 11;
     #endregion
 }

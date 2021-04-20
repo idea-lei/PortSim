@@ -223,7 +223,7 @@ MonoBehaviour:
   agentParameters:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
-  MaxStep: 100
+  MaxStep: 0
   crane: {fileID: 2344909977460900916}
 --- !u!114 &2344909976782974523
 MonoBehaviour:
@@ -238,7 +238,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 37
+    VectorObservationSize: 39
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 0
@@ -629,7 +629,7 @@ MonoBehaviour:
         m_PersistentCalls:
           m_Calls: []
       duration: 0
-      timeMode: 0
+      timeMode: 1
     - id: Transition 5
       label: 
       originID: StackDecision
