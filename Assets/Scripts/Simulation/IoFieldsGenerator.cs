@@ -21,13 +21,13 @@ public class IoFieldsGenerator : MonoBehaviour {
     }
 
     private void initFields() {
-        for (int i = 0; i < Parameters.InitInFieldNumber; i++) {
+        for (int i = 0; i < Parameters.MaxInFieldNumber / 2; i++) {
             GenerateInField();
         }
     }
 
     public InField GenerateInField() {
-        if (GetComponentsInChildren<InField>().Length > 5) return null;
+        if (GetComponentsInChildren<InField>().Length > Parameters.MaxInFieldNumber) return null;
         var obj = Instantiate(inFieldPrefab);
         var inField = obj.GetComponent<InField>();
         inField.Init(IoPorts, this);

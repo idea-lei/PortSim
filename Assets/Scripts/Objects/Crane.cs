@@ -283,16 +283,14 @@ public class Crane : MonoBehaviour {
             }
         });
         state.OnExitState.AddListener(() => {
-            if (ContainerCarrying == null) {
-                SimDebug.LogError(this, "containerCarrying is null");
-                return;
-            }
-            ContainerCarrying.RemoveFromGround();
-            ContainerCarrying.transform.SetParent(transform);
-            if (ContainerCarrying.InField != null) {
-                var inField = ContainerCarrying.InField;
-                ContainerCarrying.InField = null;
-                if (inField.IsGroundEmpty) inField.DestroyField();
+            if (ContainerCarrying) {
+                ContainerCarrying.RemoveFromGround();
+                ContainerCarrying.transform.SetParent(transform);
+                if (ContainerCarrying.InField != null) {
+                    var inField = ContainerCarrying.InField;
+                    ContainerCarrying.InField = null;
+                    if (inField.IsGroundEmpty) inField.DestroyField();
+                }
             }
         });
     }

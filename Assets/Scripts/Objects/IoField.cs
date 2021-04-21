@@ -61,6 +61,9 @@ public abstract class IoField : Field, IComparable<IoField> {
     /// this function is to destory the field and containers belongs to it
     /// </summary>
     public void DestroyField() {
+        var collection = GetComponentInParent<ObjectCollection>();
+        var stackBehaviour = collection.GetComponentInChildren<StackBehavior>();
+        stackBehaviour.EndEpisode();
         Invoke(nameof(disableField), Parameters.EventDelay);
         Destroy(gameObject, Parameters.EventDelay * 2);
     }
