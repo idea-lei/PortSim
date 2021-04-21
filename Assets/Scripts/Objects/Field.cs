@@ -2,7 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
+using Unity.MLAgents;
+using Unity.MLAgents.Actuators;
 using UnityEngine;
+
 
 /// <summary>
 /// this is the base class of the fields (ioField, stackField)
@@ -88,7 +92,7 @@ public abstract class Field : MonoBehaviour {
 
     public virtual void AddToGround(Container container, IndexInStack index) {
         if (!IsAbleToAddContainerToIndex(index)) {
-            throw new Exception("can not add container to index!");
+            SimDebug.LogError(this,"can not add container to index!");
         }
         container.transform.SetParent(transform);
         Ground[index.x, index.z].Push(container);
@@ -112,37 +116,39 @@ public abstract class Field : MonoBehaviour {
                 return s.Pop();
             }
         }
-        throw new Exception($"can not find container on peek with id: {id}");
+        SimDebug.LogError(this,$"can not find container on peek with id: {id}");
+        return null;
     }
     public virtual Container RemoveFromGround(Container c) {
         if (Ground[c.IndexInCurrentField.x, c.IndexInCurrentField.z].Peek() == c) {
             return Ground[c.IndexInCurrentField.x, c.IndexInCurrentField.z].Pop();
         }
-
-        throw new Exception("can not remove from ground");
+        SimDebug.LogError(this,"can not remove from ground");
+        return null;
     }
 
     public bool IsAbleToAddContainerToIndex(int x, int z) {
         if (x >= DimX || z >= DimZ) {
-            Debug.LogError("dimension exceeds");
+            SimDebug.LogError(this,"dimension exceeds");
             return false;
         }
         if (Ground[x, z].Count + 1 > MaxLayer) {
-            Debug.LogError("layer exceeds");
+            SimDebug.LogError(this,"layer exceeds");
             return false;
         }
         return true;
     }
+
     public bool IsAbleToAddContainerToIndex(IndexInStack index) {
         if (!index.IsValid) {
-            Debug.LogError("not valid");
+            SimDebug.LogError(this,"not valid");
             return false;
         }
         return IsAbleToAddContainerToIndex(index.x, index.z);
     }
 
     public IndexInStack StackableIndex(HashSet<IndexInStack> indicesToAvoid) {
-        for(int x = 0; x < DimX; x++) {
+        for (int x = 0; x < DimX; x++) {
             for (int z = 0; z < DimZ; z++) {
                 var idx = new IndexInStack(x, z);
                 if (Ground[x, z].Count < Parameters.MaxLayer && !indicesToAvoid.Any(i => i == idx))
@@ -167,6 +173,9 @@ public abstract class Field : MonoBehaviour {
     /// <returns> global coordinate</returns>
     public Vector3 IndexToGlobalPosition(IndexInStack index) {
         return transform.position + IndexToLocalPositionInWorldScale(index);
+    }
+    public Vector3 IndexToGlobalPosition(int x, int z) {
+        return IndexToGlobalPosition(new IndexInStack(x, z));
     }
     public IndexInStack GlobalPositionToIndex(Vector3 vec) {
         var localPos = vec - transform.position;
@@ -210,13 +219,13 @@ public abstract class Field : MonoBehaviour {
     #endregion
 
     #region private methods
-    protected virtual void initField() {
+    protected virtual void initField(IoFieldsGenerator generator) {
         // because the plane scale 1 means 10m
         transform.localScale = new Vector3(
             (DimX * (Parameters.ContainerLength_Long + Parameters.Gap_Container) + Parameters.Gap_Container) / 10f,
             0.00001f,
             (DimZ * (Parameters.ContainerWidth + Parameters.Gap_Container) + Parameters.Gap_Container) / 10f);
-        ioFieldsGenerator = FindObjectOfType<IoFieldsGenerator>();
+        ioFieldsGenerator = generator;
         Id = Guid.NewGuid();
         _ground = new Stack<Container>[DimX, DimZ];
         for (int x = 0; x < DimX; x++) {
@@ -246,7 +255,8 @@ public abstract class Field : MonoBehaviour {
     /// </summary>
     protected virtual void assignOutField(Container container, DateTime initTime) {
         if (UnityEngine.Random.Range(0, 1f) > Parameters.PossibilityOfNewOutField) {
-            var outFields = FindObjectsOfType<OutField>();
+            OutField[] outFields = ioFieldsGenerator.GetComponentInParent<ObjectCollection>().GetComponentsInChildren<OutField>();
+
             if (outFields.Length > 0) {
                 var index = UnityEngine.Random.Range(0, outFields.Length);
                 if (!outFields[index].GroundFullPlaned && outFields[index].TimePlaned > initTime) {

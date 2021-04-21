@@ -1,11 +1,29 @@
 ﻿using Ilumisoft.VisualStateMachine;
 using System;
 using System.Linq;
+using Unity.MLAgents;
 using UnityEngine;
 
 public class Crane : MonoBehaviour {
-    private StackField stackField;
+    #region serialized fields
+    [Header("manual input fields")]
+    [SerializeField] private StackField stackField;
+    [SerializeField] private StackBehavior stackBehavior;
+    [SerializeField] private IoPort[] ioPorts;
+    [SerializeField] private TempField[] tempFields;
+    #endregion
+
+
+    #region serialized fields for test
+    // do not assign values to these fields
+    [Header("fields visible for debugging")]
+    [Space(15)]
     [SerializeField] private Container _containerToPick;
+    [SerializeField] private Container _containerCarrying;
+    [SerializeField] private bool reachedTop; // this field is weird cuz of the move strategy, need to update this
+    #endregion
+
+
     public Container ContainerToPick {
         get => _containerToPick;
         private set {
@@ -14,7 +32,6 @@ public class Crane : MonoBehaviour {
         }
     }
 
-    [SerializeField] private Container _containerCarrying;
     public Container ContainerCarrying {
         get => _containerCarrying;
         private set {
@@ -23,11 +40,8 @@ public class Crane : MonoBehaviour {
         }
     }
     public bool CanPickUp => findContainerToPick() != null;
-    private IoPort[] ioPorts;
-    private TempField[] tempFields;
-    private StateMachine stateMachine;
+
     private Vector3 destination;
-    [SerializeField] private bool reachedTop; // this field is weird cuz of the move strategy, need to update this
 
     private bool hasOutField {
         get {
@@ -48,16 +62,17 @@ public class Crane : MonoBehaviour {
             return res;
         }
     }
+
+    private StateMachine stateMachine;
+
     private void Awake() {
-        stackField = FindObjectOfType<StackField>();
-        ioPorts = FindObjectsOfType<IoPort>();
         stateMachine = GetComponent<StateMachine>();
-        tempFields = FindObjectsOfType<TempField>();
 
         setStateMachineGeneralEvents();
         setStateWaitEvents();
         setStatePickUpEvents();
         setStateMoveInEvents();
+        setStackDecisionEvents();
         setStateMoveOutEvents();
         setStateRearrangeEvents();
         setStateMoveTempEvents();
@@ -68,7 +83,7 @@ public class Crane : MonoBehaviour {
         if (other.CompareTag("container_in") || other.CompareTag("container_temp")) {
             ContainerCarrying = other.GetComponent<Container>();
             if (ContainerCarrying.OutField.isActiveAndEnabled) stateMachine.TriggerByState("MoveOut");
-            else stateMachine.TriggerByState("MoveIn");
+            else stateMachine.TriggerByState("StackDecision");
             return;
         }
         if (other.CompareTag("container_stacked")) {
@@ -80,31 +95,34 @@ public class Crane : MonoBehaviour {
                 }
             }
             if (stackField.StackableIndex(ContainerCarrying.StackedIndices).IsValid) {
-                stateMachine.TriggerByState("Rearrange");
+                stateMachine.TriggerByState("StackDecision");
             } else {
                 stateMachine.TriggerByState("MoveTemp");
             }
             return;
         }
-        throw new Exception("illegal crane touch");
+        SimDebug.LogError(this, $"illegal crane touch with {other.name}");
     }
 
-    private void Update() {
-        if (stateMachine.CurrentState == "Wait") {
-            if (ContainerToPick || CanPickUp) {
-                stateMachine.TriggerByState("PickUp");
-                return;
-            }
-            if (!reachedTop) moveToWaitPosition();
-            return;
-        }
-
-        if (stateMachine.CurrentState == "PickUp") {
-            if (!ContainerToPick) ContainerToPick = findContainerToPick();
-            if (ContainerToPick) moveTo(ContainerToPick.transform.position, false);
-            else stateMachine.TriggerByState("Wait");
-        } else {
-            moveTo(destination, true);
+    private void FixedUpdate() {
+        switch (stateMachine.CurrentState) {
+            case "Wait":
+                if (ContainerToPick || CanPickUp) {
+                    stateMachine.TriggerByState("PickUp");
+                    return;
+                }
+                if (!reachedTop) moveToWaitPosition();
+                break;
+            case "PickUp":
+                if (!ContainerToPick) ContainerToPick = findContainerToPick();
+                if (ContainerToPick) moveTo(ContainerToPick.transform.position, false);
+                else stateMachine.TriggerByState("Wait");
+                break;
+            case "StackDecision":
+                break;
+            default:
+                moveTo(destination, true);
+                break;
         }
     }
 
@@ -135,7 +153,7 @@ public class Crane : MonoBehaviour {
                 step.y = -(isLoaded ? Parameters.Vy_Loaded : Parameters.Vy_Unloaded);
                 break;
         }
-        transform.position += step * Time.deltaTime;
+        transform.position += step * Time.fixedDeltaTime;
     }
 
     private void moveTo(Vector3 position, bool isLoaded) {
@@ -265,40 +283,35 @@ public class Crane : MonoBehaviour {
             }
         });
         state.OnExitState.AddListener(() => {
-            ContainerCarrying.RemoveFromGround();
-            if (ContainerCarrying.InField != null) {
-                var inField = ContainerCarrying.InField;
-                ContainerCarrying.InField = null;
-                if (inField.IsGroundEmpty) inField.DestroyField();
+            if (ContainerCarrying) {
+                ContainerCarrying.RemoveFromGround();
+                ContainerCarrying.transform.SetParent(transform);
+                if (ContainerCarrying.InField != null) {
+                    var inField = ContainerCarrying.InField;
+                    ContainerCarrying.InField = null;
+                    if (inField.IsGroundEmpty) inField.DestroyField();
+                }
             }
+        });
+    }
+
+    private void setStackDecisionEvents() {
+        var state = stateMachine.Graph.GetState("StackDecision");
+        state.OnEnterState.AddListener(() => {
+            if (!ContainerCarrying) SimDebug.LogError(this, "container carrying is null");
+            else stackBehavior.RequestDecision();
         });
     }
 
     private void setStateMoveInEvents() {
         var state = stateMachine.Graph.GetState("MoveIn");
         state.OnEnterState.AddListener(() => {
-            ContainerCarrying.transform.SetParent(transform);
-            destination = stackField.IndexToGlobalPosition(stackField.FindIndexToStack());
+            var index = stackField.TrainingResult;
+            if (index.IsValid) destination = stackField.IndexToGlobalPosition(index);
+            else stateMachine.TriggerByState("Wait");
         });
         state.OnExitState.AddListener(() => {
             stackField.AddToGround(ContainerCarrying);
-            ContainerCarrying = null;
-        });
-    }
-
-    private void setStateMoveOutEvents() {
-        var state = stateMachine.Graph.GetState("MoveOut");
-        state.OnEnterState.AddListener(() => {
-            ContainerCarrying.tag = "container_out";
-            ContainerCarrying.transform.SetParent(transform);
-            destination = ContainerCarrying.OutField.IndexToGlobalPosition(ContainerCarrying.OutField.FindIndexToStack());
-        });
-
-        state.OnExitState.AddListener(() => {
-            ContainerCarrying.OutField.AddToGround(ContainerCarrying);
-            if (ContainerCarrying.OutField.Count == ContainerCarrying.OutField.IncomingContainersCount) {
-                ContainerCarrying.OutField.DestroyField();
-            }
             ContainerCarrying = null;
         });
     }
@@ -307,8 +320,7 @@ public class Crane : MonoBehaviour {
         var state = stateMachine.Graph.GetState("Rearrange");
         state.OnEnterState.AddListener(() => {
             ContainerCarrying.tag = "container_rearrange";
-            ContainerCarrying.transform.SetParent(transform);
-            var index = stackField.FindIndexToStack(ContainerCarrying.StackedIndices);
+            var index = stackField.TrainingResult;
             if (index.IsValid) destination = stackField.IndexToGlobalPosition(index);
             else stateMachine.TriggerByState("Wait");
         });
@@ -324,12 +336,27 @@ public class Crane : MonoBehaviour {
         });
     }
 
+    private void setStateMoveOutEvents() {
+        var state = stateMachine.Graph.GetState("MoveOut");
+        state.OnEnterState.AddListener(() => {
+            ContainerCarrying.tag = "container_out";
+            destination = ContainerCarrying.OutField.IndexToGlobalPosition(ContainerCarrying.OutField.FindIndexToStack());
+        });
+
+        state.OnExitState.AddListener(() => {
+            ContainerCarrying.OutField.AddToGround(ContainerCarrying);
+            if (ContainerCarrying.OutField.Count == ContainerCarrying.OutField.IncomingContainersCount) {
+                ContainerCarrying.OutField.DestroyField();
+            }
+            ContainerCarrying = null;
+        });
+    }
+
     private void setStateMoveTempEvents() {
         TempField tempField = tempFields[0];
         var state = stateMachine.Graph.GetState("MoveTemp");
         state.OnEnterState.AddListener(() => {
             ContainerCarrying.tag = "container_temp";
-            ContainerCarrying.transform.SetParent(transform);
             tempField = tempFields[UnityEngine.Random.Range(0, tempFields.Length)];
             var index = tempField.FindIndexToStack();
             if (index.IsValid) destination = tempField.IndexToGlobalPosition(index);

@@ -6,7 +6,14 @@ using UnityEngine;
 public class Container : MonoBehaviour {
     #region fields
     public Guid Id;
-    public OutField OutField;
+    private OutField _outField;
+    public OutField OutField { 
+        get => _outField;
+        set {
+            _outField = value;
+            stateMachine = value.Port.GetComponentInParent<ObjectCollection>().StateMachine;
+        }
+    }
     public InField InField;
     private Field _currentField;
     public Field CurrentField {
@@ -26,10 +33,8 @@ public class Container : MonoBehaviour {
 
 
     #region unity methods
-    private void Awake() {
-        stateMachine = FindObjectOfType<StateMachine>();
-    }
     private void OnTriggerEnter(Collider other) {
+        if (!stateMachine) return;
         // these touches are because of initialization
         if (tag.Contains("_stack") && other.tag.Contains("_stack")) return;
         if (tag.Contains("_in") && other.tag.Contains("_in")) return;

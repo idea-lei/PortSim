@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public sealed class InField : IoField {
@@ -13,16 +14,17 @@ public sealed class InField : IoField {
     }
 
     #region unity life circle
-    private void Awake() {
-        initField();
-    }
     #endregion
 
-    protected override void initField() {
+    public void Init(IoPort[] ports, IoFieldsGenerator generator) {
+        initField(generator);
+        assignPort(ports);
+    }
+
+    protected override void initField(IoFieldsGenerator generator) {
         TimePlaned = DateTime.Now + GenerateRandomTimeSpan();
-        base.initField();
+        base.initField(generator);
         initContainers();
-        assignPort();
     }
 
     private void initContainers() {
@@ -34,8 +36,8 @@ public sealed class InField : IoField {
                     container.IndexInCurrentField = new IndexInStack(x, z);
                     AddToGround(container, new IndexInStack(x, z));
                     container.InField = this;
-                    assignOutField(container, TimePlaned);
                     container.tag = "container_in";
+                    assignOutField(container, TimePlaned);
                 }
             }
         }

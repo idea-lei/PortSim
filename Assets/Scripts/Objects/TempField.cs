@@ -15,13 +15,13 @@ public class TempField : Field {
         MaxLayer = Parameters.MaxLayer;
     }
     private void Start() {
-        initField();
-        transform.position = new Vector3(0, 0,
-            Mathf.Sign(transform.position.z) * (Parameters.DimZ / 2f * (Parameters.ContainerWidth + Parameters.Gap_Container) + Parameters.Gap_Field));
+        initField(GetComponentInParent<ObjectCollection>().IoFieldsGenerator);
+        transform.position = GetComponentInParent<ObjectCollection>().transform.position + new Vector3(0, 0,
+            Mathf.Sign(transform.position.z - GetComponentInParent<ObjectCollection>().transform.position.z) * (Parameters.DimZ / 2f * (Parameters.ContainerWidth + Parameters.Gap_Container) + Parameters.Gap_Field));
     }
 
     public override void AddToGround(Container container) {
-        base.AddToGround(container);
+         base.AddToGround(container);
         container.tag = "container_temp";
     }
 }

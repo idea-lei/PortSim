@@ -1,15 +1,20 @@
-﻿using System;
+﻿using Ilumisoft.VisualStateMachine;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public sealed class StackField : Field {
+    public IndexInStack TrainingResult;
+
     private void Awake() {
         DimX = Parameters.DimX;
         DimZ = Parameters.DimZ;
         MaxLayer = Parameters.MaxLayer;
     }
     private void Start() {
-        initField();
-        transform.position = new Vector3();
+        initField(GetComponentInParent<ObjectCollection>().IoFieldsGenerator);
         initContainers();
     }
 
@@ -34,5 +39,17 @@ public sealed class StackField : Field {
                 }
             }
         }
+    }
+
+    public bool IsIndexFull(IndexInStack idx) {
+        return Ground[idx.x, idx.z].Count >= MaxLayer;
+    }
+
+    public bool IsStackNeedRearrange(Stack<Container> stack) {
+        if (stack.Count == 0) return false;
+        var list = stack.ToArray();
+        var min = list.First(x => x.OutField.TimePlaned == list.Min(y => y.OutField.TimePlaned));
+        if (min != stack.Peek()) return true;
+        return false;
     }
 }

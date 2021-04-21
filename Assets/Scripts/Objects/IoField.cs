@@ -29,15 +29,14 @@ public abstract class IoField : Field, IComparable<IoField> {
     }
 
     #region logic methods
-    protected override void initField() {
+    protected override void initField(IoFieldsGenerator generator) {
         DimX = UnityEngine.Random.Range(1, Parameters.DimX - Parameters.MinDim);
         DimZ = UnityEngine.Random.Range(1, Parameters.DimZ - Parameters.MinDim);
         MaxLayer = UnityEngine.Random.Range(1, Parameters.MaxLayer - Parameters.MinDim);
         TimePlaned = DateTime.Now + GenerateRandomTimeSpan();
-        base.initField();
+        base.initField(generator);
     }
-    protected void assignPort() {
-        var ports = FindObjectsOfType<IoPort>();
+    protected void assignPort(IoPort[] ports) {
         Port = ports[UnityEngine.Random.Range(0, ports.Length)];
         Port.AddToBuffer(this);
         transform.position = Port.transform.position;
@@ -62,6 +61,9 @@ public abstract class IoField : Field, IComparable<IoField> {
     /// this function is to destory the field and containers belongs to it
     /// </summary>
     public void DestroyField() {
+        var collection = GetComponentInParent<ObjectCollection>();
+        var stackBehaviour = collection.GetComponentInChildren<StackBehavior>();
+        stackBehaviour.EndEpisode();
         Invoke(nameof(disableField), Parameters.EventDelay);
         Destroy(gameObject, Parameters.EventDelay * 2);
     }
@@ -81,7 +83,7 @@ public abstract class IoField : Field, IComparable<IoField> {
             UnityEngine.Random.Range(0, 0),
             UnityEngine.Random.Range(0, 0),
             UnityEngine.Random.Range(0, 3),
-            UnityEngine.Random.Range(0, 30));
+            UnityEngine.Random.Range(0, 20));
     }
 
     public int CompareTo(IoField other) {
