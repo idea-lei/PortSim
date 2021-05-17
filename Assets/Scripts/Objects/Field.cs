@@ -245,6 +245,7 @@ public abstract class Field : MonoBehaviour {
 
         var container = model.GetComponent<Container>();
         container.Id = Guid.NewGuid();
+        container.Weight = UnityEngine.Random.Range(1,11);
 
         return container;
     }

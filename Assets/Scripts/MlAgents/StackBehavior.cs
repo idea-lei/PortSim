@@ -26,13 +26,13 @@ public class StackBehavior : Agent {
     /// <remark>
     /// 1. OutTimes: a ContainerCarrying.OutTime, b StackField.PeekOutTime(time.now + 1 day if peek is null) --dimX*dimZ+1
     /// 2. Distance between containerCarrying and all the peeks --dimX*dimZ
-    /// 3. layers of all the the stacks --dimX*dimZ
+    /// 3. layers of all the the stacks --dimX*dimZ  (currently comment out!)
     /// 4. isStackFull --dimX*dimZ (redundent with 3)
     /// 5. stacks need rearrange --dimX*dimZ
     /// 6. ContainerCarrying.currentIndex (only for rearrange, to avoid stack onto same index) --2
     /// 7. IsRearrange Process (represented by (-1,-1) of 6.) --0
     /// 8. stackedIndex --dimX*dimZ
-    /// total: dimX * dimZ * 6 + 3
+    /// total: dimX * dimZ * 5 + 3
     /// </remark>
     public override void CollectObservations(VectorSensor sensor) {
         if (crane.ContainerCarrying == null) {
@@ -77,7 +77,7 @@ public class StackBehavior : Agent {
 
         foreach (var t in times) sensor.AddObservation(Mathf.InverseLerp(0, diffTime, (float)(t - minTime).TotalSeconds)); // 1
         foreach (var d in distances) sensor.AddObservation(Mathf.InverseLerp(minSqrDistance, maxSqrDistance, d)); // 2
-        foreach (var l in layers) sensor.AddObservation(l); // 3
+        //foreach (var l in layers) sensor.AddObservation(l); // 3
         foreach (var i in indexFullList) sensor.AddObservation(i); //4
         foreach (var n in needRearrangeList) sensor.AddObservation(n); //5
         foreach (var i in isStackedList) sensor.AddObservation(i); // 8
@@ -127,7 +127,7 @@ public class StackBehavior : Agent {
         if (stackField.Ground[idx.x, idx.z].Count > 0) {
             float d = (float)(stackField.Ground[idx.x, idx.z].Peek().OutField.TimePlaned
         - crane.ContainerCarrying.OutField.TimePlaned).TotalMinutes;
-            reward += 2 / (Mathf.Exp(-d) + 1) - 1; // scaled sigmoid funciton (-1,1)
+            reward += 1 / (Mathf.Exp(-d) + 1) - 1; // scaled sigmoid funciton (-0.5,0.5)
         } else reward += 1;
 
         //distance reward (0,1)
@@ -139,23 +139,23 @@ public class StackBehavior : Agent {
         reward += 1 - stackField.Ground[idx.x, idx.z].Count / (float)stackField.MaxLayer;
 
         if (stackField.IsStackNeedRearrange(stackField.Ground[idx.x, idx.z])) {
-            reward -= 0.2f;
+            reward -= 0.1f;
         }
 
         // if the target is already full
         if (stackField.IsIndexFull(idx)) {
             Debug.LogWarning("already full!");
-            AddReward(-1);
-            return false;
+            AddReward(-2);
+            return false; // need to redecide
         }
 
         // the result is already stacked
         if (crane.ContainerCarrying.StackedIndices.Contains(idx)) {
             Debug.LogWarning("already stacked!");
-            AddReward(-1f);
-            return false;
+            reward -= 1f;
         }
         AddReward(reward);
+        
         return true;
     }
 }
