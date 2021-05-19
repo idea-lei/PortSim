@@ -7,6 +7,7 @@ public class Container : MonoBehaviour {
     #region fields
     public Guid Id;
     private OutField _outField;
+    public int Weight;
     public OutField OutField { 
         get => _outField;
         set {
@@ -19,8 +20,8 @@ public class Container : MonoBehaviour {
     public Field CurrentField {
         get => _currentField;
         set {
-            if (value && value != _currentField) {
-                _currentField = value;
+            _currentField = value;
+            if (value && !(value is StackField)) {
                 StackedIndices.Clear();
             }
         }
@@ -52,6 +53,7 @@ public class Container : MonoBehaviour {
 
     public override string ToString() {
         return $"{name}\n" +
+            $"Weight: {Weight}\n"+
             $"OutField: " + (OutField == null ? "" : OutField.name) + "\n" +
             $"InField: " + (InField == null ? "" : InField.name);
     }
