@@ -1,15 +1,19 @@
 ﻿public static class Parameters
 {
+
+    #region Container
+    public static readonly float ContainerHeight = 2.5f;
+    public static readonly float ContainerWidth = 2.5f;
+    public static readonly float ContainerLength_Long = 12f;
+    public static readonly float ContainerLength_Short = 6f;
+    public static readonly int MaxContainerWeight = 20;
+    #endregion
+
     #region PlayGround
     public static readonly int DimZ = 3;
     public static readonly int DimX = 3;
     public static readonly int MaxLayer = 3;
     public static readonly int MinDim = 0; // this is only for test (random generation), should be smaller than the min Dim value
-
-    public static readonly float ContainerHeight = 2.5f;
-    public static readonly float ContainerWidth = 2.5f;
-    public static readonly float ContainerLength_Long = 12f;
-    public static readonly float ContainerLength_Short = 6f;
 
     public static readonly float Gap_Container = 1f;
     public static readonly float Gap_Field = 5f;

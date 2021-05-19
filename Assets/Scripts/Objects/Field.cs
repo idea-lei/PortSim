@@ -92,14 +92,14 @@ public abstract class Field : MonoBehaviour {
 
     public virtual void AddToGround(Container container, IndexInStack index) {
         if (!IsAbleToAddContainerToIndex(index)) {
-            SimDebug.LogError(this,"can not add container to index!");
+            SimDebug.LogError(this, "can not add container to index!");
         }
         container.transform.SetParent(transform);
         Ground[index.x, index.z].Push(container);
         container.CurrentField = this;
         container.IndexInCurrentField = new IndexInStack(index.x, index.z);
         container.transform.position = IndexToGlobalPosition(container.IndexInCurrentField);
-        container.StackedIndices.Add(index);
+        if (this is StackField) container.StackedIndices.Add(index);
     }
     /// <summary>
     /// this method will automatically find a index to stack the container
@@ -116,24 +116,24 @@ public abstract class Field : MonoBehaviour {
                 return s.Pop();
             }
         }
-        SimDebug.LogError(this,$"can not find container on peek with id: {id}");
+        SimDebug.LogError(this, $"can not find container on peek with id: {id}");
         return null;
     }
     public virtual Container RemoveFromGround(Container c) {
         if (Ground[c.IndexInCurrentField.x, c.IndexInCurrentField.z].Peek() == c) {
             return Ground[c.IndexInCurrentField.x, c.IndexInCurrentField.z].Pop();
         }
-        SimDebug.LogError(this,"can not remove from ground");
+        SimDebug.LogError(this, "can not remove from ground");
         return null;
     }
 
     public bool IsAbleToAddContainerToIndex(int x, int z) {
         if (x >= DimX || z >= DimZ) {
-            SimDebug.LogError(this,"dimension exceeds");
+            SimDebug.LogError(this, "dimension exceeds");
             return false;
         }
         if (Ground[x, z].Count + 1 > MaxLayer) {
-            SimDebug.LogError(this,"layer exceeds");
+            SimDebug.LogError(this, "layer exceeds");
             return false;
         }
         return true;
@@ -141,7 +141,7 @@ public abstract class Field : MonoBehaviour {
 
     public bool IsAbleToAddContainerToIndex(IndexInStack index) {
         if (!index.IsValid) {
-            SimDebug.LogError(this,"not valid");
+            SimDebug.LogError(this, "not valid");
             return false;
         }
         return IsAbleToAddContainerToIndex(index.x, index.z);
@@ -245,7 +245,7 @@ public abstract class Field : MonoBehaviour {
 
         var container = model.GetComponent<Container>();
         container.Id = Guid.NewGuid();
-        container.Weight = UnityEngine.Random.Range(1,11);
+        container.Weight = UnityEngine.Random.Range(1, Parameters.MaxContainerWeight + 1);
 
         return container;
     }

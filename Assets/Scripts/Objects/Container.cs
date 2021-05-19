@@ -20,8 +20,8 @@ public class Container : MonoBehaviour {
     public Field CurrentField {
         get => _currentField;
         set {
-            if (value && value != _currentField) {
-                _currentField = value;
+            _currentField = value;
+            if (value && !(value is StackField)) {
                 StackedIndices.Clear();
             }
         }

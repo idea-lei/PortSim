@@ -45,6 +45,10 @@ public sealed class StackField : Field {
         return Ground[idx.x, idx.z].Count >= MaxLayer;
     }
 
+    public bool IsIndexFull(int x, int z) {
+        return Ground[x, z].Count >= MaxLayer;
+    }
+
     public bool IsStackNeedRearrange(Stack<Container> stack) {
         if (stack.Count == 0) return false;
         var list = stack.ToArray();
