@@ -94,6 +94,7 @@ public class Crane : MonoBehaviour {
                     return;
                 }
             }
+            // this ensures there is at least one stackable index
             if (stackField.StackableIndex(ContainerCarrying.StackedIndices).IsValid) {
                 stateMachine.TriggerByState("StackDecision");
             } else {

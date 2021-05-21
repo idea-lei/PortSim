@@ -6,7 +6,7 @@ using UnityEngine;
 public class Container : MonoBehaviour {
     #region fields
     public Guid Id;
-    private OutField _outField;
+    [SerializeField] private OutField _outField;
     public int Weight;
     public OutField OutField { 
         get => _outField;
@@ -27,7 +27,7 @@ public class Container : MonoBehaviour {
         }
     }
     public IndexInStack IndexInCurrentField;
-    public HashSet<IndexInStack> StackedIndices = new HashSet<IndexInStack>();
+    [SerializeField] public HashSet<IndexInStack> StackedIndices = new HashSet<IndexInStack>();
 
     private StateMachine stateMachine;
     #endregion

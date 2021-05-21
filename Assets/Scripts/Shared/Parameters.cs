@@ -10,9 +10,9 @@
     #endregion
 
     #region PlayGround
-    public static readonly int DimZ = 3;
-    public static readonly int DimX = 3;
-    public static readonly int MaxLayer = 3;
+    public static readonly int DimZ = 5;
+    public static readonly int DimX = 5;
+    public static readonly int MaxLayer = 4;
     public static readonly int MinDim = 0; // this is only for test (random generation), should be smaller than the min Dim value
 
     public static readonly float Gap_Container = 1f;
@@ -30,6 +30,9 @@
     public static readonly float Vz_Loaded = 25f;
     public static readonly float Vz_Unloaded = 30f;
 
+    public static readonly float Ez = 0.001f;   // energy cost per meter
+    public static readonly float Ex = 0.005f;
+
     public static readonly float TranslationHeight = 20f;
     #endregion
 
@@ -46,6 +49,6 @@
     
     public static readonly float PossibilityOfDelay = 0.05f;
     public static float SetDelayInterval => DimZ * DimX * MaxLayer * 5f;
-    public static int TrainingDim = 3;
+    public static int TrainingDim = 5;
     #endregion
 }

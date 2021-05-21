@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Policies;
@@ -16,21 +17,36 @@ public class StackBehavior : Agent {
         public IndexInStack index; //this one is not a observation variable
         public DateTime outTime;
         public int weight;
-        public float distance;
+        public float energy;
         public int layer;
         public bool isIndexNeedRearrange;
 
         // n means normalized
         public float n_outTime;
         public float n_weight;
-        public float n_distance;
+        public float n_energy;
         public float n_layer;
+        public float n_isIndexNeedRearrange;
     }
 
     private Crane crane;
     private StackField stackField;
     private StateMachine stateMachine;
     private BufferSensorComponent bufferSensor;
+
+    private List<ObservationObject> obList = new List<ObservationObject>();
+
+    // reward coefficients
+    private const float c_outOfRange = 5f;
+
+    private const float c_time = 0.8f;
+    private const float c_rearrange = 1f;
+    private const float c_layer = 0.3f;
+    private const float c_energy = 0.1f;
+    private const float c_weight = 0.05f;
+
+    private static List<float> heuristicRewards = new List<float>();
+
 
     private void Start() {
         crane = GetComponentInParent<ObjectCollection>().Crane;
@@ -43,11 +59,12 @@ public class StackBehavior : Agent {
     /// <summary>
     /// for vector sensor:
     /// 1. ContainerCarrying: outTime and weight -> 2
+    /// 2. amount of available indices -> 1
     /// 
     /// for buffer sensor: (each available index)
     /// 1. peek container outTime -> 1
     /// 2. peek container weight -> 1
-    /// 3. distance (containerCarrying to index) -> 1
+    /// 3. Energy Cost (kind of distance) (containerCarrying to index) -> 1
     /// 4. index need rearrange -> 1
     /// 5. current layer of the index -> 1
     /// </summary>
@@ -58,129 +75,194 @@ public class StackBehavior : Agent {
             return;
         }
 
-        var obList = new List<ObservationObject>();
-
+        // add observation to list
         for (int x = 0; x < stackField.DimX; x++) {
             for (int z = 0; z < stackField.DimZ; z++) {
                 // index is available if it is not full and not stacked
-                if (stackField.IsIndexFull(x, z) && crane.ContainerCarrying.StackedIndices.All(i => i.x != x || i.z != z)) {
-                    var ob = new ObservationObject {
-                        index = new IndexInStack(x, z)
-                    };
+                if (stackField.IsIndexFull(x, z)) continue;
+                if (crane.ContainerCarrying.StackedIndices.Any(i => i.x == x && i.z == z)) continue;
 
-                    if (stackField.Ground[x, z].Count > 0) {
-                        ob.layer = stackField.Ground[x, z].Count;
-                        ob.isIndexNeedRearrange = stackField.IsStackNeedRearrange(stackField.Ground[x, z]);
-                        ob.weight = stackField.Ground[x, z].Peek().Weight;
-                        ob.outTime = stackField.Ground[x, z].Peek().OutField.TimePlaned;
-                        ob.distance = Vector3.SqrMagnitude(crane.ContainerCarrying.transform.position - stackField.Ground[x, z].Peek().transform.position);
-                    } else {
-                        ob.layer = 0;
-                        ob.isIndexNeedRearrange = false;
-                        ob.weight = Parameters.MaxContainerWeight;
-                        ob.outTime = DateTime.Now + TimeSpan.FromDays(1);
-                        ob.distance = Vector3.SqrMagnitude(crane.ContainerCarrying.transform.position - stackField.IndexToGlobalPosition(x, z));
-                    }
-                    obList.Add(ob);
+                var ob = new ObservationObject {
+                    index = new IndexInStack(x, z)
+                };
+
+                if (stackField.Ground[x, z].Count > 0) {
+                    ob.layer = stackField.Ground[x, z].Count;
+                    ob.isIndexNeedRearrange = stackField.IsStackNeedRearrange(stackField.Ground[x, z]);
+                    ob.weight = stackField.Ground[x, z].Peek().Weight;
+                    ob.outTime = stackField.Ground[x, z].Peek().OutField.TimePlaned;
+
+                    var vec = crane.ContainerCarrying.transform.position - stackField.Ground[x, z].Peek().transform.position;
+                    ob.energy = Mathf.Abs(vec.x) * Parameters.Ex + Mathf.Abs(vec.z) * Parameters.Ez;
+                } else {
+                    ob.layer = 0;
+                    ob.isIndexNeedRearrange = false;
+                    ob.weight = Parameters.MaxContainerWeight;
+                    ob.outTime = DateTime.Now + TimeSpan.FromDays(1);
+
+                    var vec = crane.ContainerCarrying.transform.position - stackField.IndexToGlobalPosition(x, z);
+                    ob.energy = Mathf.Abs(vec.x) * Parameters.Ex + Mathf.Abs(vec.z) * Parameters.Ez;
                 }
+                obList.Add(ob);
             }
         }
 
+        if (obList.Count == 0) {
+            SimDebug.LogError(this, "obList is empty");
+        }
+
+        //normalize
         var times = obList.Select(o => o.outTime).ToList();
         times.Add(crane.ContainerCarrying.OutField.TimePlaned);
         var maxTime = times.Max();
         var minTime = times.Min();
-        float diffTime = (float)(maxTime - minTime).TotalSeconds;
 
-        var distances = obList.Select(o => o.distance).ToList();
+        var distances = obList.Select(o => o.energy).ToList();
         float minSqrDistance = distances.Min();
         float maxSqrDistance = distances.Max();
         float diffDistance = maxSqrDistance - minSqrDistance;
 
-        foreach(var o in obList) {
-            o.n_outTime = Mathf.InverseLerp(0, diffTime, (float)(o.outTime - minTime).TotalSeconds);
-            o.n_weight = o.weight / Parameters.MaxContainerWeight;
-            o.n_distance = Mathf.InverseLerp(minSqrDistance, maxSqrDistance, o.distance);
-            o.n_layer = o.layer / Parameters.MaxLayer;
-        }
+        sensor.AddObservation((float)obList.Count / (Parameters.DimX * Parameters.DimZ));
+        sensor.AddObservation(Mathf.InverseLerp(minTime.Second, maxTime.Second, crane.ContainerCarrying.OutField.TimePlaned.Second));
+        sensor.AddObservation((float)crane.ContainerCarrying.Weight / Parameters.MaxContainerWeight);
 
-        
-        IndexInStack index = crane.ContainerCarrying.IndexInCurrentField;
-        if (!(crane.ContainerCarrying.CurrentField is StackField)) { //rearrange
-            index = new IndexInStack(-1, -1);
+        foreach (var o in obList) {
+            o.n_outTime = Mathf.InverseLerp(minTime.Second, maxTime.Second, o.outTime.Second);
+            o.n_weight = (float)o.weight / Parameters.MaxContainerWeight;
+            o.n_energy = Mathf.InverseLerp(minSqrDistance, maxSqrDistance, o.energy);
+            o.n_layer = (float)o.layer / Parameters.MaxLayer;
+            o.n_isIndexNeedRearrange = o.isIndexNeedRearrange ? 1 : -1;
+
+            if (o.n_outTime < 0 || o.n_outTime > 1) SimDebug.LogError(this, "outTime Lerp out of range");
+            if (o.n_energy < 0 || o.n_energy > 1) SimDebug.LogError(this, "n_energy Lerp out of range");
+
+            float[] buffer = new float[] { o.n_outTime, o.n_weight, o.n_energy, o.n_layer, o.n_isIndexNeedRearrange };
+
+            bufferSensor.AppendObservation(buffer);
         }
-        sensor.AddObservation(index.x);
-        sensor.AddObservation(index.z);
     }
 
-
-
     public override void Heuristic(in ActionBuffers actionsOut) {
-        var result = stackField.FindIndexToStack();
         var continuousActionsOut = actionsOut.DiscreteActions;
-        continuousActionsOut[0] = result.IsValid ? 1 : 0;
-        continuousActionsOut[1] = result.x;
-        continuousActionsOut[2] = result.z;
+
+        var rewardList = new List<float>();
+        for (int i = 0; i < obList.Count; i++) {
+            float reward = 0;
+
+            // 1. energy reward
+            reward = (1 - obList[i].n_energy) * c_energy;
+
+            // 2. needRearrange reward
+            if (obList[i].isIndexNeedRearrange) {
+                // if not all indices need rearrange
+                if (!obList.All(o => o.isIndexNeedRearrange)) reward -= c_rearrange;
+            } else reward += c_rearrange;
+
+            // 3. time reward
+            var times = obList.Select(o => o.outTime).ToList();
+            times.Add(crane.ContainerCarrying.OutField.TimePlaned);
+            var maxTime = times.Max();
+            var minTime = times.Min();
+
+            if (crane.ContainerCarrying.OutField.TimePlaned < obList[i].outTime) {
+                reward += (1 - Mathf.InverseLerp(minTime.Second, maxTime.Second, crane.ContainerCarrying.OutField.TimePlaned.Second)) * c_time;
+            } else {
+                if (!obList.All(o => crane.ContainerCarrying.OutField.TimePlaned > o.outTime))
+                    reward -= c_time;
+            }
+
+            // 4. layer reward
+            reward += (1 - obList[i].n_layer) * c_layer;
+
+            // 5. weight reward
+            if (crane.ContainerCarrying.Weight <= obList[i].weight) {
+                reward += crane.ContainerCarrying.Weight / obList[i].weight * c_weight;
+            } else {
+                if (!obList.All(o => crane.ContainerCarrying.Weight >= o.weight)) reward -= c_weight;
+            }
+
+            rewardList.Add(reward);
+        }
+
+        var strBuilder = new StringBuilder();
+        int ii = 0;
+        foreach (var r in rewardList) {
+            strBuilder.Append($"{ii++} reward: {r}\n");
+        }
+
+        float max = rewardList.Max();
+        heuristicRewards.Add(max);
+        strBuilder.Append($"mean reward = {heuristicRewards.Average()}");
+        Debug.Log(strBuilder.ToString());
+        continuousActionsOut[0] = rewardList.IndexOf(max);
     }
 
     public override void OnActionReceived(ActionBuffers actions) {
-        IndexInStack idx = new IndexInStack();
-        idx.IsValid = actions.DiscreteActions[0] > 0;
-        idx.x = actions.DiscreteActions[1];
-        idx.z = actions.DiscreteActions[2];
-        if (handleResult(idx)) {
-            stackField.TrainingResult = idx;
-            stateMachine.TriggerByState(crane.ContainerCarrying.CompareTag("container_in") || crane.ContainerCarrying.CompareTag("container_temp") ? "MoveIn" : "Rearrange");
-        } else RequestDecision();
-    }
+        int result = actions.DiscreteActions[0];
 
-    /// <param name="idx">the training result</param>
-    private bool handleResult(IndexInStack idx) {
-        var resOldMethod = stackField.FindIndexToStack();
-
-        // 1. if the training result isValid is false
-        if (!idx.IsValid) {
-            bool same = resOldMethod.IsValid == idx.IsValid;
-            AddReward(same ? 1 : -1);
-            return same;
+        if (result >= obList.Count) {
+            if (obList.Count == 0) {
+                // this means no available index, which should be determined before request decision, so error
+                SimDebug.LogError(this, "no stackable index");
+                return;
+            }
+            AddReward(c_outOfRange);  // result out of range
+            RequestDecision();
+            return;
         }
+
+        var strBuilder = new StringBuilder($"available indices amount: {obList.Count}\n" +
+            $"result is: {result} -- {obList[result].index}\n");
 
         float reward = 0;
 
-        // from here, this isValid is true
+        // 1. energy reward
+        reward = (1 - obList[result].n_energy) * c_energy;
 
-        //time difference reward
-        if (stackField.Ground[idx.x, idx.z].Count > 0) {
-            float d = (float)(stackField.Ground[idx.x, idx.z].Peek().OutField.TimePlaned
-        - crane.ContainerCarrying.OutField.TimePlaned).TotalMinutes;
-            reward += 1 / (Mathf.Exp(-d) + 1) - 1; // scaled sigmoid funciton (-0.5,0.5)
-        } else reward += 1;
+        // 2. needRearrange reward
+        if (obList[result].isIndexNeedRearrange) {
+            // if not all indices need rearrange
+            if (!obList.All(o => o.isIndexNeedRearrange)) {
+                strBuilder.Append("index need rearrange");
+                reward -= c_rearrange;
+            }
+        } else reward += c_rearrange;
 
-        //distance reward (0,1)
-        
+        // 3. time reward
+        var times = obList.Select(o => o.outTime).ToList();
+        times.Add(crane.ContainerCarrying.OutField.TimePlaned);
+        var maxTime = times.Max();
+        var minTime = times.Min();
 
-        // layer reward
-        reward += 1 - stackField.Ground[idx.x, idx.z].Count / (float)stackField.MaxLayer;
+        if (crane.ContainerCarrying.OutField.TimePlaned < obList[result].outTime) {
+            reward += (1 - Mathf.InverseLerp(minTime.Second, maxTime.Second, crane.ContainerCarrying.OutField.TimePlaned.Second)) * c_time;
+        } else {
+            if (!obList.All(o => crane.ContainerCarrying.OutField.TimePlaned > o.outTime)) {
+                reward -= c_time;
+                strBuilder.Append($"carrying is later than peek\n");
+            }
 
-        if (stackField.IsStackNeedRearrange(stackField.Ground[idx.x, idx.z])) {
-            reward -= 0.1f;
         }
 
-        // if the target is already full
-        if (stackField.IsIndexFull(idx)) {
-            Debug.LogWarning("already full!");
-            AddReward(-2);
-            return false; // need to redecide
+        // 4. layer reward
+        reward += (1 - obList[result].n_layer) * c_layer;
+
+        // 5. weight reward
+        if (crane.ContainerCarrying.Weight <= obList[result].weight) {
+            reward += crane.ContainerCarrying.Weight / obList[result].weight * c_weight;
+        } else {
+            if (!obList.All(o => crane.ContainerCarrying.Weight >= o.weight)) {
+                reward -= c_weight;
+                strBuilder.Append($"carrying is heavier than peek\n");
+            }
         }
 
-        // the result is already stacked
-        if (crane.ContainerCarrying.StackedIndices.Contains(idx)) {
-            Debug.LogWarning("already stacked!");
-            reward -= 1f;
-        }
+        Debug.Log(strBuilder.ToString());
+
         AddReward(reward);
-
-        return true;
+        stackField.TrainingResult = obList[result].index;
+        stateMachine.TriggerByState(crane.ContainerCarrying.CompareTag("container_in") || crane.ContainerCarrying.CompareTag("container_temp") ? "MoveIn" : "Rearrange");
+        obList.Clear();
     }
 }
 
@@ -250,4 +332,73 @@ public class StackBehavior : Agent {
 //    }
 //    sensor.AddObservation(index.x);
 //    sensor.AddObservation(index.z);
+//}
+
+
+//public override void Heuristic(in ActionBuffers actionsOut) {
+//    var result = stackField.FindIndexToStack();
+//    var continuousActionsOut = actionsOut.DiscreteActions;
+//    continuousActionsOut[0] = result.IsValid ? 1 : 0;
+//    continuousActionsOut[1] = result.x;
+//    continuousActionsOut[2] = result.z;
+//}
+
+///// <param name="idx">the training result</param>
+//private bool handleResult(IndexInStack idx) {
+//    var resOldMethod = stackField.FindIndexToStack();
+
+//    // 1. if the training result isValid is false
+//    if (!idx.IsValid) {
+//        bool same = resOldMethod.IsValid == idx.IsValid;
+//        AddReward(same ? 1 : -1);
+//        return same;
+//    }
+
+//    float reward = 0;
+
+//    // from here, this isValid is true
+
+//    //time difference reward
+//    if (stackField.Ground[idx.x, idx.z].Count > 0) {
+//        float d = (float)(stackField.Ground[idx.x, idx.z].Peek().OutField.TimePlaned
+//    - crane.ContainerCarrying.OutField.TimePlaned).TotalMinutes;
+//        reward += 1 / (Mathf.Exp(-d) + 1) - 1; // scaled sigmoid funciton (-0.5,0.5)
+//    } else reward += 1;
+
+//    //distance reward (0,1)
+
+
+//    // layer reward
+//    reward += 1 - stackField.Ground[idx.x, idx.z].Count / (float)stackField.MaxLayer;
+
+//    if (stackField.IsStackNeedRearrange(stackField.Ground[idx.x, idx.z])) {
+//        reward -= 0.1f;
+//    }
+
+//    // if the target is already full
+//    if (stackField.IsIndexFull(idx)) {
+//        Debug.LogWarning("already full!");
+//        AddReward(-2);
+//        return false; // need to redecide
+//    }
+
+//    // the result is already stacked
+//    if (crane.ContainerCarrying.StackedIndices.Contains(idx)) {
+//        Debug.LogWarning("already stacked!");
+//        reward -= 1f;
+//    }
+//    AddReward(reward);
+
+//    return true;
+//}
+
+//public override void OnActionReceived(ActionBuffers actions) {
+//    IndexInStack idx = new IndexInStack();
+//    idx.IsValid = actions.DiscreteActions[0] > 0;
+//    idx.x = actions.DiscreteActions[1];
+//    idx.z = actions.DiscreteActions[2];
+//    if (handleResult(idx)) {
+//        stackField.TrainingResult = idx;
+//        stateMachine.TriggerByState(crane.ContainerCarrying.CompareTag("container_in") || crane.ContainerCarrying.CompareTag("container_temp") ? "MoveIn" : "Rearrange");
+//    } else RequestDecision();
 //}
