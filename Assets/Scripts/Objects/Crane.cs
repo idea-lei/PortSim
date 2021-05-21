@@ -341,7 +341,7 @@ public class Crane : MonoBehaviour {
         var state = stateMachine.Graph.GetState("MoveOut");
         state.OnEnterState.AddListener(() => {
             ContainerCarrying.tag = "container_out";
-            destination = ContainerCarrying.OutField.IndexToGlobalPosition(ContainerCarrying.OutField.FindIndexToStack());
+            destination = ContainerCarrying.OutField.IndexToGlobalPosition(ContainerCarrying.OutField.NearestStackableIndex(transform.position));
         });
 
         state.OnExitState.AddListener(() => {
@@ -359,7 +359,7 @@ public class Crane : MonoBehaviour {
         state.OnEnterState.AddListener(() => {
             ContainerCarrying.tag = "container_temp";
             tempField = tempFields[UnityEngine.Random.Range(0, tempFields.Length)];
-            var index = tempField.FindIndexToStack();
+            var index = tempField.NearestStackableIndex(transform.position);
             if (index.IsValid) destination = tempField.IndexToGlobalPosition(index);
             else stateMachine.TriggerByState("Wait");
         });

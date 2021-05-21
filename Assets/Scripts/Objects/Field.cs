@@ -83,12 +83,6 @@ public abstract class Field : MonoBehaviour {
         index.IsValid = false;
         return index;
     }
-    public IndexInStack FindIndexToStack(IndexInStack indexToAvoid) {
-        return FindIndexToStack(new HashSet<IndexInStack> { indexToAvoid });
-    }
-    public IndexInStack FindIndexToStack() {
-        return FindIndexToStack(null);
-    }
 
     public virtual void AddToGround(Container container, IndexInStack index) {
         if (!IsAbleToAddContainerToIndex(index)) {
@@ -147,11 +141,68 @@ public abstract class Field : MonoBehaviour {
         return IsAbleToAddContainerToIndex(index.x, index.z);
     }
 
+    // this method is for outField and tempField stack
+    public IndexInStack NearestStackableIndex(Vector3 cranePos) {
+        /// <summary>
+        /// from s (selected start point) traverse the 0 - dim list
+        /// </summary>
+        List<int> traverse(int s, int dim) {
+            var oList = Enumerable.Range(0, dim).ToList();
+            var rList = new List<int>();
+            while (oList.Count > 0) {
+                rList.Add(oList[s]);
+                oList.RemoveAt(s);
+                if (oList.Count > s) {
+                    rList.Add(oList[s]);
+                    oList.RemoveAt(s);
+                }
+                if (s > 0) s--;
+            }
+            return rList;
+        }
+
+        //findout z index which is shorter 0 or dimZ-1
+        var zSelect = 0;
+        if (DimZ > 1) {
+            var z0 = IndexToGlobalPosition(0, 0);
+            var zMax = IndexToGlobalPosition(0, DimZ - 1);
+
+            float distanceZ0 = Vector2.SqrMagnitude(new Vector2(z0.x - cranePos.x, z0.z - cranePos.z));
+            float distanceZMax = Vector2.SqrMagnitude(new Vector2(zMax.x - cranePos.x, zMax.z - cranePos.z));
+            zSelect = distanceZ0 > distanceZMax ? DimZ - 1 : 0;
+        }
+        int zDirection = zSelect > 0 ? -1 : 1;
+
+        // findout shortest x
+        int xSelect = 0;
+        float minDis = float.MaxValue;
+        for (int x = 0; x < DimX; x++) {
+            var pos = IndexToGlobalPosition(x, zSelect);
+            float dis = Vector2.SqrMagnitude(new Vector2(pos.x - cranePos.x, pos.z - cranePos.z));
+            if (minDis > dis) {
+                xSelect = x;
+                minDis = dis;
+            } else break;
+        }
+
+        var xList = traverse(xSelect, DimX);
+        Debug.LogWarning($"x:{xSelect}, z:{zSelect}, dimX:{DimX}\n" +
+            $"{string.Join(", ", xList)}");
+        foreach (int x in xList) {
+            for (int z = zSelect; z >= 0 && z < DimZ; z += zDirection) {
+                var idx = new IndexInStack(x, z);
+                if (Ground[x, z].Count < MaxLayer)
+                    return idx;
+            }
+        }
+        return new IndexInStack(false);
+    }
+
     public IndexInStack StackableIndex(HashSet<IndexInStack> indicesToAvoid) {
         for (int x = 0; x < DimX; x++) {
             for (int z = 0; z < DimZ; z++) {
                 var idx = new IndexInStack(x, z);
-                if (Ground[x, z].Count < Parameters.MaxLayer && !indicesToAvoid.Any(i => i == idx))
+                if (Ground[x, z].Count < MaxLayer && !indicesToAvoid.Any(i => i == idx))
                     return idx;
             }
         }
