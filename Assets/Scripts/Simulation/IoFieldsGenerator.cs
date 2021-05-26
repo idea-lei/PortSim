@@ -26,6 +26,10 @@ public class IoFieldsGenerator : MonoBehaviour {
         }
     }
 
+    private void OnDestroy() {
+        StopAllCoroutines();
+    }
+
     public InField GenerateInField() {
         if (GetComponentsInChildren<InField>().Length > Parameters.MaxInFieldNumber) return null;
         var obj = Instantiate(inFieldPrefab);

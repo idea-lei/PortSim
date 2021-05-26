@@ -106,6 +106,7 @@ GameObject:
   - component: {fileID: 2344909976782974520}
   - component: {fileID: 2344909976782974523}
   - component: {fileID: 1460579072498122659}
+  - component: {fileID: 1502746460284658953}
   m_Layer: 0
   m_Name: StackField
   m_TagString: field_stack
@@ -268,8 +269,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_SensorName: BufferSensor
-  m_ObservableSize: 5
+  m_ObservableSize: 31
   m_MaxNumObservables: 25
+--- !u!114 &1502746460284658953
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2344909976782974513}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f2902496c0120472b90269f94a0aec7e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Record: 0
+  NumStepsToRecord: 0
+  DemonstrationName: WhereToStackDemo
+  DemonstrationDirectory: H:\programming\unity\ml-agents-release_17\results
 --- !u!1 &2344909977047355140
 GameObject:
   m_ObjectHideFlags: 0
@@ -934,6 +951,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e7c39e119cc816c4b8cc6099bab33dde, type: 3}
+--- !u!4 &277827677280288088 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2545028568384759432, guid: e7c39e119cc816c4b8cc6099bab33dde,
+    type: 3}
+  m_PrefabInstance: {fileID: 2344909977461414864}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &277827677280288068 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2545028568384759444, guid: e7c39e119cc816c4b8cc6099bab33dde,
@@ -946,12 +969,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1108f0abc3ffefc48ac5df5b8727e180, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!4 &277827677280288088 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 2545028568384759432, guid: e7c39e119cc816c4b8cc6099bab33dde,
-    type: 3}
-  m_PrefabInstance: {fileID: 2344909977461414864}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &2344909977774550603
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -49,6 +49,6 @@
     
     public static readonly float PossibilityOfDelay = 0.05f;
     public static float SetDelayInterval => DimZ * DimX * MaxLayer * 5f;
-    public static int TrainingDim = 1;
+    public static int TrainingDim = 14;
     #endregion
 }

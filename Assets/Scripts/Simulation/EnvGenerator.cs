@@ -10,5 +10,6 @@ public class EnvGenerator : MonoBehaviour {
                 Instantiate(areaContainerPrefab, new Vector3(x * 100, 0, z * 100), Quaternion.identity, null);
             }
         }
+        Destroy(gameObject);
     }
 }

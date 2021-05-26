@@ -15,6 +15,7 @@ public class StackBehavior : Agent {
     // this private class is for buffersensor
     private class ObservationObject {
         public IndexInStack index; //this one is not a observation variable
+        public int indexInList;
         public DateTime outTime;
         public int weight;
         public float energy;
@@ -38,18 +39,21 @@ public class StackBehavior : Agent {
 
     private List<ObservationObject> obList = new List<ObservationObject>();
 
-    // reward coefficients
-    private const float c_outOfRange = 5f;
-    private const float c_full = 5f;
-    private const float c_stacked = 2f;
+    private readonly int listLength = Parameters.DimX * Parameters.DimZ;
 
-    private const float c_time = 0.8f;
-    private const float c_rearrange = 1f;
-    private const float c_layer = 0.3f;
+    // reward coefficients
+    private const float c_outOfRange = 1f;
+    private const float c_full = 1f;
+    private const float c_stacked = 1f;
+
+    private const float c_time = 0.4f;
+    private const float c_rearrange = 0.4f;
+    private const float c_layer = 0.2f;
     private const float c_energy = 0.1f;
     private const float c_weight = 0.05f;
 
     private static List<float> heuristicRewards = new List<float>();
+    private int invalidTimes = 0;
 
 
     private void Start() {
@@ -66,6 +70,7 @@ public class StackBehavior : Agent {
     /// 2. amount of available indices -> 1
     /// 
     /// for buffer sensor: (each available index)
+    /// 0. whether this index is selected -> dimX * dimZ
     /// 1. peek container outTime -> 1
     /// 2. peek container weight -> 1
     /// 3. Energy Cost (kind of distance) (containerCarrying to index) -> 1
@@ -73,6 +78,7 @@ public class StackBehavior : Agent {
     /// 5. current layer of the index -> 1
     /// </summary>
     public override void CollectObservations(VectorSensor sensor) {
+        obList.Clear();
         if (crane.ContainerCarrying == null) {
             SimDebug.LogError(this, "container carrying is null!");
             EndEpisode();
@@ -80,14 +86,16 @@ public class StackBehavior : Agent {
         }
 
         // add observation to list
+        int idx = 0;
         for (int x = 0; x < stackField.DimX; x++) {
             for (int z = 0; z < stackField.DimZ; z++) {
                 //// index is available if it is not full and not stacked
-                //if (stackField.IsIndexFull(x, z)) continue;
-                //if (crane.ContainerCarrying.StackedIndices.Any(i => i.x == x && i.z == z)) continue;
+                if (stackField.IsIndexFull(x, z)) continue;
+                if (crane.ContainerCarrying.StackedIndices.Any(i => i.x == x && i.z == z)) continue;
 
                 var ob = new ObservationObject {
                     index = new IndexInStack(x, z),
+                    indexInList = idx++,
                     isStacked = crane.ContainerCarrying.StackedIndices.Any(i => i.x == x && i.z == z)
                 };
 
@@ -141,9 +149,11 @@ public class StackBehavior : Agent {
             if (o.n_outTime < 0 || o.n_outTime > 1) SimDebug.LogError(this, "outTime Lerp out of range");
             if (o.n_energy < 0 || o.n_energy > 1) SimDebug.LogError(this, "n_energy Lerp out of range");
 
-            float[] buffer = new float[] { o.n_outTime, o.n_weight, o.n_energy, o.n_layer, o.n_isIndexNeedRearrange };
+            var indicies = new float[listLength];
+            indicies[o.indexInList] = 1;
+            float[] buffer = new float[] { o.n_outTime, o.n_weight, o.n_energy, o.n_layer, o.n_layer >= 1 ? 0 : 1, o.n_isIndexNeedRearrange };
 
-            bufferSensor.AppendObservation(buffer);
+            bufferSensor.AppendObservation(indicies.Concat(buffer).ToArray());
         }
     }
 
@@ -211,20 +221,24 @@ public class StackBehavior : Agent {
                 SimDebug.LogError(this, "no stackable index");
                 return;
             }
-            AddReward(c_outOfRange);
+            AddReward(c_outOfRange * (++invalidTimes));
+            Debug.LogWarning("out of range, request new decision");
             RequestDecision();
+            //SimDebug.LogError(this, "outOfRange");
             return;
         }
 
+        invalidTimes = 0;
+
         if (obList[result].n_layer >= 1) {
             AddReward(c_full);
-            RequestDecision();
+            SimDebug.LogError(this, "full");
             return;
         }
 
         if (obList[result].isStacked) {
             AddReward(c_stacked);
-            RequestDecision();
+            SimDebug.LogError(this, "stacked");
             return;
         }
 
@@ -277,9 +291,9 @@ public class StackBehavior : Agent {
         Debug.Log(strBuilder.ToString());
 
         AddReward(reward);
+        EndEpisode();
         stackField.TrainingResult = obList[result].index;
         stateMachine.TriggerByState(crane.ContainerCarrying.CompareTag("container_in") || crane.ContainerCarrying.CompareTag("container_temp") ? "MoveIn" : "Rearrange");
-        obList.Clear();
     }
 }
 

@@ -186,8 +186,8 @@ public abstract class Field : MonoBehaviour {
         }
 
         var xList = traverse(xSelect, DimX);
-        Debug.LogWarning($"x:{xSelect}, z:{zSelect}, dimX:{DimX}\n" +
-            $"{string.Join(", ", xList)}");
+        //Debug.LogWarning($"x:{xSelect}, z:{zSelect}, dimX:{DimX}\n" +
+        //    $"{string.Join(", ", xList)}");
         foreach (int x in xList) {
             for (int z = zSelect; z >= 0 && z < DimZ; z += zDirection) {
                 var idx = new IndexInStack(x, z);
