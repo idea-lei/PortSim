@@ -20,6 +20,7 @@ public class StackBehavior : Agent {
         public float energy;
         public int layer;
         public bool isIndexNeedRearrange;
+        public bool isStacked;
 
         // n means normalized
         public float n_outTime;
@@ -27,6 +28,7 @@ public class StackBehavior : Agent {
         public float n_energy;
         public float n_layer;
         public float n_isIndexNeedRearrange;
+        public float n_isStacked;
     }
 
     private Crane crane;
@@ -38,6 +40,8 @@ public class StackBehavior : Agent {
 
     // reward coefficients
     private const float c_outOfRange = 5f;
+    private const float c_full = 5f;
+    private const float c_stacked = 2f;
 
     private const float c_time = 0.8f;
     private const float c_rearrange = 1f;
@@ -78,12 +82,13 @@ public class StackBehavior : Agent {
         // add observation to list
         for (int x = 0; x < stackField.DimX; x++) {
             for (int z = 0; z < stackField.DimZ; z++) {
-                // index is available if it is not full and not stacked
-                if (stackField.IsIndexFull(x, z)) continue;
-                if (crane.ContainerCarrying.StackedIndices.Any(i => i.x == x && i.z == z)) continue;
+                //// index is available if it is not full and not stacked
+                //if (stackField.IsIndexFull(x, z)) continue;
+                //if (crane.ContainerCarrying.StackedIndices.Any(i => i.x == x && i.z == z)) continue;
 
                 var ob = new ObservationObject {
-                    index = new IndexInStack(x, z)
+                    index = new IndexInStack(x, z),
+                    isStacked = crane.ContainerCarrying.StackedIndices.Any(i => i.x == x && i.z == z)
                 };
 
                 if (stackField.Ground[x, z].Count > 0) {
@@ -206,7 +211,19 @@ public class StackBehavior : Agent {
                 SimDebug.LogError(this, "no stackable index");
                 return;
             }
-            AddReward(c_outOfRange);  // result out of range
+            AddReward(c_outOfRange);
+            RequestDecision();
+            return;
+        }
+
+        if (obList[result].n_layer >= 1) {
+            AddReward(c_full);
+            RequestDecision();
+            return;
+        }
+
+        if (obList[result].isStacked) {
+            AddReward(c_stacked);
             RequestDecision();
             return;
         }
