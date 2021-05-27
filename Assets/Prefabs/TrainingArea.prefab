@@ -286,7 +286,7 @@ MonoBehaviour:
   Record: 0
   NumStepsToRecord: 0
   DemonstrationName: whereToStack
-  DemonstrationDirectory: H:\programming\unity\ml-agents-release_17\results
+  DemonstrationDirectory: E:\programming\unity\ml-agents-release_17\results\Demos
 --- !u!1 &2344909977047355140
 GameObject:
   m_ObjectHideFlags: 0

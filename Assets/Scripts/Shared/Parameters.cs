@@ -45,10 +45,10 @@
     #region Simulation
     public static readonly float EventDelay = 1f;
     public static readonly int MaxInFieldNumber = 6; // this is only for test (random generation)
-    public static float InFieldGenerationInterval => DimZ * DimX * MaxLayer * 1f; // this is only for test (random generation)
+    public static float InFieldGenerationInterval => DimZ * DimX * MaxLayer * 0.8f; // this is only for test (random generation)
     
     public static readonly float PossibilityOfDelay = 0.05f;
     public static float SetDelayInterval => DimZ * DimX * MaxLayer * 5f;
-    public static int TrainingDim = 13;
+    public static int TrainingDim = 7;
     #endregion
 }
