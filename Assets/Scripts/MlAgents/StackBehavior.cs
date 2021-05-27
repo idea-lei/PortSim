@@ -20,6 +20,7 @@ public class StackBehavior : Agent {
         public int weight;
         public float energy;
         public int layer;
+        public bool isFull => layer >= Parameters.MaxLayer;
         public bool isIndexNeedRearrange;
         public bool isStacked;
 
@@ -53,7 +54,6 @@ public class StackBehavior : Agent {
     private const float c_weight = 0.05f;
 
     private static List<float> heuristicRewards = new List<float>();
-    private int invalidTimes = 0;
 
 
     private void Start() {
@@ -86,7 +86,6 @@ public class StackBehavior : Agent {
         }
 
         // add observation to list
-        int idx = 0;
         for (int x = 0; x < stackField.DimX; x++) {
             for (int z = 0; z < stackField.DimZ; z++) {
                 //// index is available if it is not full and not stacked
@@ -95,7 +94,6 @@ public class StackBehavior : Agent {
 
                 var ob = new ObservationObject {
                     index = new IndexInStack(x, z),
-                    indexInList = idx++,
                     isStacked = crane.ContainerCarrying.StackedIndices.Any(i => i.x == x && i.z == z)
                 };
 
@@ -151,7 +149,7 @@ public class StackBehavior : Agent {
 
             var indicies = new float[listLength];
             indicies[o.indexInList] = 1;
-            float[] buffer = new float[] { o.n_outTime, o.n_weight, o.n_energy, o.n_layer, o.n_layer >= 1 ? 0 : 1, o.n_isIndexNeedRearrange };
+            float[] buffer = new float[] { o.n_outTime, o.n_weight, o.n_energy, o.n_layer, o.isFull ? 0 : 1, o.n_isIndexNeedRearrange };
 
             bufferSensor.AppendObservation(indicies.Concat(buffer).ToArray());
         }
@@ -209,13 +207,18 @@ public class StackBehavior : Agent {
         heuristicRewards.Add(max);
         strBuilder.Append($"mean reward = {heuristicRewards.Average()}");
         Debug.Log(strBuilder.ToString());
-        continuousActionsOut[0] = rewardList.IndexOf(max);
+        var res = obList[rewardList.IndexOf(max)];
+        continuousActionsOut[0] = res.index.x;
+        continuousActionsOut[1] = res.index.z;
     }
 
+    private int invalidTimes = 0;
     public override void OnActionReceived(ActionBuffers actions) {
-        int result = actions.DiscreteActions[0];
+        int x = actions.DiscreteActions[0];
+        int z = actions.DiscreteActions[1];
+        var result = obList.SingleOrDefault(o => o.index.x == x && o.index.z == z);
 
-        if (result >= obList.Count) {
+        if (result == null) {
             if (obList.Count == 0) {
                 // this means no available index, which should be determined before request decision, so error
                 SimDebug.LogError(this, "no stackable index");
@@ -230,28 +233,28 @@ public class StackBehavior : Agent {
 
         invalidTimes = 0;
 
-        if (obList[result].n_layer >= 1) {
+        if (result.isFull) {
             AddReward(c_full);
             SimDebug.LogError(this, "full");
             return;
         }
 
-        if (obList[result].isStacked) {
+        if (result.isStacked) {
             AddReward(c_stacked);
             SimDebug.LogError(this, "stacked");
             return;
         }
 
         var strBuilder = new StringBuilder($"available indices amount: {obList.Count}\n" +
-            $"result is: {result} -- {obList[result].index}\n");
+            $"result is: {result} -- {result.index}\n");
 
         float reward = 0;
 
         // 1. energy reward
-        reward = (1 - obList[result].n_energy) * c_energy;
+        reward = (1 - result.n_energy) * c_energy;
 
         // 2. needRearrange reward
-        if (obList[result].isIndexNeedRearrange) {
+        if (result.isIndexNeedRearrange) {
             // if not all indices need rearrange
             if (!obList.All(o => o.isIndexNeedRearrange)) {
                 strBuilder.Append("index need rearrange");
@@ -265,7 +268,7 @@ public class StackBehavior : Agent {
         var maxTime = times.Max();
         var minTime = times.Min();
 
-        if (crane.ContainerCarrying.OutField.TimePlaned < obList[result].outTime) {
+        if (crane.ContainerCarrying.OutField.TimePlaned < result.outTime) {
             reward += (1 - Mathf.InverseLerp(minTime.Second, maxTime.Second, crane.ContainerCarrying.OutField.TimePlaned.Second)) * c_time;
         } else {
             if (!obList.All(o => crane.ContainerCarrying.OutField.TimePlaned > o.outTime)) {
@@ -276,11 +279,11 @@ public class StackBehavior : Agent {
         }
 
         // 4. layer reward
-        reward += (1 - obList[result].n_layer) * c_layer;
+        reward += (1 - result.n_layer) * c_layer;
 
         // 5. weight reward
-        if (crane.ContainerCarrying.Weight <= obList[result].weight) {
-            reward += crane.ContainerCarrying.Weight / obList[result].weight * c_weight;
+        if (crane.ContainerCarrying.Weight <= result.weight) {
+            reward += crane.ContainerCarrying.Weight / result.weight * c_weight;
         } else {
             if (!obList.All(o => crane.ContainerCarrying.Weight >= o.weight)) {
                 reward -= c_weight;
@@ -292,7 +295,7 @@ public class StackBehavior : Agent {
 
         AddReward(reward);
         EndEpisode();
-        stackField.TrainingResult = obList[result].index;
+        stackField.TrainingResult = result.index;
         stateMachine.TriggerByState(crane.ContainerCarrying.CompareTag("container_in") || crane.ContainerCarrying.CompareTag("container_temp") ? "MoveIn" : "Rearrange");
     }
 }

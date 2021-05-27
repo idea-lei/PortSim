@@ -117,7 +117,14 @@ public abstract class Field : MonoBehaviour {
         if (Ground[c.IndexInCurrentField.x, c.IndexInCurrentField.z].Peek() == c) {
             return Ground[c.IndexInCurrentField.x, c.IndexInCurrentField.z].Pop();
         }
-        SimDebug.LogError(this, "can not remove from ground");
+        SimDebug.LogError(this, "can not remove from ground, the index does not correspond");
+        if (this is StackField) {
+            foreach (var otherContainer in transform.GetComponents<Container>()) {
+                if (otherContainer != c && otherContainer.StackedIndices.Any(i => i == c.IndexInCurrentField)) {
+                    otherContainer.StackedIndices.Remove(otherContainer.StackedIndices.Single(i => i == c.IndexInCurrentField));
+                }
+            }
+        }
         return null;
     }
 

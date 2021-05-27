@@ -106,7 +106,7 @@ GameObject:
   - component: {fileID: 2344909976782974520}
   - component: {fileID: 2344909976782974523}
   - component: {fileID: 1460579072498122659}
-  - component: {fileID: 1502746460284658953}
+  - component: {fileID: 6743315757388252718}
   m_Layer: 0
   m_Name: StackField
   m_TagString: field_stack
@@ -243,8 +243,8 @@ MonoBehaviour:
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 0
-      BranchSizes: 19000000
-    VectorActionSize: 19000000
+      BranchSizes: 0500000005000000
+    VectorActionSize: 0500000005000000
     VectorActionDescriptions: []
     VectorActionSpaceType: 0
     hasUpgradedBrainParametersWithActionSpec: 1
@@ -271,7 +271,7 @@ MonoBehaviour:
   m_SensorName: BufferSensor
   m_ObservableSize: 31
   m_MaxNumObservables: 25
---- !u!114 &1502746460284658953
+--- !u!114 &6743315757388252718
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -285,7 +285,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Record: 0
   NumStepsToRecord: 0
-  DemonstrationName: WhereToStackDemo
+  DemonstrationName: whereToStack
   DemonstrationDirectory: H:\programming\unity\ml-agents-release_17\results
 --- !u!1 &2344909977047355140
 GameObject:

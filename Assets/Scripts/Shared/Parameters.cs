@@ -23,12 +23,12 @@
     #endregion
 
     #region Movement
-    public static readonly float Vy_Loaded = 25f;
-    public static readonly float Vy_Unloaded = 30f;
-    public static readonly float Vx_Loaded = 25f;
-    public static readonly float Vx_Unloaded = 30f;
-    public static readonly float Vz_Loaded = 25f;
-    public static readonly float Vz_Unloaded = 30f;
+    public static readonly float Vy_Loaded = 40f;
+    public static readonly float Vy_Unloaded = 40f;
+    public static readonly float Vx_Loaded = 40f;
+    public static readonly float Vx_Unloaded = 40f;
+    public static readonly float Vz_Loaded = 40f;
+    public static readonly float Vz_Unloaded = 40f;
 
     public static readonly float Ez = 0.001f;   // energy cost per meter
     public static readonly float Ex = 0.005f;
@@ -38,8 +38,8 @@
 
     #region Errors
     // this value should be larger than v_magnitude * deltatime
-    public static readonly float DistanceError = 0.3f;
-    public static readonly float SqrDistanceError = 0.548f; // use this to avoid the sqrt calculation
+    public static readonly float DistanceError = 0.4f;
+    public static readonly float SqrDistanceError = 0.632f; // use this to avoid the sqrt calculation
     #endregion
 
     #region Simulation
@@ -49,6 +49,6 @@
     
     public static readonly float PossibilityOfDelay = 0.05f;
     public static float SetDelayInterval => DimZ * DimX * MaxLayer * 5f;
-    public static int TrainingDim = 14;
+    public static int TrainingDim = 13;
     #endregion
 }
