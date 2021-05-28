@@ -82,7 +82,7 @@ public abstract class IoField : Field, IComparable<IoField> {
         return new TimeSpan(
             UnityEngine.Random.Range(0, 0),
             UnityEngine.Random.Range(0, 0),
-            UnityEngine.Random.Range(0, 5),
+            UnityEngine.Random.Range(0, 3),
             UnityEngine.Random.Range(0, 30));
     }
 

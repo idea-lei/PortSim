@@ -239,12 +239,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 3
+    VectorObservationSize: 0
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 0
-      BranchSizes: 0500000005000000
-    VectorActionSize: 0500000005000000
+      BranchSizes: 04000000
+    VectorActionSize: 04000000
     VectorActionDescriptions: []
     VectorActionSpaceType: 0
     hasUpgradedBrainParametersWithActionSpec: 1
@@ -269,8 +269,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_SensorName: BufferSensor
-  m_ObservableSize: 31
-  m_MaxNumObservables: 25
+  m_ObservableSize: 10
+  m_MaxNumObservables: 4
 --- !u!114 &6743315757388252718
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -286,7 +286,7 @@ MonoBehaviour:
   Record: 0
   NumStepsToRecord: 0
   DemonstrationName: whereToStack
-  DemonstrationDirectory: E:\programming\unity\ml-agents-release_17\results\Demos
+  DemonstrationDirectory: H:\programming\unity\ml-agents-release_17\results\Demos
 --- !u!1 &2344909977047355140
 GameObject:
   m_ObjectHideFlags: 0

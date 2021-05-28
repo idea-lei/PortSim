@@ -201,7 +201,7 @@ public class Crane : MonoBehaviour {
         if (c != null) return c;
         c = findContainerToMoveIn();
         if (c != null) return c;
-        c = findContainerToRearrange();
+        //c = findContainerToRearrange();
         return c;
     }
 

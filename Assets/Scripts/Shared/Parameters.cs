@@ -1,5 +1,4 @@
-﻿public static class Parameters
-{
+﻿public static class Parameters {
 
     #region Container
     public static readonly float ContainerHeight = 2.5f;
@@ -10,9 +9,9 @@
     #endregion
 
     #region PlayGround
-    public static readonly int DimZ = 5;
-    public static readonly int DimX = 5;
-    public static readonly int MaxLayer = 4;
+    public static int DimZ = 2;
+    public static int DimX = 2;
+    public static int MaxLayer = 2;
     public static readonly int MinDim = 0; // this is only for test (random generation), should be smaller than the min Dim value
 
     public static readonly float Gap_Container = 1f;
@@ -46,9 +45,9 @@
     public static readonly float EventDelay = 1f;
     public static readonly int MaxInFieldNumber = 6; // this is only for test (random generation)
     public static float InFieldGenerationInterval => DimZ * DimX * MaxLayer * 0.8f; // this is only for test (random generation)
-    
+
     public static readonly float PossibilityOfDelay = 0.05f;
     public static float SetDelayInterval => DimZ * DimX * MaxLayer * 5f;
-    public static int TrainingDim = 7;
+    public static int TrainingDim = 14;
     #endregion
 }
