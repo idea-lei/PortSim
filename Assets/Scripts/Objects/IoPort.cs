@@ -75,7 +75,7 @@ public class IoPort : MonoBehaviour {
         IoField next = sumCount >= stackField.MaxCount ? fieldsBuffer.Find(f => f is OutField) : fieldsBuffer[0];
         if (nextField != next) nextField = next;
 
-        if (nextField.TimePlaned < DateTime.Now) {
+        if (nextField != null && nextField.TimePlaned < DateTime.Now) {
             if (nextField is OutField) {
                 foreach (var c in ((OutField)nextField).IncomingContainers) {
                     // means the inField is still not enabled
