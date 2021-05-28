@@ -88,6 +88,13 @@ public abstract class Field : MonoBehaviour {
         if (!IsAbleToAddContainerToIndex(index)) {
             SimDebug.LogError(this, "can not add container to index!");
         }
+        if (this is OutField) {
+            foreach (var c in GetComponentInParent<ObjectCollection>().StackField.GetComponents<Container>()) {
+                if (c.StackedIndices.Any(i => i == container.IndexInCurrentField)) {
+                    c.StackedIndices.Remove(c.StackedIndices.Single(i => i == container.IndexInCurrentField));
+                }
+            }
+        }
         container.transform.SetParent(transform);
         Ground[index.x, index.z].Push(container);
         container.CurrentField = this;
@@ -118,13 +125,6 @@ public abstract class Field : MonoBehaviour {
             return Ground[c.IndexInCurrentField.x, c.IndexInCurrentField.z].Pop();
         }
         SimDebug.LogError(this, "can not remove from ground, the index does not correspond");
-        if (this is StackField) {
-            foreach (var otherContainer in transform.GetComponents<Container>()) {
-                if (otherContainer != c && otherContainer.StackedIndices.Any(i => i == c.IndexInCurrentField)) {
-                    otherContainer.StackedIndices.Remove(otherContainer.StackedIndices.Single(i => i == c.IndexInCurrentField));
-                }
-            }
-        }
         return null;
     }
 
