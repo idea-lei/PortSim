@@ -9,9 +9,9 @@
     #endregion
 
     #region PlayGround
-    public static int DimZ = 2;
-    public static int DimX = 2;
-    public static int MaxLayer = 2;
+    public static int DimZ = 5;
+    public static int DimX = 5;
+    public static int MaxLayer = 3;
     public static readonly int MinDim = 0; // this is only for test (random generation), should be smaller than the min Dim value
 
     public static readonly float Gap_Container = 1f;
@@ -30,7 +30,7 @@
     public static readonly float Vz_Unloaded = 40f;
 
     public static readonly float Ez = 0.001f;   // energy cost per meter
-    public static readonly float Ex = 0.005f;
+    public static readonly float Ex = 0.01f;
 
     public static readonly float TranslationHeight = 20f;
     #endregion
@@ -44,10 +44,10 @@
     #region Simulation
     public static readonly float EventDelay = 1f;
     public static readonly int MaxInFieldNumber = 6; // this is only for test (random generation)
-    public static float InFieldGenerationInterval => DimZ * DimX * MaxLayer * 0.8f; // this is only for test (random generation)
+    public static float InFieldGenerationInterval => DimX * 5f; // this is only for test (random generation)
 
     public static readonly float PossibilityOfDelay = 0.05f;
     public static float SetDelayInterval => DimZ * DimX * MaxLayer * 5f;
-    public static int TrainingDim = 20;
+    public static int TrainingDim = 10;
     #endregion
 }

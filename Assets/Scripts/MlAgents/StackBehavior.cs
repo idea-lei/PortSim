@@ -50,6 +50,8 @@ public class StackBehavior : Agent {
     private StateMachine stateMachine;
     private BufferSensorComponent bufferSensor;
 
+    private EnvironmentParameters envParams;
+
     private List<ObservationObject> obList = new List<ObservationObject>();
 
     // reward coefficients
@@ -57,18 +59,17 @@ public class StackBehavior : Agent {
     private const float c_full = 1f;
     private const float c_stacked = 1f;
 
-    private const float c_time = 0.3f;
-    private const float c_rearrange = 0.3f;
-    private const float c_layer = 0.1f;
-    private const float c_energy = 0.05f;
-    private const float c_weight = 0.01f;
+    private const float c_time = 0.5f;
+    private const float c_rearrange = 0.5f;
+    private const float c_layer = 0.2f;
+    private const float c_energy = 0.1f;
+    private const float c_weight = 0.05f;
 
-    private void Start() {
+    public override void Initialize() {
         crane = GetComponentInParent<ObjectCollection>().Crane;
         stackField = GetComponent<StackField>();
         stateMachine = crane.GetComponent<StateMachine>();
         bufferSensor = GetComponent<BufferSensorComponent>();
-        Initialize();
     }
 
     /// <summary>
@@ -97,7 +98,6 @@ public class StackBehavior : Agent {
                     layer = stackField.Ground[x, z].Count,
                     noRearrange = !stackField.IsStackNeedRearrange(stackField.Ground[x, z])
                 };
-
 
                 Vector3 vec;
                 if (stackField.Ground[x, z].Count > 0) {
@@ -135,7 +135,7 @@ public class StackBehavior : Agent {
             if (o.n_timeDiff < 0 || o.n_timeDiff > 1) SimDebug.LogError(this, "outTime Lerp out of range");
             if (o.n_energy < 0 || o.n_energy > 1) SimDebug.LogError(this, "n_energy Lerp out of range");
 
-            float[] hotEncoding = new float[Parameters.DimX * Parameters.DimZ];
+            float[] hotEncoding = new float[25];
             hotEncoding[obList.IndexOf(o)] = 1;
 
             float[] buffer = new float[] {
@@ -158,7 +158,7 @@ public class StackBehavior : Agent {
         var continuousActionsOut = actionsOut.DiscreteActions;
         var rewardList = new List<float>();
 
-        foreach (var ob in obList) rewardList.Add(CalculateReward(ob));
+        foreach (var ob in obList) rewardList.Add(CalculateReward(ob, true));
 
         float max = rewardList.Max();
         continuousActionsOut[0] = rewardList.IndexOf(max);
@@ -180,35 +180,34 @@ public class StackBehavior : Agent {
         }
 
         var result = obList[actions.DiscreteActions[0]];
-        if (!result.isLayerOk) {
-            AddReward(-c_full);
+        float reward = CalculateReward(result);
+
+        AddReward(reward);
+        if (reward <= -1) {
             RequestDecision();
-            Debug.LogWarning("full");
             return;
         }
 
-        if (!result.notStacked) {
-            AddReward(-c_stacked);
-            RequestDecision();
-            Debug.LogWarning("stacked");
-            return;
-        }
-
-        AddReward(CalculateReward(result));
-        //EndEpisode();
         stackField.TrainingResult = result.index;
         stateMachine.TriggerByState(crane.ContainerCarrying.CompareTag("container_in") || crane.ContainerCarrying.CompareTag("container_temp") ? "MoveIn" : "Rearrange");
     }
 
-    private float CalculateReward(ObservationObject ob) {
+    private float CalculateReward(ObservationObject ob, bool isHeuristic = false) {
+        float reward = 0;
         // 0.1) is Full?
-        if (!ob.isLayerOk) return -c_full;
-        // 0.2) is stacked?
-        if (!ob.notStacked) return -c_stacked;
+        if (!ob.isLayerOk) {
+            if (!isHeuristic) Debug.LogWarning("full");
+            return -c_full;
+        } else reward += c_full / 2;
 
-        float reward;
+        // 0.2) is stacked?
+        if (!ob.notStacked) {
+            if (!isHeuristic) Debug.LogWarning("stacked");
+            return -c_stacked;
+        } else reward += c_stacked / 2;
+
         // 1) energy reward
-        reward = (1 - ob.n_energy) * c_energy;
+        reward += (1 - ob.n_energy) * c_energy;
 
         // 2) noRearrange reward
         if (!ob.noRearrange) {
@@ -227,7 +226,7 @@ public class StackBehavior : Agent {
         // 5) weight reward
         if (!ob.isWeightOk) {
             if (obList.Any(o => o.isWeightOk)) reward -= c_weight;
-        } else reward += ob.n_weightDiff * c_weight;
+        } else reward += (1 - ob.n_weightDiff) * c_weight;
 
         return reward;
     }

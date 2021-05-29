@@ -243,8 +243,8 @@ MonoBehaviour:
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 0
-      BranchSizes: 04000000
-    VectorActionSize: 04000000
+      BranchSizes: 19000000
+    VectorActionSize: 19000000
     VectorActionDescriptions: []
     VectorActionSpaceType: 0
     hasUpgradedBrainParametersWithActionSpec: 1
@@ -269,8 +269,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_SensorName: BufferSensor
-  m_ObservableSize: 13
-  m_MaxNumObservables: 4
+  m_ObservableSize: 34
+  m_MaxNumObservables: 25
 --- !u!114 &6743315757388252718
 MonoBehaviour:
   m_ObjectHideFlags: 0
