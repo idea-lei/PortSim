@@ -50,8 +50,6 @@ public class StackBehavior : Agent {
     private StateMachine stateMachine;
     private BufferSensorComponent bufferSensor;
 
-    private EnvironmentParameters envParams;
-
     private List<ObservationObject> obList = new List<ObservationObject>();
 
     // reward coefficients
@@ -92,6 +90,10 @@ public class StackBehavior : Agent {
         // add observation to list
         for (int x = 0; x < stackField.DimX; x++) {
             for (int z = 0; z < stackField.DimZ; z++) {
+                //// index is available if it is not full and not stacked
+                if (stackField.IsIndexFull(x, z)) continue;
+                if (crane.ContainerCarrying.StackedIndices.Any(i => i == new IndexInStack(x, z))) continue;
+
                 var ob = new ObservationObject {
                     index = new IndexInStack(x, z),
                     notStacked = crane.ContainerCarrying.StackedIndices.All(i => i.x != x || i.z != z),
@@ -198,13 +200,13 @@ public class StackBehavior : Agent {
         if (!ob.isLayerOk) {
             if (!isHeuristic) Debug.LogWarning("full");
             return -c_full;
-        } else reward += c_full / 2;
+        }
 
         // 0.2) is stacked?
         if (!ob.notStacked) {
             if (!isHeuristic) Debug.LogWarning("stacked");
             return -c_stacked;
-        } else reward += c_stacked / 2;
+        }
 
         // 1) energy reward
         reward += (1 - ob.n_energy) * c_energy;

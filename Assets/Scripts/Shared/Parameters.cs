@@ -46,8 +46,8 @@
     public static readonly int MaxInFieldNumber = 6; // this is only for test (random generation)
     public static float InFieldGenerationInterval => DimX * 5f; // this is only for test (random generation)
 
-    public static readonly float PossibilityOfDelay = 0.05f;
+    public static readonly float PossibilityOfDelay = 0.01f;
     public static float SetDelayInterval => DimZ * DimX * MaxLayer * 5f;
-    public static int TrainingDim = 10;
+    public static int TrainingDim = 1;
     #endregion
 }
