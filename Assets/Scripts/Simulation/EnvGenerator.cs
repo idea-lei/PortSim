@@ -12,7 +12,10 @@ public class EnvGenerator : MonoBehaviour {
                 Instantiate(areaContainerPrefab, new Vector3(x * 100, 0, z * 100), Quaternion.identity, null);
             }
         }
-        InvokeRepeating(nameof(CheckEnvParameter), 60, 60);
+        if (Academy.Instance.IsCommunicatorOn) {
+            InvokeRepeating(nameof(CheckEnvParameter), 60, 60);
+        }
+        
     }
 
     void CheckEnvParameter() {

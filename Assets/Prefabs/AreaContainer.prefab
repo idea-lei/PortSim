@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 1464309279243691640}
   - component: {fileID: 1464309279243691643}
   m_Layer: 0
-  m_Name: AreaContainer 1
+  m_Name: AreaContainer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -43,5 +43,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ebbcbc4a0c97a2143b86d21d8bff5455, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  AreaPrefab: {fileID: 2344909977047355140, guid: 220af7269107e5c43a3c14d093624fba,
+  AreaPrefab: {fileID: 8338865797647822907, guid: 49e1ca49015919f47b2b1c19ca720557,
     type: 3}
