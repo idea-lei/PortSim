@@ -39,18 +39,26 @@ public class Crane : MonoBehaviour {
             _containerCarrying = value;
         }
     }
-    public bool CanPickUp {
+    public bool CanPickUp_In {
         get {
             bool isStackFieldFull = stackField.IsGroundFull;
+            foreach (var io in ioPorts) {
+                // check container to move in
+                if (!isStackFieldFull && io.CurrentField is InField)
+                    return true;
+            }
+            return false;
+        }
+    }
+
+    public bool CanPickUp_OutOrRearrange {
+        get {
             foreach (var io in ioPorts) {
                 // check container to move out
                 if (io.CurrentField is OutField) {
                     if (((OutField)io.CurrentField).IncomingContainersCount > io.CurrentField.GetComponentsInChildren<Container>().Length)
                         return true;
                 }
-                // check container to move in
-                if (!isStackFieldFull && io.CurrentField is InField)
-                    return true;
             }
             return false;
         }
@@ -85,7 +93,8 @@ public class Crane : MonoBehaviour {
 
         setStateMachineGeneralEvents();
         setStateWaitEvents();
-        setStatePickUpDecisionEvents();
+        setStateFindOutOrRearrangeEvents();
+        setStateFindInEvents();
         setStatePickUpEvents();
         setStateMoveInEvents();
         setStackDecisionEvents();
@@ -128,8 +137,16 @@ public class Crane : MonoBehaviour {
                     moveToWaitPosition();
                     return;
                 }
-                if (CanPickUp) {
-                    stateMachine.TriggerByState("PickUpDecision");
+                if (ContainerToPick != null) {
+                    SimDebug.LogError(this, "container to pick is not null when making pickup decision");
+                    return;
+                }
+                if (CanPickUp_OutOrRearrange) {
+                    stateMachine.TriggerByState("FindOutOrRearrange");
+                    return;
+                }
+                if (CanPickUp_In) {
+                    stateMachine.TriggerByState("FindIn");
                     return;
                 }
                 break;
@@ -138,7 +155,6 @@ public class Crane : MonoBehaviour {
                 else stateMachine.TriggerByState("Wait");
                 break;
             case "StackDecision":
-            case "PickUpDecision":
                 break;
             default:
                 moveTo(destination, true);
@@ -293,24 +309,38 @@ public class Crane : MonoBehaviour {
         state.OnExitState.AddListener(() => { });
     }
 
-    private void setStatePickUpDecisionEvents() {
-        var state = stateMachine.Graph.GetState("PickUpDecision");
+    private void setStateFindOutOrRearrangeEvents() {
+        var state = stateMachine.Graph.GetState("FindOutOrRearrange");
         state.OnEnterState.AddListener(() => {
-            if (ContainerToPick != null) { 
+            if (ContainerToPick != null) {
                 SimDebug.LogError(this, "container to pick is not null when making pickup decision");
                 return;
             }
-            ContainerToPick = findContainerToPick();
-            stateMachine.TriggerByState(ContainerToPick==null?"Wait": "PickUp");
+            ContainerToPick = findContainerToMoveOut();
+            stateMachine.TriggerByState(ContainerToPick == null ? "Wait" : "PickUp");
         });
-        state.OnExitState.AddListener(() => { 
+        state.OnExitState.AddListener(() => {
+        });
+    }
+
+    private void setStateFindInEvents() {
+        var state = stateMachine.Graph.GetState("FindIn");
+        state.OnEnterState.AddListener(() => {
+            if (ContainerToPick != null) { // which means the last time 
+                SimDebug.LogError(this, "container to pick is not null when making pickup decision");
+                return;
+            }
+            ContainerToPick = findContainerToMoveIn();
+            stateMachine.TriggerByState(ContainerToPick == null ? "Wait" : "PickUp");
+        });
+        state.OnExitState.AddListener(() => {
         });
     }
 
     private void setStatePickUpEvents() {
         var state = stateMachine.Graph.GetState("PickUp");
         state.OnEnterState.AddListener(() => {
-            
+
             if (ContainerToPick == null || !ContainerToPick.CurrentField.isActiveAndEnabled) {
                 Debug.LogWarning("container to pick is null or the field is not enabled");
                 stateMachine.TriggerByState("Wait");
