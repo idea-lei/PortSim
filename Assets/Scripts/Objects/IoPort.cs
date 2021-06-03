@@ -79,7 +79,7 @@ public class IoPort : MonoBehaviour {
             if (nextField is OutField) {
                 foreach (var c in ((OutField)nextField).IncomingContainers) {
                     // means the inField is still not enabled
-                    if (c.CurrentField && c.CurrentField is InField && !c.CurrentField.isActiveAndEnabled) {
+                    if (c.CurrentField && c.CurrentField is InField) { // && !c.CurrentField.isActiveAndEnabled
                         delayField(nextField);
                         return;
                     }
