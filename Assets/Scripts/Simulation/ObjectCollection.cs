@@ -14,10 +14,8 @@ public class ObjectCollection : MonoBehaviour {
     public IoFieldsGenerator IoFieldsGenerator;
     public IoPort[] IoPorts;
     public TempField[] TempFields;
-    public RearrangeAgent RearrangeAgent;
     public FindContainerAgent FindContainerAgent;
     public FindIndexAgent FindIndexAgent;
-    public StackBehavior StackBehavior;
 
     private void Start() {
         InvokeRepeating(nameof(CheckStackFull), 10 + Random.Range(-5, 5), 10);

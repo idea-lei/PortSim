@@ -20,35 +20,35 @@ public class RearrangeAgent : AgentBase {
     /// </summary>
     public override void CollectObservations(VectorSensor sensor) {
         obList.Clear();
-        if (crane.ContainerCarrying == null) {
+        if (objs.Crane.ContainerCarrying == null) {
             SimDebug.LogError(this, "container carrying is null!");
             EndEpisode();
             return;
         }
 
         // add observation to list
-        for (int x = 0; x < stackField.DimX; x++) {
-            for (int z = 0; z < stackField.DimZ; z++) {
+        for (int x = 0; x < objs.StackField.DimX; x++) {
+            for (int z = 0; z < objs.StackField.DimZ; z++) {
                 //// index is available if it is not full and not stacked
-                if (stackField.IsIndexFull(x, z)) continue;
-                if (crane.ContainerCarrying.StackedIndices.Any(i => i == new IndexInStack(x, z))) continue;
+                if (objs.StackField.IsIndexFull(x, z)) continue;
+                if (objs.Crane.ContainerCarrying.StackedIndices.Any(i => i == new IndexInStack(x, z))) continue;
 
                 var ob = new RearrangeObservationObject {
                     index = new IndexInStack(x, z),
-                    notStacked = crane.ContainerCarrying.StackedIndices.All(i => i.x != x || i.z != z),
-                    layer = stackField.Ground[x, z].Count,
-                    noRearrange = !stackField.IsStackNeedRearrange(stackField.Ground[x, z])
+                    notStacked = objs.Crane.ContainerCarrying.StackedIndices.All(i => i.x != x || i.z != z),
+                    layer = objs.StackField.Ground[x, z].Count,
+                    noRearrange = !objs.StackField.IsStackNeedRearrange(objs.StackField.Ground[x, z])
                 };
 
                 Vector3 vec;
-                if (stackField.Ground[x, z].Count > 0) {
-                    ob.weightDiff = stackField.Ground[x, z].Peek().Weight - crane.ContainerCarrying.Weight;
-                    ob.timeDiff = stackField.Ground[x, z].Peek().OutField.TimePlaned - crane.ContainerCarrying.OutField.TimePlaned;
-                    vec = crane.ContainerCarrying.transform.position - stackField.Ground[x, z].Peek().transform.position;
+                if (objs.StackField.Ground[x, z].Count > 0) {
+                    ob.weightDiff = objs.StackField.Ground[x, z].Peek().Weight - objs.Crane.ContainerCarrying.Weight;
+                    ob.timeDiff = objs.StackField.Ground[x, z].Peek().OutField.TimePlaned - objs.Crane.ContainerCarrying.OutField.TimePlaned;
+                    vec = objs.Crane.ContainerCarrying.transform.position - objs.StackField.Ground[x, z].Peek().transform.position;
                 } else {
-                    ob.weightDiff = Parameters.MaxContainerWeight - crane.ContainerCarrying.Weight;
-                    ob.timeDiff = DateTime.Now + TimeSpan.FromMinutes(20) - crane.ContainerCarrying.OutField.TimePlaned;
-                    vec = crane.ContainerCarrying.transform.position - stackField.IndexToGlobalPosition(x, z);
+                    ob.weightDiff = Parameters.MaxContainerWeight - objs.Crane.ContainerCarrying.Weight;
+                    ob.timeDiff = DateTime.Now + TimeSpan.FromMinutes(20) - objs.Crane.ContainerCarrying.OutField.TimePlaned;
+                    vec = objs.Crane.ContainerCarrying.transform.position - objs.StackField.IndexToGlobalPosition(x, z);
                 }
                 ob.energy = Mathf.Abs(vec.x) * Parameters.Ex + Mathf.Abs(vec.z) * Parameters.Ez;
                 obList.Add(ob);
@@ -129,14 +129,14 @@ public class RearrangeAgent : AgentBase {
             return;
         }
 
-        stackField.TrainingResult = result.index;
-        stateMachine.TriggerByState("Rearrange");
+        objs.StackField.TrainingResult = result.index;
+        objs.StateMachine.TriggerByState("Rearrange");
     }
 
 
     /// <summary>
     /// this function calculates the reward of stack
-    /// it works only on stackField (no training for outField)</summary>
+    /// it works only on objs.StackField (no training for outField)</summary>
     /// <param name="ob"></param>
     /// <param name="isHeuristic"></param>
     /// <returns></returns>

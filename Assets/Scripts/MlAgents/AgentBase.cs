@@ -8,10 +8,8 @@ using Unity.MLAgents.Sensors;
 using UnityEngine;
 
 public abstract class AgentBase : Agent {
-    protected StackField stackField;
-    protected Crane crane;
-    protected StateMachine stateMachine;
     protected BufferSensorComponent bufferSensor;
+    protected ObjectCollection objs;
 
     // reward coefficients
     protected const float c_outOfRange = 1f;
@@ -24,13 +22,9 @@ public abstract class AgentBase : Agent {
     protected const float c_energy = 0.1f;
     protected const float c_weight = 0.05f;
 
-    protected
-
     // Start is called before the first frame update
     void Start() {
-        stackField = GetComponentInParent<ObjectCollection>().StackField;
-        crane = GetComponentInParent<ObjectCollection>().Crane;
-        stateMachine = crane.GetComponent<StateMachine>();
         bufferSensor = GetComponent<BufferSensorComponent>();
+        objs = GetComponentInParent<ObjectCollection>();
     }
 }
