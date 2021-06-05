@@ -45,6 +45,8 @@ public class Crane : MonoBehaviour {
         }
     }
 
+    public bool CanPickUp => CanPickUp_In || CanPickUp_OutOrRearrange;
+
     public bool CanPickUp_OutOrRearrange {
         get {
             foreach (var io in objs.IoPorts) {
@@ -88,8 +90,7 @@ public class Crane : MonoBehaviour {
 
         setStateMachineGeneralEvents();
         setStateWaitEvents();
-        setStateFindOutOrRearrangeEvents();
-        setStateFindInEvents();
+        setStateFindPickUpEvents();
         setStatePickUpEvents();
         setStateMoveInEvents();
         setStackDecisionEvents();
@@ -136,12 +137,8 @@ public class Crane : MonoBehaviour {
                     SimDebug.LogError(this, "container to pick is not null when making pickup decision");
                     return;
                 }
-                if (CanPickUp_OutOrRearrange) {
-                    stateMachine.TriggerByState("FindOutOrRearrange");
-                    return;
-                }
-                if (CanPickUp_In) {
-                    stateMachine.TriggerByState("FindIn");
+                if (CanPickUp) {
+                    stateMachine.TriggerByState("FindPickUp");
                     return;
                 }
                 break;
@@ -149,6 +146,7 @@ public class Crane : MonoBehaviour {
                 if (ContainerToPick) moveTo(ContainerToPick.transform.position, false);
                 else stateMachine.TriggerByState("Wait");
                 break;
+            case "FindPickUp":
             case "StackDecision":
                 break;
             default:
@@ -243,7 +241,7 @@ public class Crane : MonoBehaviour {
             }
             // try to find container in
             if (p.CurrentField is InField && p.CurrentField.enabled) {
-                
+
             }
         }
         return (null, "Wait");
@@ -334,29 +332,14 @@ public class Crane : MonoBehaviour {
         state.OnExitState.AddListener(() => { });
     }
 
-    private void setStateFindOutOrRearrangeEvents() {
-        var state = stateMachine.Graph.GetState("FindOutOrRearrange");
+    private void setStateFindPickUpEvents() {
+        var state = stateMachine.Graph.GetState("FindPickUp");
         state.OnEnterState.AddListener(() => {
             if (ContainerToPick != null) {
                 SimDebug.LogError(this, "container to pick is not null when making pickup decision");
                 return;
             }
-            ContainerToPick = findContainerToMoveOut();
-            stateMachine.TriggerByState(ContainerToPick == null ? "Wait" : "PickUp");
-        });
-        state.OnExitState.AddListener(() => {
-        });
-    }
-
-    private void setStateFindInEvents() {
-        var state = stateMachine.Graph.GetState("FindIn");
-        state.OnEnterState.AddListener(() => {
-            if (ContainerToPick != null) { // which means the last time 
-                SimDebug.LogError(this, "container to pick is not null when making pickup decision");
-                return;
-            }
-            ContainerToPick = findContainerToMoveIn();
-            stateMachine.TriggerByState(ContainerToPick == null ? "Wait" : "PickUp");
+            findContainerToPick();
         });
         state.OnExitState.AddListener(() => {
         });
