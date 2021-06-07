@@ -61,9 +61,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dd8012d5925524537b27131fef517017, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_SensorName: BufferSensor
-  m_ObservableSize: 0
-  m_MaxNumObservables: 0
+  m_SensorName: ContainerInBufferSensor
+  m_ObservableSize: 27
+  m_MaxNumObservables: 25
 --- !u!114 &3008764491624158610
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -77,19 +77,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 1
+    VectorObservationSize: 0
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 0
-      BranchSizes: 01000000
-    VectorActionSize: 01000000
+      BranchSizes: 19000000
+    VectorActionSize: 19000000
     VectorActionDescriptions: []
     VectorActionSpaceType: 0
     hasUpgradedBrainParametersWithActionSpec: 1
   m_Model: {fileID: 0}
   m_InferenceDevice: 0
   m_BehaviorType: 0
-  m_BehaviorName: My Behavior
+  m_BehaviorName: FindContainerIn
   TeamId: 0
   m_UseChildSensors: 1
   m_UseChildActuators: 1
@@ -394,19 +394,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 1
+    VectorObservationSize: 0
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 0
-      BranchSizes: 01000000
-    VectorActionSize: 01000000
+      BranchSizes: 19000000
+    VectorActionSize: 19000000
     VectorActionDescriptions: []
     VectorActionSpaceType: 0
     hasUpgradedBrainParametersWithActionSpec: 1
   m_Model: {fileID: 0}
   m_InferenceDevice: 0
   m_BehaviorType: 0
-  m_BehaviorName: My Behavior
+  m_BehaviorName: FindContainerOut
   TeamId: 0
   m_UseChildSensors: 1
   m_UseChildActuators: 1
@@ -423,9 +423,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dd8012d5925524537b27131fef517017, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_SensorName: BufferSensor
-  m_ObservableSize: 0
-  m_MaxNumObservables: 0
+  m_SensorName: ContainerOutBufferSensor
+  m_ObservableSize: 27
+  m_MaxNumObservables: 25
 --- !u!1 &6983714008121432362
 GameObject:
   m_ObjectHideFlags: 0
@@ -686,8 +686,8 @@ MonoBehaviour:
   TempFields:
   - {fileID: 8853789257185798688}
   - {fileID: 6453442298091025689}
-  FindContainerInAgent: {fileID: 0}
-  FindContainerOutAgent: {fileID: 0}
+  FindContainerInAgent: {fileID: 1963998828}
+  FindContainerOutAgent: {fileID: 6620697768080818896}
   FindIndexAgent: {fileID: 6620697767189814248}
 --- !u!1 &8853789258112142446
 GameObject:

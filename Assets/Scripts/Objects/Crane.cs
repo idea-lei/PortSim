@@ -59,29 +59,27 @@ public class Crane : MonoBehaviour {
 
     private bool hasOutField {
         get {
-            bool res = false;
             foreach (var port in objs.IoPorts) {
                 if (port.CurrentField &&
                     port.CurrentField.isActiveAndEnabled &&
                     port.CurrentField is OutField &&
                     ((OutField)port.CurrentField).IncomingContainers.Count > port.CurrentField.GetComponentsInChildren<Container>().Length)
-                    res = true;
+                    return true;
             }
-            return res;
+            return false;
         }
     }
 
     private bool hasInField {
         get {
-            bool res = false;
             foreach (var port in objs.IoPorts) {
                 if (port.CurrentField
                     && port.CurrentField.isActiveAndEnabled
                     && port.CurrentField is InField
                     && port.CurrentField.GetComponentsInChildren<Container>().Length > 0)
-                    res = true;
+                    return true;
             }
-            return res;
+            return false;
         }
     }
 

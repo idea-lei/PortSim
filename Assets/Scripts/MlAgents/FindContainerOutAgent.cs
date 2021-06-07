@@ -8,7 +8,7 @@ using UnityEngine;
 
 public class FindContainerOutAgent : AgentBase {
     private class FindContainerOutObservationObject {
-        public IndexInStack index; //this one is not a observation variable
+        public Container container; //this one is not a observation variable
 
         public bool isPeek;
         public float energy;
@@ -34,12 +34,15 @@ public class FindContainerOutAgent : AgentBase {
         }
 
         var outFields = objs.IoPorts
-            .Where(i => i.CurrentField && i.CurrentField is OutField)
+            .Where(i => i.CurrentField 
+                && i.CurrentField is OutField
+                && ((OutField)i.CurrentField).IncomingContainers.Count > i.CurrentField.GetComponentsInChildren<Container>().Length)
             .Select(i => i.CurrentField);
         foreach (var s in objs.StackField.Ground) {
             foreach (var c in s.ToArray()) {
                 if (outFields.Contains(c.OutField)) {
                     obList.Add(new FindContainerOutObservationObject() {
+                        container = c,
                         isPeek = c == s.Peek(),
                         energy = CalculateEnergy(c)
                     });
@@ -49,6 +52,8 @@ public class FindContainerOutAgent : AgentBase {
                 }
             }
         }
+
+        // normalize
         float maxE = obList.Max(o => o.energy);
         float minE = obList.Min(o => o.energy);
         foreach (var o in obList) {
@@ -73,6 +78,27 @@ public class FindContainerOutAgent : AgentBase {
         }
         var actOut = actionsOut.DiscreteActions;
         actOut[0] = rewardList.IndexOf(rewardList.Max());
+    }
+
+    public override void OnActionReceived(ActionBuffers actions) {
+        if (obList.Count == 0) {
+            // this means no available index, which should be determined before request decision, so error
+            SimDebug.LogError(this, "no suitable container");
+            return;
+        }
+        if (actions.DiscreteActions[0] >= obList.Count) {
+            AddReward(-c_outOfRange);
+            Debug.LogWarning("out of range, request new decision");
+            RequestDecision();
+            //SimDebug.LogError(this, "result is null");
+            return;
+        }
+
+        var result = obList[actions.DiscreteActions[0]];
+        AddReward(CalculateReward(result));
+
+        objs.Crane.ContainerToPick = obList[actions.DiscreteActions[0]].container;
+        objs.StateMachine.TriggerByState("PickUp");
     }
 
     // backup
