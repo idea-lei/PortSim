@@ -12,13 +12,18 @@ using UnityEngine;
 /// </summary>
 [Serializable]
 class OpObject {
+    private Crane crane;
+
     public Container Container;
+    public string State => crane.GetComponent<StateMachine>().CurrentState;
 
     public IndexInStack PickUpIndex;
     public Field PickUpField;
 
     public IndexInStack StackIndex;
     public Field StackField;
+
+    public OpObject(Crane _c) { crane = _c; }
 }
 
 public class Crane : MonoBehaviour {
@@ -37,7 +42,7 @@ public class Crane : MonoBehaviour {
 
     public Container ContainerToPick {
         get => _containerToPick;
-        private set {
+        set {
             if (value) ContainerCarrying = null;
             _containerToPick = value;
         }
@@ -45,7 +50,7 @@ public class Crane : MonoBehaviour {
 
     public Container ContainerCarrying {
         get => _containerCarrying;
-        private set {
+        set {
             //value && value == ContainerToPick
             if (value) ContainerToPick = null;
             _containerCarrying = value;

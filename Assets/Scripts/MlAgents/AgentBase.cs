@@ -23,7 +23,7 @@ public abstract class AgentBase : Agent {
     protected const float c_weight = 0.05f;
 
     // Start is called before the first frame update
-    void Start() {
+    void Awake() {
         bufferSensor = GetComponent<BufferSensorComponent>();
         objs = GetComponentInParent<ObjectCollection>();
     }
