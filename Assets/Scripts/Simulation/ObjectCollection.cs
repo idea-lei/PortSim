@@ -14,7 +14,8 @@ public class ObjectCollection : MonoBehaviour {
     public IoFieldsGenerator IoFieldsGenerator;
     public IoPort[] IoPorts;
     public TempField[] TempFields;
-    public FindContainerAgent FindContainerAgent;
+    public FindContainerInAgent FindContainerInAgent;
+    public FindContainerOutAgent FindContainerOutAgent;
     public FindIndexAgent FindIndexAgent;
 
     private void Start() {

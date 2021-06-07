@@ -57,6 +57,34 @@ public class Crane : MonoBehaviour {
         }
     }
 
+    private bool hasOutField {
+        get {
+            bool res = false;
+            foreach (var port in objs.IoPorts) {
+                if (port.CurrentField &&
+                    port.CurrentField.isActiveAndEnabled &&
+                    port.CurrentField is OutField &&
+                    ((OutField)port.CurrentField).IncomingContainers.Count > port.CurrentField.GetComponentsInChildren<Container>().Length)
+                    res = true;
+            }
+            return res;
+        }
+    }
+
+    private bool hasInField {
+        get {
+            bool res = false;
+            foreach (var port in objs.IoPorts) {
+                if (port.CurrentField
+                    && port.CurrentField.isActiveAndEnabled
+                    && port.CurrentField is InField
+                    && port.CurrentField.GetComponentsInChildren<Container>().Length > 0)
+                    res = true;
+            }
+            return res;
+        }
+    }
+
     public bool CanPickUp_In {
         get {
             bool isStackFieldFull = objs.StackField.IsGroundFull;
@@ -240,7 +268,14 @@ public class Crane : MonoBehaviour {
                 SimDebug.LogError(this, "container to pick is not null when making pickup decision");
                 return;
             }
-            objs.FindContainerAgent.FindContainerToPick();
+            if (hasOutField) {
+                objs.FindContainerOutAgent.RequestDecision();
+                return;
+            }
+            if (hasInField) {
+                objs.FindContainerInAgent.RequestDecision();
+                return;
+            }
         });
         state.OnExitState.AddListener(() => {
         });

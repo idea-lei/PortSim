@@ -10,7 +10,7 @@ public class FindIndexAgent : AgentBase {
     // this private class is for buffersensor
     // make sure the positive value represents that this field is good
     //eg: n_isNotFull true -> 1
-    private class ObservationObject {
+    private class FindIndexObservationObject {
         public IndexInStack index; //this one is not a observation variable
 
 
@@ -40,7 +40,7 @@ public class FindIndexAgent : AgentBase {
         public float n_notStacked => notStacked ? 1f : 0f;
     }
 
-    private List<ObservationObject> obList = new List<ObservationObject>();
+    private List<FindIndexObservationObject> obList = new List<FindIndexObservationObject>();
 
     public override void Initialize() {
     }
@@ -69,7 +69,7 @@ public class FindIndexAgent : AgentBase {
                 if (objs.StackField.IsIndexFull(x, z)) continue;
                 if (objs.Crane.ContainerCarrying.StackedIndices.Any(i => i == new IndexInStack(x, z))) continue;
 
-                var ob = new ObservationObject {
+                var ob = new FindIndexObservationObject {
                     index = new IndexInStack(x, z),
                     notStacked = objs.Crane.ContainerCarrying.StackedIndices.All(i => i.x != x || i.z != z),
                     layer = objs.StackField.Ground[x, z].Count,
@@ -172,7 +172,7 @@ public class FindIndexAgent : AgentBase {
             ? "MoveIn" : "Rearrange");
     }
 
-    private float CalculateReward(ObservationObject ob, bool isHeuristic = false) {
+    private float CalculateReward(FindIndexObservationObject ob, bool isHeuristic = false) {
         float reward = 0;
         // 0.1) is Full?
         if (!ob.isLayerOk) {
