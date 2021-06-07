@@ -7,14 +7,17 @@ using UnityEngine;
 /// </summary>
 public abstract class IoField : Field, IComparable<IoField> {
     private DateTime _timePlaned;
+
+    // means operations of this field are finished, this field will be removed soon
+    public abstract bool Finished { get; }
     public virtual DateTime TimePlaned {
         get => _timePlaned;
         set {
             _timePlaned = value;
         }
     }
-    [NonSerialized] public DateTime TimeReal;   // do we need this?
-    [NonSerialized] public TimeSpan EstimatedDuration;  // this estimated duration for loading / unloading process
+    //[NonSerialized] public DateTime TimeReal;   // do we need this?
+    //[NonSerialized] public TimeSpan EstimatedDuration;  // this estimated duration for loading / unloading process
     [NonSerialized] public IoPort Port;
     private void OnEnable() {
         updateState(true);

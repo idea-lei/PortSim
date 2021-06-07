@@ -7,10 +7,14 @@ using UnityEngine;
 
 public static class SimDebug {
     public static void LogError(MonoBehaviour sender, string e) {
-        Debug.LogError(e);
         var objectCollection = sender.GetComponentInParent<ObjectCollection>();
         //GameObject.Destroy(objectCollection.gameObject);
-        var c = objectCollection.Crane.gameObject;
-        c.GetComponent<MeshRenderer>().material.color = Color.red;
+
+        foreach(var t in objectCollection.TempFields) {
+            t.GetComponent<MeshRenderer>().material.color = Color.red;
+        }
+        //var c = objectCollection.StackField.gameObject;
+        //c.GetComponent<MeshRenderer>().material.color = Color.red;
+        Debug.LogError(e);
     }
 }

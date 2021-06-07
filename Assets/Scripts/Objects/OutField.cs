@@ -13,13 +13,15 @@ public class OutField : IoField {
 
     public bool IsStackable => IsGroundFull;
 
-    public override DateTime TimePlaned { 
-        get => base.TimePlaned; 
+    public override DateTime TimePlaned {
+        get => base.TimePlaned;
         set {
             base.TimePlaned = value;
             name = "OutField_" + value.ToString("G");
         }
     }
+
+    public override bool Finished => IncomingContainers.Count == GetComponentsInChildren<Container>().Length;
 
     public void Init(IoPort[] ports, IoFieldsGenerator generator) {
         initField(generator);
@@ -28,7 +30,7 @@ public class OutField : IoField {
 
     public void AddContainerToList(Container c) {
         IncomingContainers.Add(c);
-        if(!c.InField && TimePlaned < DateTime.Now) {
+        if (!c.InField && TimePlaned < DateTime.Now) {
             TimePlaned = DateTime.Now + GenerateRandomTimeSpan();
         }
 

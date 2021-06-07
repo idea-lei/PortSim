@@ -13,6 +13,8 @@ public sealed class InField : IoField {
         }
     }
 
+    public override bool Finished => GetComponentsInChildren<Container>().Length == 0;
+
     #region unity life circle
     #endregion
 

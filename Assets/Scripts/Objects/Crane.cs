@@ -62,8 +62,8 @@ public class Crane : MonoBehaviour {
             foreach (var port in objs.IoPorts) {
                 if (port.CurrentField &&
                     port.CurrentField.isActiveAndEnabled &&
-                    port.CurrentField is OutField &&
-                    ((OutField)port.CurrentField).IncomingContainers.Count > port.CurrentField.GetComponentsInChildren<Container>().Length)
+                    port.CurrentField is OutField field &&
+                    !field.Finished)
                     return true;
             }
             return false;
@@ -75,40 +75,16 @@ public class Crane : MonoBehaviour {
             foreach (var port in objs.IoPorts) {
                 if (port.CurrentField
                     && port.CurrentField.isActiveAndEnabled
-                    && port.CurrentField is InField
-                    && port.CurrentField.GetComponentsInChildren<Container>().Length > 0)
+                    && port.CurrentField is InField field
+                    && !field.Finished)
                     return true;
             }
             return false;
         }
     }
 
-    public bool CanPickUp_In {
-        get {
-            bool isStackFieldFull = objs.StackField.IsGroundFull;
-            foreach (var io in objs.IoPorts) {
-                // check container to move in
-                if (!isStackFieldFull && io.CurrentField is InField)
-                    return true;
-            }
-            return false;
-        }
-    }
-
-    public bool CanPickUp => CanPickUp_In || CanPickUp_OutOrRearrange;
-
-    public bool CanPickUp_OutOrRearrange {
-        get {
-            foreach (var io in objs.IoPorts) {
-                // check container to move out
-                if (io.CurrentField is OutField) {
-                    if (((OutField)io.CurrentField).IncomingContainersCount > io.CurrentField.GetComponentsInChildren<Container>().Length)
-                        return true;
-                }
-            }
-            return false;
-        }
-    }
+    private bool canPickUp_In => hasInField && !objs.StackField.IsGroundFull;
+    private bool canPickUp_Out => hasOutField;
 
     private Vector3 destination;
 
@@ -167,7 +143,7 @@ public class Crane : MonoBehaviour {
                     SimDebug.LogError(this, "container to pick is not null when making pickup decision");
                     return;
                 }
-                if (CanPickUp) {
+                if (canPickUp_In || canPickUp_Out) {
                     stateMachine.TriggerByState("FindPickUp");
                     return;
                 }
@@ -266,14 +242,15 @@ public class Crane : MonoBehaviour {
                 SimDebug.LogError(this, "container to pick is not null when making pickup decision");
                 return;
             }
-            if (hasOutField) {
+            if (canPickUp_Out) {
                 objs.FindContainerOutAgent.RequestDecision();
                 return;
             }
-            if (hasInField) {
+            if (canPickUp_In) {
                 objs.FindContainerInAgent.RequestDecision();
                 return;
             }
+            SimDebug.LogError(this, "has no out / in Field");
         });
         state.OnExitState.AddListener(() => {
         });
