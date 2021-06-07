@@ -24,8 +24,8 @@ public class FindContainerInAgent : AgentBase {
         obList.Clear();
         var inFields = objs.IoPorts
             .Where(i => i.CurrentField
-                && i.CurrentField is InField
-                && i.CurrentField.GetComponentsInChildren<Container>().Length > 0)
+                && i.CurrentField is InField field
+                && field.GetComponentsInChildren<Container>().Length > 0)
             .Select(i => i.CurrentField);
         // select the infield with min amount of containers
         var inField = inFields.Aggregate((curMin, x) =>

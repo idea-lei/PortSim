@@ -35,9 +35,10 @@ public class FindContainerOutAgent : AgentBase {
 
         var outFields = objs.IoPorts
             .Where(i => i.CurrentField 
-                && i.CurrentField is OutField
-                && ((OutField)i.CurrentField).IncomingContainers.Count > i.CurrentField.GetComponentsInChildren<Container>().Length)
+                && i.CurrentField is OutField field
+                && field.IncomingContainers.Count > i.CurrentField.GetComponentsInChildren<Container>().Length)
             .Select(i => i.CurrentField);
+
         foreach (var s in objs.StackField.Ground) {
             foreach (var c in s.ToArray()) {
                 if (outFields.Contains(c.OutField)) {
