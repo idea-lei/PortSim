@@ -424,8 +424,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_SensorName: ContainerOutBufferSensor
-  m_ObservableSize: 27
-  m_MaxNumObservables: 25
+  m_ObservableSize: 52
+  m_MaxNumObservables: 50
 --- !u!1 &6983714008121432362
 GameObject:
   m_ObjectHideFlags: 0

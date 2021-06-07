@@ -34,25 +34,24 @@ public class FindContainerOutAgent : AgentBase {
         }
 
         var outFields = objs.IoPorts
-            .Where(i => i.CurrentField 
+            .Where(i => i.CurrentField
                 && i.CurrentField is OutField field
-                && field.IncomingContainers.Count > i.CurrentField.GetComponentsInChildren<Container>().Length)
-            .Select(i => i.CurrentField);
-
-        foreach (var s in objs.StackField.Ground) {
-            foreach (var c in s.ToArray()) {
-                if (outFields.Contains(c.OutField)) {
-                    obList.Add(new FindContainerOutObservationObject() {
-                        container = c,
-                        isPeek = c == s.Peek(),
-                        energy = CalculateEnergy(c)
-                    });
-                    // this break ensures the each stack has max. 1 Container out
-                    // which means the obList won't larger than dimX * dimZ
-                    break;
-                }
-            }
+                && !field.Finished)
+            .Select(i => (OutField)i.CurrentField);
+        var incomingContainers = new List<Container>();
+        foreach (var o in outFields) {
+            incomingContainers.AddRange(o.IncomingContainers);
         }
+
+        foreach (var c in objs.StackField.GetComponentsInChildren<Container>().Intersect(incomingContainers)) {
+            obList.Add(new FindContainerOutObservationObject() {
+                container = c,
+                isPeek = c == objs.StackField.Ground[c.IndexInCurrentField.x, c.IndexInCurrentField.z].Peek(),
+                energy = CalculateEnergy(c)
+            });
+        }
+
+        if (obList.Count == 0) SimDebug.LogError(this, "obList is empty");
 
         // normalize
         float maxE = obList.Max(o => o.energy);
@@ -62,7 +61,7 @@ public class FindContainerOutAgent : AgentBase {
             o.n_isPeek = o.isPeek ? 1 : 0;
         }
 
-        int dimHotEncoding = Parameters.DimX * Parameters.DimZ;
+        int dimHotEncoding = Parameters.DimX * Parameters.DimZ * 2;
         foreach (var ob in obList) {
             float[] arr = new float[dimHotEncoding + 2];
             arr[obList.IndexOf(ob)] = 1;

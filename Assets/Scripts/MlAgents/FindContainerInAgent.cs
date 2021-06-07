@@ -40,6 +40,8 @@ public class FindContainerInAgent : AgentBase {
             });
         }
 
+        if (obList.Count == 0) SimDebug.LogError(this, "obList is empty");
+
         // normalize
         float maxE = obList.Max(o => o.energy);
         float minE = obList.Min(o => o.energy);
