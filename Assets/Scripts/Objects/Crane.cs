@@ -57,34 +57,13 @@ public class Crane : MonoBehaviour {
         }
     }
 
-    private bool hasOutField {
-        get {
-            foreach (var port in objs.IoPorts) {
-                if (port.CurrentField &&
-                    port.CurrentField.isActiveAndEnabled &&
-                    port.CurrentField is OutField field &&
-                    !field.Finished)
-                    return true;
-            }
-            return false;
-        }
-    }
+    private bool canPickUp_In =>
+        (objs.HasInField || objs.ContainersInTempFields.Length > 0)
+        && !objs.StackField.IsGroundFull;
 
-    private bool hasInField {
-        get {
-            foreach (var port in objs.IoPorts) {
-                if (port.CurrentField
-                    && port.CurrentField.isActiveAndEnabled
-                    && port.CurrentField is InField field
-                    && !field.Finished)
-                    return true;
-            }
-            return false;
-        }
-    }
-
-    private bool canPickUp_In => hasInField && !objs.StackField.IsGroundFull;
-    private bool canPickUp_Out => hasOutField;
+    private bool canPickUp_Out =>
+        objs.HasOutField 
+        && (objs.OutContainersInTempFields.Length > 0 || objs.OutContainersInStackField.Length > 0);
 
     private Vector3 destination;
 

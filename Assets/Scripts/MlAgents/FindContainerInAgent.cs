@@ -22,15 +22,22 @@ public class FindContainerInAgent : AgentBase {
 
     public override void CollectObservations(VectorSensor sensor) {
         obList.Clear();
-        var inFields = objs.IoPorts
-            .Where(i => i.CurrentField
-                && i.CurrentField is InField field
-                && field.GetComponentsInChildren<Container>().Length > 0)
-            .Select(i => i.CurrentField);
-        // select the infield with min amount of containers
-        var inField = inFields.Aggregate((curMin, x) =>
-                       x.GetComponentsInChildren<Container>().Count() < curMin.GetComponentsInChildren<Container>().Count() ? x : curMin);
+        var inFields = objs.Infields;
+        Field inField = null;
+        if (objs.ContainersInTempFields.Length > 0) {
+            foreach (var f in objs.TempFields) {
+                if (f.GetComponentInChildren<Container>() != null) {
+                    inField = f;
+                    break;
+                }
+            }
+        }
+        if (inField == null) {
+            // select the infield with min amount of containers
+            inField = inFields.Aggregate((curMin, x) =>
+                           x.GetComponentsInChildren<Container>().Count() < curMin.GetComponentsInChildren<Container>().Count() ? x : curMin);
 
+        }
         foreach (var s in inField.Ground) {
             if (s.Count == 0) continue;
             obList.Add(new FindContainerInObservationObject() {

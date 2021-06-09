@@ -33,22 +33,29 @@ public class FindContainerOutAgent : AgentBase {
             return;
         }
 
-        var outFields = objs.IoPorts
-            .Where(i => i.CurrentField
-                && i.CurrentField is OutField field
-                && !field.Finished)
-            .Select(i => (OutField)i.CurrentField);
+        var outFields = objs.OutFields;
         var incomingContainers = new List<Container>();
         foreach (var o in outFields) {
             incomingContainers.AddRange(o.IncomingContainers);
         }
 
-        foreach (var c in objs.StackField.GetComponentsInChildren<Container>().Intersect(incomingContainers)) {
-            obList.Add(new FindContainerOutObservationObject() {
-                container = c,
-                isPeek = c == objs.StackField.Ground[c.IndexInCurrentField.x, c.IndexInCurrentField.z].Peek(),
-                energy = CalculateEnergy(c)
-            });
+        var cOutInTemp = objs.OutContainersInTempFields;
+        if (cOutInTemp.Length > 0) {
+            foreach (var c in cOutInTemp.Intersect(incomingContainers)) {
+                obList.Add(new FindContainerOutObservationObject() {
+                    container = c,
+                    isPeek = c == objs.StackField.Ground[c.IndexInCurrentField.x, c.IndexInCurrentField.z].Peek(),
+                    energy = CalculateEnergy(c)
+                });
+            }
+        } else {
+            foreach (var c in objs.OutContainersInStackField.Intersect(incomingContainers)) {
+                obList.Add(new FindContainerOutObservationObject() {
+                    container = c,
+                    isPeek = c == objs.StackField.Ground[c.IndexInCurrentField.x, c.IndexInCurrentField.z].Peek(),
+                    energy = CalculateEnergy(c)
+                });
+            }
         }
 
         if (obList.Count == 0) SimDebug.LogError(this, "obList is empty");
