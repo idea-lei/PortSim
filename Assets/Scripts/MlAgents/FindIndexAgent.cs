@@ -6,6 +6,9 @@ using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Sensors;
 using UnityEngine;
 
+/// <summary>
+/// this class is for moveIn and rearrange
+/// </summary>
 public class FindIndexAgent : AgentBase {
     // this private class is for buffersensor
     // make sure the positive value represents that this field is good
