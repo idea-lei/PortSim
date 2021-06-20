@@ -115,7 +115,7 @@ public class FindIndexAgent : AgentBase {
             if (o.n_timeDiff < 0 || o.n_timeDiff > 1) SimDebug.LogError(this, "outTime Lerp out of range");
             if (o.n_energy < 0 || o.n_energy > 1) SimDebug.LogError(this, "n_energy Lerp out of range");
 
-            float[] hotEncoding = new float[25];
+            float[] hotEncoding = new float[Parameters.DimX * Parameters.DimZ];
             hotEncoding[obList.IndexOf(o)] = 1;
 
             float[] buffer = new float[] {
