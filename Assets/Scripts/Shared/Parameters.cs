@@ -43,7 +43,7 @@
 
     #region Simulation
     public static readonly float EventDelay = 1f;
-    public static readonly int MaxInFieldsWaiting = 8; // this is only for test (random generation)
+    public static readonly int MaxInFieldsWaiting = 10; // this is only for test (random generation)
     public static readonly int MaxInFieldsSpawn = 10000; // can be regarded as the simulation duration
     public static float InFieldGenerationInterval => DimX * 4f; // this is only for test (random generation)
 
