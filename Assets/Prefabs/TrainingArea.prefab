@@ -62,8 +62,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_SensorName: ContainerInBufferSensor
-  m_ObservableSize: 27
-  m_MaxNumObservables: 25
+  m_ObservableSize: 102
+  m_MaxNumObservables: 100
 --- !u!114 &3008764491624158610
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -297,8 +297,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_SensorName: BufferSensor
-  m_ObservableSize: 34
-  m_MaxNumObservables: 25
+  m_ObservableSize: 109
+  m_MaxNumObservables: 100
 --- !u!1 &6620697767243008484
 GameObject:
   m_ObjectHideFlags: 0
@@ -398,8 +398,8 @@ MonoBehaviour:
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 0
-      BranchSizes: 19000000
-    VectorActionSize: 19000000
+      BranchSizes: 90010000
+    VectorActionSize: 90010000
     VectorActionDescriptions: []
     VectorActionSpaceType: 0
     hasUpgradedBrainParametersWithActionSpec: 1
@@ -424,8 +424,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_SensorName: ContainerOutBufferSensor
-  m_ObservableSize: 52
-  m_MaxNumObservables: 50
+  m_ObservableSize: 202
+  m_MaxNumObservables: 100
 --- !u!1 &6983714008121432362
 GameObject:
   m_ObjectHideFlags: 0

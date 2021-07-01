@@ -349,46 +349,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 4919848464751348055, guid: 49e1ca49015919f47b2b1c19ca720557,
-        type: 3}
-      propertyPath: m_ObservableSize
-      value: 402
-      objectReference: {fileID: 0}
-    - target: {fileID: 4919848464751348055, guid: 49e1ca49015919f47b2b1c19ca720557,
-        type: 3}
-      propertyPath: m_MaxNumObservables
-      value: 400
-      objectReference: {fileID: 0}
-    - target: {fileID: 6620697767189814250, guid: 49e1ca49015919f47b2b1c19ca720557,
-        type: 3}
-      propertyPath: m_ObservableSize
-      value: 409
-      objectReference: {fileID: 0}
-    - target: {fileID: 6620697767189814250, guid: 49e1ca49015919f47b2b1c19ca720557,
-        type: 3}
-      propertyPath: m_MaxNumObservables
-      value: 400
-      objectReference: {fileID: 0}
-    - target: {fileID: 6620697768080818897, guid: 49e1ca49015919f47b2b1c19ca720557,
-        type: 3}
-      propertyPath: m_BrainParameters.VectorActionSize.Array.data[0]
-      value: 400
-      objectReference: {fileID: 0}
-    - target: {fileID: 6620697768080818897, guid: 49e1ca49015919f47b2b1c19ca720557,
-        type: 3}
-      propertyPath: m_BrainParameters.m_ActionSpec.BranchSizes.Array.data[0]
-      value: 400
-      objectReference: {fileID: 0}
-    - target: {fileID: 6620697768080818898, guid: 49e1ca49015919f47b2b1c19ca720557,
-        type: 3}
-      propertyPath: m_ObservableSize
-      value: 802
-      objectReference: {fileID: 0}
-    - target: {fileID: 6620697768080818898, guid: 49e1ca49015919f47b2b1c19ca720557,
-        type: 3}
-      propertyPath: m_MaxNumObservables
-      value: 400
-      objectReference: {fileID: 0}
     - target: {fileID: 8853789257694660439, guid: 49e1ca49015919f47b2b1c19ca720557,
         type: 3}
       propertyPath: m_RootOrder
@@ -448,11 +408,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: TrainingArea
-      objectReference: {fileID: 0}
-    - target: {fileID: 8853789257694660441, guid: 49e1ca49015919f47b2b1c19ca720557,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 49e1ca49015919f47b2b1c19ca720557, type: 3}
