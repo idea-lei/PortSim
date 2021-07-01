@@ -40,7 +40,7 @@ public class OutField : IoField {
     }
 
     public override void DestroyField() {
-        GetComponentInParent<Evaluation>().UpdateEvaluation(GetComponentsInChildren<Container>());
+        objs.Evaluation.UpdateEvaluation(GetComponentsInChildren<Container>());
         base.DestroyField();
     }
 }

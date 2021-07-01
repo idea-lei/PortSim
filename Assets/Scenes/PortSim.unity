@@ -409,5 +409,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: TrainingArea
       objectReference: {fileID: 0}
+    - target: {fileID: 8853789257694660441, guid: 49e1ca49015919f47b2b1c19ca720557,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 49e1ca49015919f47b2b1c19ca720557, type: 3}

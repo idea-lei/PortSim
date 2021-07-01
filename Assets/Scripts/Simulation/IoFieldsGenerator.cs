@@ -12,6 +12,8 @@ public class IoFieldsGenerator : MonoBehaviour {
     [Header("fields")]
     private ObjectCollection objs;
 
+    private int generatedInFields = 0;
+
     private void Awake() {
         objs = GetComponentInParent<ObjectCollection>();
     }
@@ -22,7 +24,7 @@ public class IoFieldsGenerator : MonoBehaviour {
     }
 
     private void initFields() {
-        for (int i = 0; i < Parameters.MaxInFieldNumber / 2; i++) {
+        for (int i = 0; i < Parameters.MaxInFieldsWaiting / 2; i++) {
             GenerateInField();
         }
     }
@@ -32,12 +34,14 @@ public class IoFieldsGenerator : MonoBehaviour {
     }
 
     public InField GenerateInField() {
-        if (GetComponentsInChildren<InField>().Length > Parameters.MaxInFieldNumber) return null;
+        if (generatedInFields > Parameters.MaxInFieldsSpawn) return null;
+        if (GetComponentsInChildren<InField>().Length > Parameters.MaxInFieldsWaiting) return null;
         var obj = Instantiate(inFieldPrefab);
         var inField = obj.GetComponent<InField>();
         inField.Init(objs.IoPorts, this);
         inField.transform.SetParent(inField.Port.transform);
         inField.enabled = false;
+        generatedInFields++;
         return inField;
     }
 

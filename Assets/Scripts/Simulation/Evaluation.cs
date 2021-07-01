@@ -22,6 +22,6 @@ public class Evaluation : MonoBehaviour
             TotalTimeSpan += c.TotalMoveTime;
         }
         avgRearrangeCount = (float)RearrangeCount / OutContainerCount;
-        avgTimeSpan = new TimeSpan(Convert.ToInt64(TotalTimeSpan.Ticks / OutContainerCount)).ToString("g");
+        avgTimeSpan = new TimeSpan(Convert.ToInt64(TotalTimeSpan.Ticks * Time.timeScale / OutContainerCount)).ToString(@"g");
     }
 }

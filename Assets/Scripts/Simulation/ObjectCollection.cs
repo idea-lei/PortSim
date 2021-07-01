@@ -17,6 +17,7 @@ public class ObjectCollection : MonoBehaviour {
     public FindContainerInAgent FindContainerInAgent;
     public FindContainerOutAgent FindContainerOutAgent;
     public FindIndexAgent FindIndexAgent;
+    public Evaluation Evaluation;
 
     public OutField[] OutFields {
         get {
@@ -76,6 +77,10 @@ public class ObjectCollection : MonoBehaviour {
             var ofs = OutFields;
             return ContainersInStackField.Where(c => ofs.Contains(c.OutField)).ToArray();
         }
+    }
+
+    private void Awake() {
+        Time.timeScale = 50;
     }
 
     private void Start() {

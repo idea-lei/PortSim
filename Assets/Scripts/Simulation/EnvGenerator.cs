@@ -9,7 +9,7 @@ public class EnvGenerator : MonoBehaviour {
     void Start() {
         for (int x = 0; x < Parameters.TrainingDim; x++) {
             for (int z = 0; z < Parameters.TrainingDim; z++) {
-                Instantiate(areaContainerPrefab, new Vector3(x * 100, 0, z * 100), Quaternion.identity, null);
+                Instantiate(areaContainerPrefab, new Vector3(x * 200, 0, z * 200), Quaternion.identity, null);
             }
         }
         if (Academy.Instance.IsCommunicatorOn) {

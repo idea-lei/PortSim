@@ -57,7 +57,13 @@ public abstract class Field : MonoBehaviour {
     private Stack<Container>[,] _ground;
     [SerializeField] private GameObject containerPrefab;
     private IoFieldsGenerator ioFieldsGenerator;
+
+    protected ObjectCollection objs;
     #endregion
+
+    private void Start() {
+        objs = GetComponentInParent<ObjectCollection>();
+    }
 
     #region logic methods
 
