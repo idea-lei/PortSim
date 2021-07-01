@@ -38,4 +38,9 @@ public class OutField : IoField {
             TimePlaned = c.InField.TimePlaned + GenerateRandomTimeSpan();
         }
     }
+
+    public override void DestroyField() {
+        GetComponentInParent<Evaluation>().UpdateEvaluation(GetComponentsInChildren<Container>());
+        base.DestroyField();
+    }
 }

@@ -42,9 +42,12 @@ public class Container : MonoBehaviour {
     }
     [SerializeField] private string totalTimeDisplay;
 
-    public int RearrangeCount = -1; // cuz each container needs at least one moving-in, so the base value is set to -1
+    public int RearrangeCount;
     #endregion
 
+    private void Awake() {
+        RearrangeCount = -1; // cuz each container needs at least one moving-in, so the base value is set to -1
+    }
 
     #region unity methods
     private void OnTriggerEnter(Collider other) {

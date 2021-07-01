@@ -251,7 +251,7 @@ public class Crane : MonoBehaviour {
                 if (ContainerCarrying.InField != null) {
                     var inField = ContainerCarrying.InField;
                     ContainerCarrying.InField = null;
-                    if (inField.IsGroundEmpty) inField.DestroyField();
+                    if (inField.Finished) inField.DestroyField();
                 }
             }
         });
@@ -269,8 +269,9 @@ public class Crane : MonoBehaviour {
         var state = stateMachine.Graph.GetState("MoveIn");
         state.OnEnterState.AddListener(() => {
             var index = objs.StackField.TrainingResult;
-            if (index.IsValid) destination = objs.StackField.IndexToGlobalPosition(index);
-            else stateMachine.TriggerByState("Wait");
+            if (index.IsValid) {
+                destination = objs.StackField.IndexToGlobalPosition(index);
+            } else stateMachine.TriggerByState("Wait");
         });
         state.OnExitState.AddListener(() => {
             objs.StackField.AddToGround(ContainerCarrying);
@@ -283,8 +284,9 @@ public class Crane : MonoBehaviour {
         state.OnEnterState.AddListener(() => {
             ContainerCarrying.tag = "container_rearrange";
             var index = objs.StackField.TrainingResult;
-            if (index.IsValid) destination = objs.StackField.IndexToGlobalPosition(index);
-            else stateMachine.TriggerByState("Wait");
+            if (index.IsValid) {
+                destination = objs.StackField.IndexToGlobalPosition(index);
+            } else stateMachine.TriggerByState("Wait");
         });
         state.OnExitState.AddListener(() => {
             var diffVec = transform.position - destination;
@@ -307,7 +309,7 @@ public class Crane : MonoBehaviour {
 
         state.OnExitState.AddListener(() => {
             ContainerCarrying.OutField.AddToGround(ContainerCarrying);
-            if (ContainerCarrying.OutField.Count == ContainerCarrying.OutField.IncomingContainersCount) {
+            if (ContainerCarrying.OutField.Finished) {
                 ContainerCarrying.OutField.DestroyField();
             }
             ContainerCarrying = null;

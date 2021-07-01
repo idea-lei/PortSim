@@ -103,6 +103,7 @@ public abstract class Field : MonoBehaviour {
         }
         if (this is StackField) {
             container.StackedIndices.Add(index);
+            container.RearrangeCount += 1;
         }
 
         container.CurrentField = this;

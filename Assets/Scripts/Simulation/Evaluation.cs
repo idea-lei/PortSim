@@ -9,7 +9,19 @@ public class Evaluation : MonoBehaviour
     public int RearrangeCount = 0;
     public TimeSpan TotalTimeSpan = new TimeSpan();
 
-    public void UpdateEvaluation(Container[] containers) {
+    [SerializeField] private float avgRearrangeCount;
+    [SerializeField] private string avgTimeSpan;
 
+    /// <summary>
+    /// thsi method should be called when removing a outfield
+    /// </summary>
+    public void UpdateEvaluation(Container[] containers) {
+        OutContainerCount += containers.Length;
+        foreach(var c in containers) {
+            RearrangeCount += c.RearrangeCount;
+            TotalTimeSpan += c.TotalMoveTime;
+        }
+        avgRearrangeCount = (float)RearrangeCount / OutContainerCount;
+        avgTimeSpan = new TimeSpan(Convert.ToInt64(TotalTimeSpan.Ticks / OutContainerCount)).ToString("g");
     }
 }
