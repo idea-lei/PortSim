@@ -77,7 +77,9 @@ public class IoPort : MonoBehaviour {
                         return;
                     }
                 }
+                objs.Evaluation.Data.OutFieldCount++;
             }
+            if (nextField is InField) objs.Evaluation.Data.InFieldCount++;
             CurrentField = nextField;
         }
     }
