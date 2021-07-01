@@ -15,11 +15,12 @@ public sealed class StackField : Field {
     }
     private void Start() {
         initField(GetComponentInParent<ObjectCollection>().IoFieldsGenerator);
-        //initContainers();
+        initContainers();
     }
 
     public override void AddToGround(Container container) {
         base.AddToGround(container);
+        container.RearrangeCount += 1;
         container.tag = "container_stacked";
     }
 

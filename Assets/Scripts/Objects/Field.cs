@@ -97,10 +97,17 @@ public abstract class Field : MonoBehaviour {
         }
         container.transform.SetParent(transform);
         Ground[index.x, index.z].Push(container);
+        if (container.StartMoveTime.HasValue) {
+            container.TotalMoveTime += DateTime.Now - container.StartMoveTime.Value;
+            container.StartMoveTime = null;
+        }
+        if (this is StackField) {
+            container.StackedIndices.Add(index);
+        }
+
         container.CurrentField = this;
-        container.IndexInCurrentField = new IndexInStack(index.x, index.z);
+        container.IndexInCurrentField = index;
         container.transform.position = IndexToGlobalPosition(container.IndexInCurrentField);
-        if (this is StackField) container.StackedIndices.Add(index);
     }
     /// <summary>
     /// this method will automatically find a index to stack the container
@@ -122,6 +129,10 @@ public abstract class Field : MonoBehaviour {
     }
     public virtual Container RemoveFromGround(Container c) {
         if (Ground[c.IndexInCurrentField.x, c.IndexInCurrentField.z].Peek() == c) {
+            if (c.StartMoveTime != null) {
+                SimDebug.LogError(this, "start move time is not null!");
+            }
+            c.StartMoveTime = DateTime.Now;
             return Ground[c.IndexInCurrentField.x, c.IndexInCurrentField.z].Pop();
         }
         SimDebug.LogError(this, "can not remove from ground, the index does not correspond");

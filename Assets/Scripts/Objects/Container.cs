@@ -16,7 +16,7 @@ public class Container : MonoBehaviour {
         }
     }
     public InField InField;
-    private Field _currentField;
+    [SerializeField] private Field _currentField;
     public Field CurrentField {
         get => _currentField;
         set {
@@ -30,6 +30,19 @@ public class Container : MonoBehaviour {
     [SerializeField] public HashSet<IndexInStack> StackedIndices = new HashSet<IndexInStack>();
 
     private StateMachine stateMachine;
+
+    public DateTime? StartMoveTime; // to make sure no error when directly spawn containers in stackfield, use nullable
+    private TimeSpan _totalMoveTime = new TimeSpan();
+    public TimeSpan TotalMoveTime {
+        get => _totalMoveTime;
+        set {
+            _totalMoveTime = value;
+            totalTimeDisplay = _totalMoveTime.ToString("g");
+        }
+    }
+    [SerializeField] private string totalTimeDisplay;
+
+    public int RearrangeCount = -1; // cuz each container needs at least one moving-in, so the base value is set to -1
     #endregion
 
 

@@ -10,10 +10,11 @@ public class IoFieldsGenerator : MonoBehaviour {
     [SerializeField] private GameObject outFieldPrefab;
 
     [Header("fields")]
-    public StackField StackField;
-    public TempField[] TempFields;
-    public IoPort[] IoPorts;
-    public Crane Crane;
+    private ObjectCollection objs;
+
+    private void Awake() {
+        objs = GetComponentInParent<ObjectCollection>();
+    }
 
     private void Start() {
         initFields();
@@ -34,7 +35,7 @@ public class IoFieldsGenerator : MonoBehaviour {
         if (GetComponentsInChildren<InField>().Length > Parameters.MaxInFieldNumber) return null;
         var obj = Instantiate(inFieldPrefab);
         var inField = obj.GetComponent<InField>();
-        inField.Init(IoPorts, this);
+        inField.Init(objs.IoPorts, this);
         inField.transform.SetParent(inField.Port.transform);
         inField.enabled = false;
         return inField;
@@ -43,7 +44,7 @@ public class IoFieldsGenerator : MonoBehaviour {
     public OutField GenerateOutField() {
         var obj = Instantiate(outFieldPrefab);
         var outField = obj.GetComponent<OutField>();
-        outField.Init(IoPorts, this);
+        outField.Init(objs.IoPorts, this);
         outField.transform.SetParent(outField.Port.transform);
         outField.enabled = false;
         return outField;
