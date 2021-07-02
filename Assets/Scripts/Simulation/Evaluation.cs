@@ -14,7 +14,7 @@ public struct Data {
     public int RearrangeCount;
     public TimeSpan TotalTimeSpan;
     public float avgRearrangeCount;
-    public string avgTimeSpan;
+    public TimeSpan avgTimeSpan;
 
     public Data(Data data) => this = data;
 }
@@ -35,7 +35,7 @@ public class Evaluation : MonoBehaviour {
             Data.TotalTimeSpan += c.TotalMoveTime;
         }
         Data.avgRearrangeCount = (float)Data.RearrangeCount / Data.OutContainerCount;
-        Data.avgTimeSpan = new TimeSpan(Convert.ToInt64(Data.TotalTimeSpan.Ticks * Time.timeScale / Data.OutContainerCount)).ToString(@"g", culture);
+        Data.avgTimeSpan = new TimeSpan(Convert.ToInt64(Data.TotalTimeSpan.Ticks * Time.timeScale * Parameters.SpeedScale / Data.OutContainerCount));
         records.Add(new Data(Data));
     }
 
@@ -44,9 +44,9 @@ public class Evaluation : MonoBehaviour {
     }
 
     private void ToCSV() {
-        var sb = new StringBuilder("InFieldCount,OutFieldCount,OutContainerCount,RearrangeCount,avgRearrangeCount,avgTimeSpan");
+        var sb = new StringBuilder("InFieldCount,OutFieldCount,OutContainerCount,RearrangeCount,avgRearrangeCount,avgTimeSpan,avgTimeSpanSeconds");
         foreach(var data in records) {
-            sb.Append($"\n{data.InFieldCount},{data.OutFieldCount},{data.OutContainerCount},{data.RearrangeCount},{data.avgRearrangeCount.ToString(culture)},{data.avgTimeSpan.ToString(culture)}");
+            sb.Append($"\n{data.InFieldCount},{data.OutFieldCount},{data.OutContainerCount},{data.RearrangeCount},{data.avgRearrangeCount.ToString(culture)},{data.avgTimeSpan.ToString(@"g", culture)}, {data.avgTimeSpan.TotalMinutes.ToString(culture)}");
         }
         string path = @"D:\works\Arbeit\UDE\TUL\Duisport\thesis\data\evaluation.csv";
         using (var writer = new StreamWriter(path, false)) {

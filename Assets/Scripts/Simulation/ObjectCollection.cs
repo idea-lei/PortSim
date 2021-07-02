@@ -80,7 +80,7 @@ public class ObjectCollection : MonoBehaviour {
     }
 
     private void Awake() {
-        Time.timeScale = 50;
+        Time.timeScale = Parameters.TimeScale;
     }
 
     private void Start() {
