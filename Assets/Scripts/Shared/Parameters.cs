@@ -30,8 +30,8 @@
     public static readonly float Vz_Loaded = 20f;
     public static readonly float Vz_Unloaded = 20f;
 
-    public static readonly float Ez = 0.001f;   // energy cost per meter
-    public static readonly float Ex = 0.01f;
+    public static readonly float Ez = 0.01f;   // energy cost per meter
+    public static readonly float Ex = 0.1f;
 
     public static readonly float TranslationHeight = 20f;
     #endregion

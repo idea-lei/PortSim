@@ -44,7 +44,7 @@ public class Evaluation : MonoBehaviour {
     }
 
     private void ToCSV() {
-        var sb = new StringBuilder("InFieldCount,OutFieldCount,OutContainerCount,RearrangeCount,avgRearrangeCount,avgTimeSpan,avgTimeSpanSeconds");
+        var sb = new StringBuilder("InFieldCount,OutFieldCount,OutContainerCount,RearrangeCount,avgRearrangeCount,avgTimeSpan,avgTimeSpanMinutes");
         foreach(var data in records) {
             sb.Append($"\n{data.InFieldCount},{data.OutFieldCount},{data.OutContainerCount},{data.RearrangeCount},{data.avgRearrangeCount.ToString(culture)},{data.avgTimeSpan.ToString(@"g", culture)}, {data.avgTimeSpan.TotalMinutes.ToString(culture)}");
         }
