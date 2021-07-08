@@ -77,7 +77,7 @@ public class FindContainerOutAgent : AgentBase {
         }
 
         foreach (var ob in obList) {
-            bufferSensor.AppendObservation(new float[] { ob.n_energy, ob.n_isPeek, ob.reward });
+            bufferSensor.AppendObservation(new float[] { ob.n_energy, ob.n_isPeek, });//ob.reward
         }
     }
 
@@ -100,13 +100,21 @@ public class FindContainerOutAgent : AgentBase {
         var p = actions.ContinuousActions[0] / 2f + 0.5f;
         var e = actions.ContinuousActions[1] / 2f + 0.5f;
 
+        if (p * e == 0 && e + p == 0) {
+            AddReward(-1);
+            RequestDecision();
+            return;
+        }
+
         c_p = p / (p + e);
         c_e = e / (p + e);
 
         foreach (var o in obList) {
             o.reward = CalculateReward(o);
         }
-        AddReward(obList.Select(o => o.reward).Max() - lastReward);
+
+        float reward = obList.Select(o => o.reward).Max();
+        AddReward(reward - lastReward);
 
         if (train_times++ >= 10) {
             train_times = 0;

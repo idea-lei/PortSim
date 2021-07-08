@@ -93,9 +93,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dd8012d5925524537b27131fef517017, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_SensorName: BufferSensor
-  m_ObservableSize: 3
-  m_MaxNumObservables: 100
+  m_SensorName: ContainerInBufferSensor
+  m_ObservableSize: 2
+  m_MaxNumObservables: 25
 --- !u!1 &6453442298091025688
 GameObject:
   m_ObjectHideFlags: 0
@@ -303,8 +303,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dd8012d5925524537b27131fef517017, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_SensorName: BufferSensor
-  m_ObservableSize: 10
+  m_SensorName: IndexBufferSensor
+  m_ObservableSize: 9
   m_MaxNumObservables: 25
 --- !u!1 &6620697767243008484
 GameObject:
@@ -433,7 +433,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_SensorName: ContainerOutBufferSensor
-  m_ObservableSize: 3
+  m_ObservableSize: 2
   m_MaxNumObservables: 25
 --- !u!1 &6983714008121432362
 GameObject:

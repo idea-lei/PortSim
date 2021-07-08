@@ -135,7 +135,7 @@ public class FindIndexAgent : AgentBase {
                 o.n_isLayerOk,
                 o.n_notStacked,
                 o.n_noRearrange,
-                o.reward
+                //o.reward
             };
 
             bufferSensor.AppendObservation(buffer);
@@ -168,6 +168,13 @@ public class FindIndexAgent : AgentBase {
         var w = actions.ContinuousActions[3] / 2f + 0.5f;
         var r = actions.ContinuousActions[4] / 2f + 0.5f;
 
+        if (t * e * l * w * r == 0 &&
+            t + e + l + w + r == 0) {
+            AddReward(-1);
+            RequestDecision();
+            return;
+        }
+
         c_t = t / (t + e + l + w + r);
         c_e = e / (t + e + l + w + r);
         c_l = l / (t + e + l + w + r);
@@ -180,7 +187,7 @@ public class FindIndexAgent : AgentBase {
 
         AddReward(obList.Select(o => o.reward).Max() - lastReward);
 
-        if (train_times++ >= 100) {
+        if (train_times++ >= 10) {
             train_times = 0;
             EndEpisode();
             var rewardList = obList.Select(o => o.reward).ToList();
