@@ -70,7 +70,6 @@ public class FindContainerInAgent : AgentBase {
         foreach (var ob in obList) {
             bufferSensor.AppendObservation(new float[] { ob.n_energy, ob.n_timeOut, ob.reward });
         }
-        lastReward = obList.Select(o => o.reward).Max();
     }
 
     public override void Heuristic(in ActionBuffers actionsOut) {
@@ -84,10 +83,11 @@ public class FindContainerInAgent : AgentBase {
 
         var actOut = actionsOut.ContinuousActions;
         actOut[0] = 0f;
-        actOut[0] = 0f;
+        actOut[1] = 0f;
     }
 
     public override void OnActionReceived(ActionBuffers actions) {
+        lastReward = obList.Select(o => o.reward).Max();
 
         var t = actions.ContinuousActions[0] / 2f + 0.5f;
         var e = actions.ContinuousActions[1] / 2f + 0.5f;
@@ -100,7 +100,7 @@ public class FindContainerInAgent : AgentBase {
         }
         AddReward(obList.Select(o => o.reward).Max() - lastReward);
 
-        if (train_times++ >= 10) {
+        if (train_times++ >= 100) {
             train_times = 0;
             EndEpisode();
             var rewardList = obList.Select(o => o.reward).ToList();

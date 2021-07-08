@@ -48,7 +48,7 @@ public class FindIndexAgent : AgentBase {
     [SerializeField] private float c_t = 0.2f;
     [SerializeField] private float c_l = 0.2f;
     [SerializeField] private float c_w = 0.2f;
-    [SerializeField] private float c_r;
+    [SerializeField] private float c_r = 0.2f;
     private float lastReward;
     private int train_times;
 
@@ -140,7 +140,6 @@ public class FindIndexAgent : AgentBase {
 
             bufferSensor.AppendObservation(buffer);
         }
-        lastReward = obList.Select(o => o.reward).Max();
     }
 
     public override void Heuristic(in ActionBuffers actionsOut) {
@@ -157,9 +156,12 @@ public class FindIndexAgent : AgentBase {
         continuousActionsOut[1] = 0.2f;
         continuousActionsOut[2] = 0.2f;
         continuousActionsOut[3] = 0.2f;
+        continuousActionsOut[4] = 0.2f;
     }
 
     public override void OnActionReceived(ActionBuffers actions) {
+        lastReward = obList.Select(o => o.reward).Max();
+
         var t = actions.ContinuousActions[0] / 2f + 0.5f;
         var e = actions.ContinuousActions[1] / 2f + 0.5f;
         var l = actions.ContinuousActions[2] / 2f + 0.5f;
@@ -178,7 +180,7 @@ public class FindIndexAgent : AgentBase {
 
         AddReward(obList.Select(o => o.reward).Max() - lastReward);
 
-        if (train_times++ >= 10) {
+        if (train_times++ >= 100) {
             train_times = 0;
             EndEpisode();
             var rewardList = obList.Select(o => o.reward).ToList();

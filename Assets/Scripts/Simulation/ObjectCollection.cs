@@ -17,7 +17,7 @@ public class ObjectCollection : MonoBehaviour {
     public FindContainerInAgent FindContainerInAgent;
     public FindContainerOutAgent FindContainerOutAgent;
     public FindIndexAgent FindIndexAgent;
-    public Evaluation Evaluation;
+    [HideInInspector] public Evaluation Evaluation;
 
     public OutField[] OutFields {
         get {
@@ -81,6 +81,7 @@ public class ObjectCollection : MonoBehaviour {
 
     private void Awake() {
         Time.timeScale = Parameters.TimeScale;
+        Evaluation = Evaluation.Instance;
     }
 
     private void Start() {

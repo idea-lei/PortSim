@@ -79,7 +79,6 @@ public class FindContainerOutAgent : AgentBase {
         foreach (var ob in obList) {
             bufferSensor.AppendObservation(new float[] { ob.n_energy, ob.n_isPeek, ob.reward });
         }
-        lastReward = obList.Select(o => o.reward).Max();
     }
 
     public override void Heuristic(in ActionBuffers actionsOut) {
@@ -96,6 +95,8 @@ public class FindContainerOutAgent : AgentBase {
     }
 
     public override void OnActionReceived(ActionBuffers actions) {
+        lastReward = obList.Select(o => o.reward).Max();
+
         var p = actions.ContinuousActions[0] / 2f + 0.5f;
         var e = actions.ContinuousActions[1] / 2f + 0.5f;
 

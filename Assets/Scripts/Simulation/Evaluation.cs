@@ -19,7 +19,7 @@ public struct Data {
     public Data(Data data) => this = data;
 }
 
-public class Evaluation : MonoBehaviour {
+public class Evaluation : Singleton<Evaluation> {
     [SerializeField] public Data Data;
 
     List<Data> records = new List<Data>();
@@ -40,7 +40,7 @@ public class Evaluation : MonoBehaviour {
     }
 
     private void OnDestroy() {
-        //ToCSV();
+        ToCSV();
     }
 
     private void ToCSV() {
