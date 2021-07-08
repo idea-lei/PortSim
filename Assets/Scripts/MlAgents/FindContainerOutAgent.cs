@@ -16,7 +16,14 @@ public class FindContainerOutAgent : AgentBase {
         // n means normalized
         public float n_isPeek;
         public float n_energy;
+        public float reward;
     }
+
+    [SerializeField] private float c_p = 0.5f;
+    [SerializeField] private float c_e = 0.5f;
+
+    private int train_times = 0;
+    private float lastReward;
 
     private List<FindContainerOutObservationObject> obList = new List<FindContainerOutObservationObject>();
 
@@ -66,46 +73,49 @@ public class FindContainerOutAgent : AgentBase {
         foreach (var o in obList) {
             o.n_energy = Mathf.InverseLerp(minE, maxE, o.energy);
             o.n_isPeek = o.isPeek ? 1 : 0;
+            o.reward = CalculateReward(o);
         }
 
-        int dimHotEncoding = Parameters.DimX * Parameters.DimZ * 2;
         foreach (var ob in obList) {
-            float[] arr = new float[dimHotEncoding + 2];
-            arr[obList.IndexOf(ob)] = 1;
-            arr[dimHotEncoding] = ob.n_energy;
-            arr[dimHotEncoding + 1] = ob.n_isPeek;
-            bufferSensor.AppendObservation(arr);
+            bufferSensor.AppendObservation(new float[] { ob.n_energy, ob.n_isPeek, ob.reward });
         }
+        lastReward = obList.Select(o => o.reward).Max();
     }
 
     public override void Heuristic(in ActionBuffers actionsOut) {
-        var rewardList = new List<float>();
-        foreach (var ob in obList) {
-            rewardList.Add(CalculateReward(ob));
-        }
-        var actOut = actionsOut.DiscreteActions;
-        actOut[0] = rewardList.IndexOf(rewardList.Max());
+        //var rewardList = new List<float>();
+        //foreach (var ob in obList) {
+        //    rewardList.Add(CalculateReward(ob));
+        //}
+        //var actOut = actionsOut.DiscreteActions;
+        //actOut[0] = rewardList.IndexOf(rewardList.Max());
+
+        var actOut = actionsOut.ContinuousActions;
+        actOut[0] = 0f;
+        actOut[1] = 0f;
     }
 
     public override void OnActionReceived(ActionBuffers actions) {
-        if (obList.Count == 0) {
-            // this means no available index, which should be determined before request decision, so error
-            SimDebug.LogError(this, "no suitable container");
-            return;
+        var p = actions.ContinuousActions[0] / 2f + 0.5f;
+        var e = actions.ContinuousActions[1] / 2f + 0.5f;
+
+        c_p = p / (p + e);
+        c_e = e / (p + e);
+
+        foreach (var o in obList) {
+            o.reward = CalculateReward(o);
         }
-        if (actions.DiscreteActions[0] >= obList.Count) {
-            AddReward(-c_outOfRange);
-            Debug.LogWarning("out of range, request new decision");
+        AddReward(obList.Select(o => o.reward).Max() - lastReward);
+
+        if (train_times++ >= 10) {
+            train_times = 0;
+            EndEpisode();
+            var rewardList = obList.Select(o => o.reward).ToList();
+            objs.Crane.ContainerToPick = obList[rewardList.IndexOf(rewardList.Max())].container;
+            objs.StateMachine.TriggerByState("PickUp");
+        } else {
             RequestDecision();
-            //SimDebug.LogError(this, "result is null");
-            return;
         }
-
-        var result = obList[actions.DiscreteActions[0]];
-        AddReward(CalculateReward(result));
-
-        objs.Crane.ContainerToPick = obList[actions.DiscreteActions[0]].container;
-        objs.StateMachine.TriggerByState("PickUp");
     }
 
     // backup
@@ -163,11 +173,11 @@ public class FindContainerOutAgent : AgentBase {
         float reward = 0;
 
         // 1) energy reward
-        reward += (1 - ob.n_energy) * c_energy;
+        reward += (1 - ob.n_energy) * c_e;
 
         // 2) is Peek reward
-        if (!ob.isPeek && obList.Any(o => o.isPeek)) reward -= c_isPeek;
-        else reward += c_isPeek;
+        if (!ob.isPeek && obList.Any(o => o.isPeek)) reward -= c_p;
+        else reward += c_p;
 
         return reward;
     }

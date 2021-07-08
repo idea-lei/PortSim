@@ -41,7 +41,16 @@ public class FindIndexAgent : AgentBase {
         public float n_isLayerOk => isLayerOk ? 1f : 0f;
         public float n_noRearrange => noRearrange ? 1f : 0f;
         public float n_notStacked => notStacked ? 1f : 0f;
+        public float reward;
     }
+
+    [SerializeField] private float c_e = 0.2f;
+    [SerializeField] private float c_t = 0.2f;
+    [SerializeField] private float c_l = 0.2f;
+    [SerializeField] private float c_w = 0.2f;
+    [SerializeField] private float c_r;
+    private float lastReward;
+    private int train_times;
 
     private List<FindIndexObservationObject> obList = new List<FindIndexObservationObject>();
 
@@ -90,6 +99,7 @@ public class FindIndexAgent : AgentBase {
                     vec = objs.Crane.ContainerCarrying.transform.position - objs.StackField.IndexToGlobalPosition(x, z);
                 }
                 ob.energy = Mathf.Abs(vec.x) * Parameters.Ex + Mathf.Abs(vec.z) * Parameters.Ez;
+                ob.reward = CalculateReward(ob);
                 obList.Add(ob);
             }
         }
@@ -115,9 +125,6 @@ public class FindIndexAgent : AgentBase {
             if (o.n_timeDiff < 0 || o.n_timeDiff > 1) SimDebug.LogError(this, "outTime Lerp out of range");
             if (o.n_energy < 0 || o.n_energy > 1) SimDebug.LogError(this, "n_energy Lerp out of range");
 
-            float[] hotEncoding = new float[Parameters.DimX * Parameters.DimZ];
-            hotEncoding[obList.IndexOf(o)] = 1;
-
             float[] buffer = new float[] {
                 o.n_timeDiff,
                 o.n_isTimeOk,
@@ -127,52 +134,62 @@ public class FindIndexAgent : AgentBase {
                 o.n_layer,
                 o.n_isLayerOk,
                 o.n_notStacked,
-                o.n_noRearrange
+                o.n_noRearrange,
+                o.reward
             };
 
-            bufferSensor.AppendObservation(hotEncoding.Concat(buffer).ToArray());
+            bufferSensor.AppendObservation(buffer);
         }
+        lastReward = obList.Select(o => o.reward).Max();
     }
 
     public override void Heuristic(in ActionBuffers actionsOut) {
-        var continuousActionsOut = actionsOut.DiscreteActions;
-        var rewardList = new List<float>();
+        //var continuousActionsOut = actionsOut.DiscreteActions;
+        //var rewardList = new List<float>();
 
-        foreach (var ob in obList) rewardList.Add(CalculateReward(ob, true));
+        //foreach (var ob in obList) rewardList.Add(CalculateReward(ob, true));
 
-        float max = rewardList.Max();
-        continuousActionsOut[0] = rewardList.IndexOf(max);
+        //float max = rewardList.Max();
+        //continuousActionsOut[0] = rewardList.IndexOf(max);
+
+        var continuousActionsOut = actionsOut.ContinuousActions;
+        continuousActionsOut[0] = 0.2f;
+        continuousActionsOut[1] = 0.2f;
+        continuousActionsOut[2] = 0.2f;
+        continuousActionsOut[3] = 0.2f;
     }
 
     public override void OnActionReceived(ActionBuffers actions) {
-        if (obList.Count == 0) {
-            // this means no available index, which should be determined before request decision, so error
-            SimDebug.LogError(this, "no stackable index");
-            return;
+        var t = actions.ContinuousActions[0] / 2f + 0.5f;
+        var e = actions.ContinuousActions[1] / 2f + 0.5f;
+        var l = actions.ContinuousActions[2] / 2f + 0.5f;
+        var w = actions.ContinuousActions[3] / 2f + 0.5f;
+        var r = actions.ContinuousActions[4] / 2f + 0.5f;
+
+        c_t = t / (t + e + l + w + r);
+        c_e = e / (t + e + l + w + r);
+        c_l = l / (t + e + l + w + r);
+        c_w = w / (t + e + l + w + r);
+        c_r = r / (t + e + l + w + r);
+
+        foreach (var o in obList) {
+            o.reward = CalculateReward(o);
         }
 
-        if (actions.DiscreteActions[0] >= obList.Count) {
-            AddReward(-c_outOfRange);
-            Debug.LogWarning("out of range, request new decision");
-            RequestDecision();
-            //SimDebug.LogError(this, "result is null");
-            return;
-        }
+        AddReward(obList.Select(o => o.reward).Max() - lastReward);
 
-        var result = obList[actions.DiscreteActions[0]];
-        float reward = CalculateReward(result);
-
-        AddReward(reward);
-        if (reward <= -1) {
-            RequestDecision();
-            return;
-        }
-
-        objs.StackField.TrainingResult = result.index;
-        objs.StateMachine.TriggerByState(
+        if (train_times++ >= 10) {
+            train_times = 0;
+            EndEpisode();
+            var rewardList = obList.Select(o => o.reward).ToList();
+            objs.StackField.TrainingResult = obList[rewardList.IndexOf(rewardList.Max())].index;
+            objs.StateMachine.TriggerByState(
             objs.Crane.ContainerCarrying.CompareTag("container_in")
             || objs.Crane.ContainerCarrying.CompareTag("container_temp")
             ? "MoveIn" : "Rearrange");
+        } else {
+            RequestDecision();
+        }
     }
 
     private float CalculateReward(FindIndexObservationObject ob, bool isHeuristic = false) {
@@ -190,26 +207,26 @@ public class FindIndexAgent : AgentBase {
         }
 
         // 1) energy reward
-        reward += (1 - ob.n_energy) * c_energy;
+        reward += (1 - ob.n_energy) * c_e;
 
         // 2) noRearrange reward
         if (!ob.noRearrange) {
             // if not all indices need rearrange
-            if (obList.Any(o => o.noRearrange)) reward -= c_rearrange;
-        } else reward += c_rearrange;
+            if (obList.Any(o => o.noRearrange)) reward -= c_r;
+        } else reward += c_r;
 
         // 3) time reward
         if (!ob.isTimeOk) {
-            if (obList.Any(o => o.isTimeOk)) reward -= c_time;
-        } else reward += c_time;
+            if (obList.Any(o => o.isTimeOk)) reward -= c_t;
+        } else reward += c_t;
 
         // 4) layer reward
-        reward += (1 - ob.n_layer) * c_layer;
+        reward += (1 - ob.n_layer) * c_l;
 
         // 5) weight reward
         if (!ob.isWeightOk) {
-            if (obList.Any(o => o.isWeightOk)) reward -= c_weight;
-        } else reward += (1 - ob.n_weightDiff) * c_weight;
+            if (obList.Any(o => o.isWeightOk)) reward -= c_w;
+        } else reward += (1 - ob.n_weightDiff) * c_w;
 
         return reward;
     }

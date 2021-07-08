@@ -40,7 +40,7 @@ public class Evaluation : MonoBehaviour {
     }
 
     private void OnDestroy() {
-        ToCSV();
+        //ToCSV();
     }
 
     private void ToCSV() {
