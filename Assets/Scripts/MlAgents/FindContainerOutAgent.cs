@@ -34,11 +34,11 @@ public class FindContainerOutAgent : AgentBase {
 
     public override void CollectObservations(VectorSensor sensor) {
         obList.Clear();
-        if (objs.Crane.ContainerToPick != null) {
-            SimDebug.LogError(this, "ContainerToPick is not null!");
-            EndEpisode();
-            return;
-        }
+        //if (objs.Crane.ContainerToPick != null) {
+        //    SimDebug.LogError(this, "ContainerToPick is not null!");
+        //    EndEpisode();
+        //    return;
+        //}
 
         var outFields = objs.OutFields;
         var incomingContainers = new List<Container>();
@@ -46,24 +46,24 @@ public class FindContainerOutAgent : AgentBase {
             incomingContainers.AddRange(o.IncomingContainers);
         }
 
-        var cOutInTemp = objs.OutContainersInTempFields;
-        if (cOutInTemp.Length > 0) {
-            foreach (var c in cOutInTemp.Intersect(incomingContainers)) {
-                obList.Add(new FindContainerOutObservationObject() {
-                    container = c,
-                    isPeek = c == objs.StackField.Ground[c.IndexInCurrentField.x, c.IndexInCurrentField.z].Peek(),
-                    energy = CalculateEnergy(c)
-                });
-            }
-        } else {
-            foreach (var c in objs.OutContainersInStackField.Intersect(incomingContainers)) {
-                obList.Add(new FindContainerOutObservationObject() {
-                    container = c,
-                    isPeek = c == objs.StackField.Ground[c.IndexInCurrentField.x, c.IndexInCurrentField.z].Peek(),
-                    energy = CalculateEnergy(c)
-                });
-            }
-        }
+        //var cOutInTemp = objs.OutContainersInTempFields;
+        //if (cOutInTemp.Length > 0) {
+        //    foreach (var c in cOutInTemp.Intersect(incomingContainers)) {
+        //        obList.Add(new FindContainerOutObservationObject() {
+        //            container = c,
+        //            isPeek = c == objs.StackField.Ground[c.IndexInCurrentField.x, c.IndexInCurrentField.z].Peek(),
+        //            energy = CalculateEnergy(c)
+        //        });
+        //    }
+        //} else {
+        //    foreach (var c in objs.OutContainersInStackField.Intersect(incomingContainers)) {
+        //        obList.Add(new FindContainerOutObservationObject() {
+        //            container = c,
+        //            isPeek = c == objs.StackField.Ground[c.IndexInCurrentField.x, c.IndexInCurrentField.z].Peek(),
+        //            energy = CalculateEnergy(c)
+        //        });
+        //    }
+        //}
 
         if (obList.Count == 0) SimDebug.LogError(this, "obList is empty");
 
@@ -123,7 +123,7 @@ public class FindContainerOutAgent : AgentBase {
 
         EndEpisode();
         var rewardList = obList.Select(o => o.reward).ToList();
-        objs.Crane.ContainerToPick = obList[rewardList.IndexOf(rewardList.Max())].container;
+        //objs.Crane.ContainerToPick = obList[rewardList.IndexOf(rewardList.Max())].container;
         objs.StateMachine.TriggerByState("PickUp");
 
         //if (train_times++ >= 10) {

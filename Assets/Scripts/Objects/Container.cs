@@ -43,6 +43,8 @@ public class Container : MonoBehaviour {
     [SerializeField] private string totalTimeDisplay;
 
     public int RearrangeCount;
+
+    public bool IsPeak => CurrentField.Ground[IndexInCurrentField.x, IndexInCurrentField.z].Peek() == this;
     #endregion
 
     private void Awake() {
@@ -56,7 +58,7 @@ public class Container : MonoBehaviour {
         if (tag.Contains("_stack") && other.tag.Contains("_stack")) return;
         if (tag.Contains("_in") && other.tag.Contains("_in")) return;
 
-        if (other.tag.Contains("container") || other.CompareTag("field_out") || other.CompareTag("field_stack") || other.CompareTag("field_temp"))
+        if (other.tag.Contains("container") || other.CompareTag("field_out") || other.CompareTag("field_stack"))
             if (stateMachine.CurrentState != "Wait") stateMachine.TriggerByState("Wait");
 
     }

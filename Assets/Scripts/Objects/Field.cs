@@ -51,6 +51,19 @@ public abstract class Field : MonoBehaviour {
             return sum;
         }
     }
+
+    public List<IndexInStack> AvailableIndices {
+        get {
+            var indices = new List<IndexInStack>();
+            for(int x = 0; x < DimX; x++) {
+                for (int z = 0; z < DimZ; z++) {
+                    if (Ground[x,z].Count < MaxLayer) indices.Add(new IndexInStack(x,z));
+                }
+            }
+            return indices;
+        }
+    }
+
     #endregion
 
     #region private / protected properties
@@ -99,6 +112,8 @@ public abstract class Field : MonoBehaviour {
                 if (c.StackedIndices.Any(i => i == container.IndexInCurrentField)) {
                     c.StackedIndices.Remove(c.StackedIndices.Single(i => i == container.IndexInCurrentField));
                 }
+                objs.FindNextOperationAgent.AddReward(2 / (float)container.TotalMoveTime.TotalMinutes); // scale 2 times
+                objs.FindNextOperationAgent.EndEpisode();
             }
         }
         container.transform.SetParent(transform);

@@ -17,6 +17,7 @@ public class ObjectCollection : MonoBehaviour {
     public FindContainerInAgent FindContainerInAgent;
     public FindContainerOutAgent FindContainerOutAgent;
     public FindIndexAgent FindIndexAgent;
+    public FindNextOperation FindNextOperationAgent;
     [HideInInspector] public Evaluation Evaluation;
 
     public OutField[] OutFields {
@@ -47,37 +48,78 @@ public class ObjectCollection : MonoBehaviour {
         }
     }
 
+    #region properties
     public bool HasOutField => OutFields.Length > 0;
 
     public bool HasInField => Infields.Length > 0;
 
     public Container[] ContainersInStackField => StackField.GetComponentsInChildren<Container>();
 
-    public Container[] ContainersInTempFields {
+    //public Container[] ContainersInTempFields {
+    //    get {
+    //        List<Container> cs = new List<Container>();
+    //        foreach (var field in TempFields) {
+    //            cs.AddRange(field.GetComponentsInChildren<Container>());
+    //        }
+    //        return cs.ToArray();
+    //    }
+    //}
+
+    public Container[] InContainers {
         get {
-            List<Container> cs = new List<Container>();
-            foreach (var field in TempFields) {
-                cs.AddRange(field.GetComponentsInChildren<Container>());
-            }
-            return cs.ToArray();
+            if (!HasInField) return new Container[0];
+            return Infields[0].GetComponentsInChildren<Container>();
         }
     }
 
-    public Container[] OutContainersInTempFields {
-        get {
-            if (!HasOutField) return new Container[0];
-            var ofs = OutFields;
-            return ContainersInTempFields.Where(c => ofs.Contains(c.OutField)).ToArray();
-        }
-    }
-
-    public Container[] OutContainersInStackField {
+    public Container[] OutContainers {
         get {
             if (!HasOutField) return new Container[0];
             var ofs = OutFields;
             return ContainersInStackField.Where(c => ofs.Contains(c.OutField)).ToArray();
         }
     }
+
+    public IndexInStack[] OutContainersIndices {
+        get {
+            var set = new HashSet<IndexInStack>();
+            foreach(var c in OutContainers) {
+                set.Add(c.IndexInCurrentField);
+            }
+            return set.ToArray();
+        }
+    }
+
+    public Container[] PeakContainersToRelocate {
+        get {
+            var set = new HashSet<IndexInStack>();
+            var containers = new List<Container>();
+            foreach (var c in OutContainers) {
+                set.Add(c.IndexInCurrentField);
+            }
+            foreach(var i in set) {
+                containers.Add(StackField.Ground[i.x, i.z].Peek());
+            }
+            return containers.ToArray();
+        }
+    }
+
+    public Container[] RelocateContainers {
+        get {
+            if (!HasOutField) return new Container[0];
+            var ofs = OutFields;
+            return ContainersInStackField.Where(c => ofs.Contains(c.OutField)).ToArray();
+        }
+    }
+
+    public Container[] OutContainersOnPeak {
+        get {
+            if (!HasOutField) return new Container[0];
+            var ofs = OutFields;
+            return ContainersInStackField.Where(c => ofs.Contains(c.OutField) && c.IsPeak).ToArray();
+        }
+    }
+    #endregion
 
     private void Awake() {
         Time.timeScale = Parameters.TimeScale;

@@ -31,14 +31,14 @@ public class FindContainerInAgent : AgentBase {
         obList.Clear();
         var inFields = objs.Infields;
         Field inField = null;
-        if (objs.ContainersInTempFields.Length > 0) {
-            foreach (var f in objs.TempFields) {
-                if (f.GetComponentInChildren<Container>() != null) {
-                    inField = f;
-                    break;
-                }
-            }
-        }
+        //if (objs.ContainersInTempFields.Length > 0) {
+        //    foreach (var f in objs.TempFields) {
+        //        if (f.GetComponentInChildren<Container>() != null) {
+        //            inField = f;
+        //            break;
+        //        }
+        //    }
+        //}
         if (inField == null) {
             // select the infield with min amount of containers
             inField = inFields.Aggregate((curMin, x) =>
@@ -116,7 +116,7 @@ public class FindContainerInAgent : AgentBase {
 
         EndEpisode();
         var rewardList = obList.Select(o => o.reward).ToList();
-        objs.Crane.ContainerToPick = obList[rewardList.IndexOf(rewardList.Max())].container;
+        //objs.Crane.ContainerToPick = obList[rewardList.IndexOf(rewardList.Max())].container;
         objs.StateMachine.TriggerByState("PickUp");
 
         //if (train_times++ >= 10) {
