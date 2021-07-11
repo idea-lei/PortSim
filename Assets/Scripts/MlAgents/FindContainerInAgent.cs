@@ -22,8 +22,8 @@ public class FindContainerInAgent : AgentBase {
     [SerializeField] private float c_t = 0.5f;
     [SerializeField] private float c_e = 0.5f;
 
-    private int train_times = 0;
-    private float lastReward;
+    //private int train_times = 0;
+    //private float lastReward;
 
     private List<FindContainerInObservationObject> obList = new List<FindContainerInObservationObject>();
 
@@ -68,7 +68,11 @@ public class FindContainerInAgent : AgentBase {
         }
 
         foreach (var ob in obList) {
-            bufferSensor.AppendObservation(new float[] { ob.n_energy, ob.n_timeOut,  });//ob.reward
+            var buffer = new float[Parameters.DimX * Parameters.DimZ + 2];
+            buffer[obList.IndexOf(ob)] = 1;
+            buffer[buffer.Length - 1] = ob.n_energy;
+            buffer[buffer.Length - 2] = ob.n_timeOut;
+            bufferSensor.AppendObservation(buffer);//ob.reward
         }
     }
 
@@ -87,7 +91,7 @@ public class FindContainerInAgent : AgentBase {
     }
 
     public override void OnActionReceived(ActionBuffers actions) {
-        lastReward = obList.Select(o => o.reward).Max();
+        //lastReward = obList.Select(o => o.reward).Max();
 
         var t = actions.ContinuousActions[0] / 2f + 0.5f;
         var e = actions.ContinuousActions[1] / 2f + 0.5f;
@@ -106,17 +110,24 @@ public class FindContainerInAgent : AgentBase {
         }
 
         float reward = obList.Select(o => o.reward).Max();
-        AddReward(reward - lastReward);
+        //AddReward(reward - lastReward);
 
-        if (train_times++ >= 10) {
-            train_times = 0;
-            EndEpisode();
-            var rewardList = obList.Select(o => o.reward).ToList();
-            objs.Crane.ContainerToPick = obList[rewardList.IndexOf(rewardList.Max())].container;
-            objs.StateMachine.TriggerByState("PickUp");
-        } else {
-            RequestDecision();
-        }
+        AddReward(reward);
+
+        EndEpisode();
+        var rewardList = obList.Select(o => o.reward).ToList();
+        objs.Crane.ContainerToPick = obList[rewardList.IndexOf(rewardList.Max())].container;
+        objs.StateMachine.TriggerByState("PickUp");
+
+        //if (train_times++ >= 10) {
+        //    train_times = 0;
+        //    EndEpisode();
+        //    var rewardList = obList.Select(o => o.reward).ToList();
+        //    objs.Crane.ContainerToPick = obList[rewardList.IndexOf(rewardList.Max())].container;
+        //    objs.StateMachine.TriggerByState("PickUp");
+        //} else {
+        //    RequestDecision();
+        //}
     }
 
     private Container findContainerToMoveIn() {

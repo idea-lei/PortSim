@@ -49,8 +49,8 @@ public class FindIndexAgent : AgentBase {
     [SerializeField] private float c_l = 0.2f;
     [SerializeField] private float c_w = 0.2f;
     [SerializeField] private float c_r = 0.2f;
-    private float lastReward;
-    private int train_times;
+    //private float lastReward;
+    //private int train_times;
 
     private List<FindIndexObservationObject> obList = new List<FindIndexObservationObject>();
 
@@ -125,20 +125,18 @@ public class FindIndexAgent : AgentBase {
             if (o.n_timeDiff < 0 || o.n_timeDiff > 1) SimDebug.LogError(this, "outTime Lerp out of range");
             if (o.n_energy < 0 || o.n_energy > 1) SimDebug.LogError(this, "n_energy Lerp out of range");
 
-            float[] buffer = new float[] {
-                o.n_timeDiff,
-                o.n_isTimeOk,
-                o.n_weightDiff,
-                o.n_isWeightOk,
-                o.n_energy,
-                o.n_layer,
-                o.n_isLayerOk,
-                o.n_notStacked,
-                o.n_noRearrange,
-                //o.reward
-            };
-
-            bufferSensor.AppendObservation(buffer);
+            var buffer = new float[Parameters.DimX * Parameters.DimZ + 9];
+            buffer[obList.IndexOf(o)] = 1;
+            buffer[buffer.Length - 1] = o.n_timeDiff;
+            buffer[buffer.Length - 2] = o.n_isTimeOk;
+            buffer[buffer.Length - 3] = o.n_weightDiff;
+            buffer[buffer.Length - 4] = o.n_isWeightOk;
+            buffer[buffer.Length - 5] = o.n_energy;
+            buffer[buffer.Length - 6] = o.n_layer;
+            buffer[buffer.Length - 7] = o.n_isLayerOk;
+            buffer[buffer.Length - 8] = o.n_notStacked;
+            buffer[buffer.Length - 9] = o.n_noRearrange;
+            bufferSensor.AppendObservation(buffer);//ob.reward
         }
     }
 
@@ -160,7 +158,7 @@ public class FindIndexAgent : AgentBase {
     }
 
     public override void OnActionReceived(ActionBuffers actions) {
-        lastReward = obList.Select(o => o.reward).Max();
+        //lastReward = obList.Select(o => o.reward).Max();
 
         var t = actions.ContinuousActions[0] / 2f + 0.5f;
         var e = actions.ContinuousActions[1] / 2f + 0.5f;
@@ -185,20 +183,28 @@ public class FindIndexAgent : AgentBase {
             o.reward = CalculateReward(o);
         }
 
-        AddReward(obList.Select(o => o.reward).Max() - lastReward);
+        AddReward(obList.Select(o => o.reward).Max());
 
-        if (train_times++ >= 10) {
-            train_times = 0;
-            EndEpisode();
-            var rewardList = obList.Select(o => o.reward).ToList();
-            objs.StackField.TrainingResult = obList[rewardList.IndexOf(rewardList.Max())].index;
-            objs.StateMachine.TriggerByState(
-            objs.Crane.ContainerCarrying.CompareTag("container_in")
-            || objs.Crane.ContainerCarrying.CompareTag("container_temp")
-            ? "MoveIn" : "Rearrange");
-        } else {
-            RequestDecision();
-        }
+        EndEpisode();
+        var rewardList = obList.Select(o => o.reward).ToList();
+        objs.StackField.TrainingResult = obList[rewardList.IndexOf(rewardList.Max())].index;
+        objs.StateMachine.TriggerByState(
+        objs.Crane.ContainerCarrying.CompareTag("container_in")
+        || objs.Crane.ContainerCarrying.CompareTag("container_temp")
+        ? "MoveIn" : "Rearrange");
+
+        //if (train_times++ >= 10) {
+        //    train_times = 0;
+        //    EndEpisode();
+        //    var rewardList = obList.Select(o => o.reward).ToList();
+        //    objs.StackField.TrainingResult = obList[rewardList.IndexOf(rewardList.Max())].index;
+        //    objs.StateMachine.TriggerByState(
+        //    objs.Crane.ContainerCarrying.CompareTag("container_in")
+        //    || objs.Crane.ContainerCarrying.CompareTag("container_temp")
+        //    ? "MoveIn" : "Rearrange");
+        //} else {
+        //    RequestDecision();
+        //}
     }
 
     private float CalculateReward(FindIndexObservationObject ob, bool isHeuristic = false) {

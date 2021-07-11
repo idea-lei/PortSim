@@ -94,7 +94,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_SensorName: ContainerInBufferSensor
-  m_ObservableSize: 2
+  m_ObservableSize: 27
   m_MaxNumObservables: 25
 --- !u!1 &6453442298091025688
 GameObject:
@@ -304,7 +304,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_SensorName: IndexBufferSensor
-  m_ObservableSize: 9
+  m_ObservableSize: 34
   m_MaxNumObservables: 25
 --- !u!1 &6620697767243008484
 GameObject:
@@ -433,7 +433,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_SensorName: ContainerOutBufferSensor
-  m_ObservableSize: 2
+  m_ObservableSize: 27
   m_MaxNumObservables: 25
 --- !u!1 &6983714008121432362
 GameObject:
