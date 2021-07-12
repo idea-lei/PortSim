@@ -25,8 +25,8 @@
     public static readonly float SpeedScale = 10f;
     public static readonly float Vy_Loaded = 6f;
     public static readonly float Vy_Unloaded = 15f;
-    public static readonly float Vx_Loaded = 5f;
-    public static readonly float Vx_Unloaded = 5f;
+    public static readonly float Vx_Loaded = 8f;
+    public static readonly float Vx_Unloaded = 8f;
     public static readonly float Vz_Loaded = 20f;
     public static readonly float Vz_Unloaded = 20f;
 

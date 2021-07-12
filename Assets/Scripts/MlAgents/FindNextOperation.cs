@@ -64,7 +64,7 @@ public class FindNextOperation : Agent {
         objs.Crane.OpObj.Container = container;
         objs.Crane.OpObj.PickUpPos = container.transform.position;
         objs.Crane.OpObj.StackPos = Ob.TargetField.IndexToGlobalPosition(index);
-
+        objs.Crane.OpObj.TargetField = Ob.TargetField;
         objs.StateMachine.TriggerByState("PickUp");
 
         // check script "Field->AddToGround", for AddReward if nex operation is moving out

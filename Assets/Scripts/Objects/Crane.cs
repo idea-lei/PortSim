@@ -13,10 +13,9 @@ using UnityEngine;
 [Serializable]
 public class OpObject {
     public Container Container;
+    public Field TargetField;
     public string State;
-
     public Vector3 PickUpPos;
-
     public Vector3 StackPos;
 }
 
@@ -58,11 +57,12 @@ public class Crane : MonoBehaviour {
         setStateMachineGeneralEvents();
         setStateWaitEvents();
         //setStateFindPickUpEvents();
+        setStateOperateEvents();
         setStatePickUpEvents();
-        setStateMoveInEvents();
+        //setStateMoveInEvents();
         setStateDecisionEvents();
-        setStateMoveOutEvents();
-        setStateRearrangeEvents();
+        //setStateMoveOutEvents();
+        //setStateRearrangeEvents();
         //setStateMoveTempEvents();
     }
 
@@ -74,8 +74,10 @@ public class Crane : MonoBehaviour {
                 if (OpObj.Container == other.GetComponent<Container>()) {
                     ContainerCarrying = other.GetComponent<Container>();
                     destination = OpObj.StackPos;
+                } else {
+                    SimDebug.LogError(this, "target is not the touched");
                 }
-                objs.StateMachine.TriggerByState(OpObj.State);
+                objs.StateMachine.TriggerByState("Operate");
                 return;
             }
         }
@@ -220,7 +222,7 @@ public class Crane : MonoBehaviour {
                 agent.Ob = new ObservationFindOperation() {
                     Containers = objs.OutContainersOnPeak.ToList(),
                     TargetField = objs.IoPorts[0].CurrentField,
-                    State = "MoveOut",
+                    State = "container_out",
                     AvailableIndices = objs.IoPorts[0].CurrentField.AvailableIndices
                 };
                 agent.RequestDecision();
@@ -231,7 +233,7 @@ public class Crane : MonoBehaviour {
                 agent.Ob = new ObservationFindOperation() {
                     Containers = objs.PeakContainersToRelocate.ToList(),
                     TargetField = objs.StackField,
-                    State = "Relocate",
+                    State = "container_rearrange",
                     AvailableIndices = objs.StackField.AvailableIndices.Except(objs.OutContainersIndices).ToList()
                 };
                 agent.RequestDecision();
@@ -241,9 +243,9 @@ public class Crane : MonoBehaviour {
             // move in
             if (canPickUp_In) {
                 agent.Ob = new ObservationFindOperation() {
-                    Containers = objs.InContainers.ToList(),
+                    Containers = objs.InContainersOnPeak.ToList(),
                     TargetField = objs.StackField,
-                    State = "MoveIn",
+                    State = "container_in",
                     AvailableIndices = objs.StackField.AvailableIndices
                 };
                 agent.RequestDecision();
@@ -304,6 +306,24 @@ public class Crane : MonoBehaviour {
     //    });
     //}
 
+    private void setStateOperateEvents() {
+        var state = stateMachine.Graph.GetState("Operate");
+        state.OnEnterState.AddListener(() => {
+            if(ContainerCarrying == null) {
+                SimDebug.LogError(this, "container carrying is null");
+                return;
+            }
+            ContainerCarrying.tag = OpObj.State;
+            destination = OpObj.StackPos;
+        });
+        state.OnExitState.AddListener(() => {
+            OpObj.TargetField.AddToGround(ContainerCarrying);
+            ContainerCarrying = null;
+            OpObj = null;
+            objs.FindNextOperationAgent.Ob = null;
+        });
+    }
+
     private void setStateMoveInEvents() {
         var state = stateMachine.Graph.GetState("MoveIn");
         state.OnEnterState.AddListener(() => {
@@ -348,9 +368,6 @@ public class Crane : MonoBehaviour {
 
         state.OnExitState.AddListener(() => {
             ContainerCarrying.OutField.AddToGround(ContainerCarrying);
-            if (ContainerCarrying.OutField.Finished) {
-                ContainerCarrying.OutField.DestroyField();
-            }
             ContainerCarrying = null;
             OpObj = null;
             objs.FindNextOperationAgent.Ob = null;

@@ -15,7 +15,7 @@ public sealed class StackField : Field {
     }
     private void Start() {
         initField(GetComponentInParent<ObjectCollection>().IoFieldsGenerator);
-        //initContainers();
+        initContainers();
     }
 
     public override void AddToGround(Container container) {

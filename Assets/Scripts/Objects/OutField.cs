@@ -39,6 +39,13 @@ public class OutField : IoField {
         }
     }
 
+    public override void AddToGround(Container container) {
+        base.AddToGround(container);
+        if (Finished) {
+            DestroyField();
+        }
+    }
+
     public override void DestroyField() {
         objs.Evaluation.UpdateEvaluation(GetComponentsInChildren<Container>());
         base.DestroyField();

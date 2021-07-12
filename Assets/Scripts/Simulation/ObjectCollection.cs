@@ -72,6 +72,17 @@ public class ObjectCollection : MonoBehaviour {
         }
     }
 
+    public Container[] InContainersOnPeak {
+        get {
+            if (!HasInField) return new Container[0];
+            var list = new List<Container>();
+            foreach(var s in Infields[0].Ground) {
+                if (s.Count > 0) list.Add(s.Peek());
+            }
+            return list.ToArray();
+        }
+    }
+
     public Container[] OutContainers {
         get {
             if (!HasOutField) return new Container[0];

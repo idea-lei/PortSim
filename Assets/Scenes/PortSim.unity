@@ -1137,30 +1137,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   graph:
     states:
-    - position: {x: 654.2744, y: 343.27817}
+    - position: {x: 872.9584, y: 256.43225}
       id: PickUp
-      onEnterState:
-        m_PersistentCalls:
-          m_Calls: []
-      onExitState:
-        m_PersistentCalls:
-          m_Calls: []
-      onUpdateState:
-        m_PersistentCalls:
-          m_Calls: []
-    - position: {x: 953.6511, y: 259.97296}
-      id: Relocate
-      onEnterState:
-        m_PersistentCalls:
-          m_Calls: []
-      onExitState:
-        m_PersistentCalls:
-          m_Calls: []
-      onUpdateState:
-        m_PersistentCalls:
-          m_Calls: []
-    - position: {x: 951.99805, y: 341.41824}
-      id: MoveOut
       onEnterState:
         m_PersistentCalls:
           m_Calls: []
@@ -1181,17 +1159,6 @@ MonoBehaviour:
       onUpdateState:
         m_PersistentCalls:
           m_Calls: []
-    - position: {x: 953.8613, y: 173.91458}
-      id: MoveIn
-      onEnterState:
-        m_PersistentCalls:
-          m_Calls: []
-      onExitState:
-        m_PersistentCalls:
-          m_Calls: []
-      onUpdateState:
-        m_PersistentCalls:
-          m_Calls: []
     - position: {x: 652.27106, y: 256.05463}
       id: Decision
       onEnterState:
@@ -1203,56 +1170,19 @@ MonoBehaviour:
       onUpdateState:
         m_PersistentCalls:
           m_Calls: []
+    - position: {x: 871.25226, y: 173.59636}
+      id: Operate
+      onEnterState:
+        m_PersistentCalls:
+          m_Calls: []
+      onExitState:
+        m_PersistentCalls:
+          m_Calls: []
+      onUpdateState:
+        m_PersistentCalls:
+          m_Calls: []
     anyStates: []
     transitions:
-    - id: PickUp2MoveOut
-      label: 
-      originID: PickUp
-      targetID: MoveOut
-      onEnterTransition:
-        m_PersistentCalls:
-          m_Calls: []
-      onExitTransition:
-        m_PersistentCalls:
-          m_Calls: []
-      duration: 0
-      timeMode: 0
-    - id: MoveIn2Wait
-      label: 
-      originID: MoveIn
-      targetID: Wait
-      onEnterTransition:
-        m_PersistentCalls:
-          m_Calls: []
-      onExitTransition:
-        m_PersistentCalls:
-          m_Calls: []
-      duration: 0
-      timeMode: 0
-    - id: MoveOut2Wait
-      label: 
-      originID: MoveOut
-      targetID: Wait
-      onEnterTransition:
-        m_PersistentCalls:
-          m_Calls: []
-      onExitTransition:
-        m_PersistentCalls:
-          m_Calls: []
-      duration: 0
-      timeMode: 0
-    - id: Transition
-      label: 
-      originID: Relocate
-      targetID: Wait
-      onEnterTransition:
-        m_PersistentCalls:
-          m_Calls: []
-      onExitTransition:
-        m_PersistentCalls:
-          m_Calls: []
-      duration: 0
-      timeMode: 0
     - id: Transition 12
       label: 
       originID: Decision
@@ -1289,10 +1219,10 @@ MonoBehaviour:
           m_Calls: []
       duration: 0
       timeMode: 0
-    - id: Transition 1
+    - id: Transition 3
       label: 
       originID: PickUp
-      targetID: Relocate
+      targetID: Operate
       onEnterTransition:
         m_PersistentCalls:
           m_Calls: []
@@ -1301,10 +1231,10 @@ MonoBehaviour:
           m_Calls: []
       duration: 0
       timeMode: 0
-    - id: Transition 2
+    - id: Transition 4
       label: 
-      originID: PickUp
-      targetID: MoveIn
+      originID: Operate
+      targetID: Wait
       onEnterTransition:
         m_PersistentCalls:
           m_Calls: []
@@ -1337,6 +1267,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   OpObj:
     Container: {fileID: 0}
+    TargetField: {fileID: 0}
     State: 
     PickUpPos: {x: 0, y: 0, z: 0}
     StackPos: {x: 0, y: 0, z: 0}
