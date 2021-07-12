@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
@@ -10,11 +11,14 @@ public class ObservationFindOperation {
     public List<Container> Containers;
     public Field TargetField;
     public List<IndexInStack> AvailableIndices;
-    public string State; 
+    public string State;
 }
 
 public class FindNextOperation : Agent {
+
     private ObjectCollection objs;
+    [SerializeField] private BufferSensorComponent containerBuffer;
+    [SerializeField] private BufferSensorComponent indexBuffer;
 
     [SerializeField] private float c_t = 0.5f;
     [SerializeField] private float c_e = 0.5f;
@@ -36,28 +40,71 @@ public class FindNextOperation : Agent {
             return;
         }
 
+        // is out field? for out field, dont consider the time difference
+        sensor.AddObservation(Ob.TargetField is OutField);
 
+        // crane pos
+        var cranePos = objs.Crane.transform.position - objs.transform.position;
+        sensor.AddObservation(cranePos.x);
+        sensor.AddObservation(cranePos.z);
+
+        // container buffer
+        foreach (var c in Ob.Containers) {
+            var list = new float[Parameters.DimX * Parameters.DimZ + 4];
+            var vec = c.transform.position - objs.transform.position;
+            list[Ob.Containers.IndexOf(c)] = 1;
+            list[list.Length - 1] = vec.z / (objs.StackField.transform.localScale.z * 10); // plane init size is 10
+            list[list.Length - 2] = vec.x / (objs.StackField.transform.localScale.x * 10);
+            list[list.Length - 3] = (float)(c.OutField.TimePlaned - DateTime.Now).TotalSeconds / 600; // normalization
+            list[list.Length - 4] = 1; // if this buffer is manually added, to train the out-of-range problem
+        }
+
+        // index buffer
+        foreach (var i in Ob.AvailableIndices) {
+            bool needRelocation = Ob.TargetField is StackField stackField && stackField.IsStackNeedRearrange(i);
+
+            var list = new float[Parameters.DimX * Parameters.DimZ + 4];
+            list[Ob.AvailableIndices.IndexOf(i)] = 1;
+            list[list.Length - 1] = i.z / (float)Parameters.DimZ;
+            list[list.Length - 2] = i.x / (float)Parameters.DimX;
+            list[list.Length - 3] = needRelocation ? 1 : 0;
+            list[list.Length - 4] = 1; // if this buffer is manually added, to train the out-of-range problem
+        }
     }
 
     public override void Heuristic(in ActionBuffers actionsOut) {
         var actOut = actionsOut.DiscreteActions;
-        actOut[0] = Random.Range(0, Ob.Containers.Count);
-        actOut[1] = Random.Range(0, Ob.AvailableIndices.Count);
+
+        int cIndex = 0;
+        int iIndex = 0;
+        float reward = Mathf.NegativeInfinity;
+
+        foreach(var c in Ob.Containers) {
+            foreach(var i in Ob.AvailableIndices) {
+                float r = CalculateReward(c, i);
+                if (r> reward) {
+                    reward = r;
+                    cIndex = Ob.Containers.IndexOf(c);
+                    iIndex = Ob.AvailableIndices.IndexOf(i);
+                }
+            }
+        }
+
+        actOut[0] = cIndex;
+        actOut[1] = iIndex;
     }
 
     public override void OnActionReceived(ActionBuffers actions) {
-        if(actions.DiscreteActions[0] >= Ob.Containers.Count) {
-            AddReward(-1);
+        if (actions.DiscreteActions[0] >= Ob.Containers.Count || actions.DiscreteActions[1] >= Ob.AvailableIndices.Count) {
+            AddReward(-0.1f);
             RequestDecision();
             return;
         }
-        if (actions.DiscreteActions[1] >= Ob.AvailableIndices.Count) {
-            AddReward(-1);
-            RequestDecision();
-            return;
-        }
+
         var index = Ob.AvailableIndices[actions.DiscreteActions[1]];
         var container = Ob.Containers[actions.DiscreteActions[0]];
+
+        AddReward(CalculateReward(container, index));
 
         objs.Crane.OpObj = new OpObject();
         objs.Crane.OpObj.State = Ob.State;
@@ -67,6 +114,32 @@ public class FindNextOperation : Agent {
         objs.Crane.OpObj.TargetField = Ob.TargetField;
         objs.StateMachine.TriggerByState("PickUp");
 
-        // check script "Field->AddToGround", for AddReward if nex operation is moving out
+        objs.FindNextOperationAgent.EndEpisode();
+    }
+
+    float CalculateReward(Container container, IndexInStack index) {
+        float reward = 0;
+
+        // relocation reward
+        if (Ob.TargetField is StackField field) {
+            if (field.IsStackNeedRearrange(index)) reward -= 1f;
+            var peak = field.Ground[index.x, index.z].Count > 0 ? field.Ground[index.x, index.z].Peek() : null;
+            if (peak != null && container.OutField.TimePlaned > peak.OutField.TimePlaned) {
+                reward -= 1f;
+            } else reward += 1f;
+        }
+
+        // time reward
+        var crane = objs.Crane;
+        var f = Ob.TargetField;
+        var vec1 = crane.transform.position - container.transform.position;
+        var vec2 = container.transform.position - f.IndexToGlobalPosition(index);
+        float tx = Mathf.Abs(vec1.x) / Parameters.Vx_Unloaded + Mathf.Abs(vec2.x) / Parameters.Vx_Loaded;
+        float tz = Mathf.Abs(vec1.z) / Parameters.Vz_Unloaded + Mathf.Abs(vec2.z) / Parameters.Vz_Loaded;
+
+        if (objs == null) objs = GetComponentInParent<ObjectCollection>();
+        reward += 0.3f / (float)((tx + tz) * Time.timeScale * Parameters.SpeedScale);
+        
+        return reward;
     }
 }

@@ -57,4 +57,8 @@ public sealed class StackField : Field {
         if (min != stack.Peek()) return true;
         return false;
     }
+
+    public bool IsStackNeedRearrange(IndexInStack idx) {
+        return IsStackNeedRearrange(Ground[idx.x, idx.x]);
+    }
 }

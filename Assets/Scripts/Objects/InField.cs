@@ -24,7 +24,7 @@ public sealed class InField : IoField {
     }
 
     protected override void initField(IoFieldsGenerator generator) {
-        TimePlaned = DateTime.Now + GenerateRandomTimeSpan();
+        TimePlaned = DateTime.Now + GenerateRandomTimeSpan(true);
         base.initField(generator);
         initContainers();
     }

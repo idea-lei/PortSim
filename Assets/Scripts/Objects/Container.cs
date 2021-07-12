@@ -19,15 +19,9 @@ public class Container : MonoBehaviour {
     [SerializeField] private Field _currentField;
     public Field CurrentField {
         get => _currentField;
-        set {
-            _currentField = value;
-            if (value && !(value is StackField)) {
-                StackedIndices.Clear();
-            }
-        }
+        set => _currentField = value;
     }
     public IndexInStack IndexInCurrentField;
-    [SerializeField] public HashSet<IndexInStack> StackedIndices = new HashSet<IndexInStack>();
 
     private StateMachine stateMachine;
 

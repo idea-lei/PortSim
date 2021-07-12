@@ -62,13 +62,19 @@ public class IoPort : MonoBehaviour {
         // calculate sum count of containers
         int sumCount = objs.StackField.Count;
         if (objs.Crane.ContainerCarrying) sumCount++;
-        foreach (var t in objs.TempFields) sumCount += t.Count;
+        //foreach (var t in objs.TempFields) sumCount += t.Count;
         foreach (var i in objs.IoPorts) if (i.CurrentField is InField) sumCount += i.CurrentField.Count;
 
         IoField next = sumCount >= objs.StackField.MaxCount ? fieldsBuffer.Find(f => f is OutField) : fieldsBuffer[0];
         if (nextField != next) nextField = next;
 
         if (nextField != null && nextField.TimePlaned < DateTime.Now) {
+            if(nextField is InField inField) {
+                if(inField.Count + objs.StackField.Count >= objs.StackField.MaxCount) {
+                    delayField(nextField);
+                    return;
+                }
+            }
             if (nextField is OutField) {
                 foreach (var c in ((OutField)nextField).IncomingContainers) {
                     // means the inField is still not enabled

@@ -131,12 +131,12 @@ public class FindContainerInAgent : AgentBase {
     }
 
     private Container findContainerToMoveIn() {
-        foreach (var t in objs.TempFields) {
-            if (t.IsGroundEmpty) continue;
-            foreach (var s in t.Ground) {
-                if (s.Count > 0) return s.Peek();
-            }
-        }
+        //foreach (var t in objs.TempFields) {
+        //    if (t.IsGroundEmpty) continue;
+        //    foreach (var s in t.Ground) {
+        //        if (s.Count > 0) return s.Peek();
+        //    }
+        //}
         /*if (stackField.Count + 1 >= stackField.MaxCount) return null;*/ // avoid full stack, otherwise will be no arrange possible
         if (objs.StackField.Count >= objs.StackField.MaxCount) return null;
         foreach (var p in objs.IoPorts) {

@@ -92,11 +92,11 @@ public class StackBehavior : Agent {
             for (int z = 0; z < stackField.DimZ; z++) {
                 //// index is available if it is not full and not stacked
                 if (stackField.IsIndexFull(x, z)) continue;
-                if (crane.ContainerCarrying.StackedIndices.Any(i => i == new IndexInStack(x, z))) continue;
+                //if (crane.ContainerCarrying.StackedIndices.Any(i => i == new IndexInStack(x, z))) continue;
 
                 var ob = new ObservationObject {
                     index = new IndexInStack(x, z),
-                    notStacked = crane.ContainerCarrying.StackedIndices.All(i => i.x != x || i.z != z),
+                    //notStacked = crane.ContainerCarrying.StackedIndices.All(i => i.x != x || i.z != z),
                     layer = stackField.Ground[x, z].Count,
                     noRearrange = !stackField.IsStackNeedRearrange(stackField.Ground[x, z])
                 };

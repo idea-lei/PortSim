@@ -13,10 +13,10 @@ public class ObjectCollection : MonoBehaviour {
     public StateMachine StateMachine;
     public IoFieldsGenerator IoFieldsGenerator;
     public IoPort[] IoPorts;
-    public TempField[] TempFields;
-    public FindContainerInAgent FindContainerInAgent;
-    public FindContainerOutAgent FindContainerOutAgent;
-    public FindIndexAgent FindIndexAgent;
+    //public TempField[] TempFields;
+    //public FindContainerInAgent FindContainerInAgent;
+    //public FindContainerOutAgent FindContainerOutAgent;
+    //public FindIndexAgent FindIndexAgent;
     public FindNextOperation FindNextOperationAgent;
     [HideInInspector] public Evaluation Evaluation;
 

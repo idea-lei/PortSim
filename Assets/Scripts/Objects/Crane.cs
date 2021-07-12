@@ -230,11 +230,15 @@ public class Crane : MonoBehaviour {
             }
             // relocation
             if (objs.OutContainers.Length > 0) {
+                var indices = objs.StackField.AvailableIndices.Except(objs.OutContainersIndices);
+                if (indices.Count() == 0) {
+                    indices = objs.StackField.AvailableIndices;
+                }
                 agent.Ob = new ObservationFindOperation() {
                     Containers = objs.PeakContainersToRelocate.ToList(),
                     TargetField = objs.StackField,
                     State = "container_rearrange",
-                    AvailableIndices = objs.StackField.AvailableIndices.Except(objs.OutContainersIndices).ToList()
+                    AvailableIndices = indices.ToList()
                 };
                 agent.RequestDecision();
                 return;
@@ -280,10 +284,10 @@ public class Crane : MonoBehaviour {
         var state = stateMachine.Graph.GetState("PickUp");
         state.OnEnterState.AddListener(() => {
 
-            if (OpObj?.Container == null || OpObj.Container.CurrentField.isActiveAndEnabled) {
-                Debug.LogWarning("container to pick is null or the field is not enabled");
-                stateMachine.TriggerByState("Wait");
-            }
+            //if (OpObj?.Container == null || OpObj.Container.CurrentField.isActiveAndEnabled) {
+            //    Debug.LogWarning("container to pick is null or the field is not enabled");
+            //    stateMachine.TriggerByState("Wait");
+            //}
         });
         state.OnExitState.AddListener(() => {
             if (ContainerCarrying) {

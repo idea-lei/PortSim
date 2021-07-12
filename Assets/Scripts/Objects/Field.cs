@@ -74,10 +74,6 @@ public abstract class Field : MonoBehaviour {
     protected ObjectCollection objs;
     #endregion
 
-    private void Start() {
-        objs = GetComponentInParent<ObjectCollection>();
-    }
-
     #region logic methods
 
     /// <summary>
@@ -107,23 +103,16 @@ public abstract class Field : MonoBehaviour {
         if (!IsAbleToAddContainerToIndex(index)) {
             SimDebug.LogError(this, "can not add container to index!");
         }
-        if (this is OutField) {
-            foreach (var c in GetComponentInParent<ObjectCollection>().StackField.GetComponents<Container>()) {
-                if (c.StackedIndices.Any(i => i == container.IndexInCurrentField)) {
-                    c.StackedIndices.Remove(c.StackedIndices.Single(i => i == container.IndexInCurrentField));
-                }
-                objs.FindNextOperationAgent.AddReward(2 / (float)container.TotalMoveTime.TotalMinutes); // scale 2 times
-                objs.FindNextOperationAgent.EndEpisode();
-            }
-        }
+
         container.transform.SetParent(transform);
         Ground[index.x, index.z].Push(container);
         if (container.StartMoveTime.HasValue) {
-            container.TotalMoveTime += DateTime.Now - container.StartMoveTime.Value;
+            var timespan = DateTime.Now - container.StartMoveTime.Value;
+            container.TotalMoveTime += timespan;
             container.StartMoveTime = null;
         }
         if (this is StackField) {
-            container.StackedIndices.Add(index);
+            //container.StackedIndices.Add(index);
             container.RearrangeCount += 1;
         }
 

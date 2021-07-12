@@ -10,9 +10,9 @@ public static class SimDebug {
         var objectCollection = sender.GetComponentInParent<ObjectCollection>();
         //GameObject.Destroy(objectCollection.gameObject);
 
-        foreach(var t in objectCollection.TempFields) {
-            t.GetComponent<MeshRenderer>().material.color = Color.red;
-        }
+        //foreach(var t in objectCollection.TempFields) {
+        //    t.GetComponent<MeshRenderer>().material.color = Color.red;
+        //}
         //var c = objectCollection.StackField.gameObject;
         //c.GetComponent<MeshRenderer>().material.color = Color.red;
         Debug.LogError(e);
