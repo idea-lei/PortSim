@@ -3,15 +3,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Unity.MLAgents;
 using UnityEngine;
 
 public sealed class StackField : Field {
     public IndexInStack TrainingResult;
 
+    EnvironmentParameters envParams;
+
     private void Awake() {
         DimX = Parameters.DimX;
         DimZ = Parameters.DimZ;
         MaxLayer = Parameters.MaxLayer;
+        envParams = Academy.Instance.EnvironmentParameters;
     }
     private void Start() {
         initField(GetComponentInParent<ObjectCollection>().IoFieldsGenerator);
@@ -28,20 +32,22 @@ public sealed class StackField : Field {
     /// </summary>
     public void initContainers() {
         int i = 0;
-        for (int x = 0; x < DimX; x++) {
-            for (int k = 0; k < Parameters.MaxLayer; k++) {
-                for (int z = 0; z < DimZ; z++) {
-                    if (i++ < Parameters.DimZ * (Parameters.MaxLayer - 1) + 1) {
-                        var idx = new IndexInStack(x, z);
-                        var pos = IndexToLocalPositionInWorldScale(idx);
-                        var container = generateContainer(pos);
-                        container.IndexInCurrentField = idx;
-                        AddToGround(container, idx);
-                        assignOutField(container, DateTime.Now);
-                        container.tag = "container_stacked";
-                    }
-                }
+        int amount = (int)envParams.GetWithDefault("amount", Parameters.DimZ * (Parameters.MaxLayer - 1) + 1);
+        for (int x = 0; x < DimX; x++) { // x for crp is always 1
 
+            while (i < amount) {
+                int z = UnityEngine.Random.Range(0, Parameters.DimZ);
+
+                var idx = new IndexInStack(x, z);
+                if (IsIndexFull(idx)) continue;
+
+                i++;
+                var pos = IndexToLocalPositionInWorldScale(idx);
+                var container = generateContainer(pos);
+                container.IndexInCurrentField = idx;
+                AddToGround(container, idx);
+                assignOutField(container, DateTime.Now);
+                container.tag = "container_stacked";
             }
         }
     }

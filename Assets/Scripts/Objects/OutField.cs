@@ -43,6 +43,7 @@ public class OutField : IoField {
         base.AddToGround(container);
         if (objs == null) objs = GetComponentInParent<ObjectCollection>();
         objs.CRPAgent.AddReward(1f);
+        objs.CRPAgent.EndEpisode();
         if (Finished) {
             DestroyField();
         }
@@ -51,7 +52,6 @@ public class OutField : IoField {
     public override void DestroyField() {
         if (objs == null) objs = GetComponentInParent<ObjectCollection>();
         if (objs.StackField.Count == 0) {
-            objs.CRPAgent.EndEpisode();
             Invoke(nameof(initNewContainers), 2);
         }
         Evaluation.Instance.UpdateEvaluation(GetComponentsInChildren<Container>());
