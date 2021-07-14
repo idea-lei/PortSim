@@ -107,11 +107,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 87133066f541e85409c7f38112b3972f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _outField: {fileID: 0}
+  Weight: 0
   InField: {fileID: 0}
+  _currentField: {fileID: 0}
   IndexInCurrentField:
     IsValid: 0
     x: 0
     z: 0
+  totalTimeDisplay: 
+  RearrangeCount: 0
 --- !u!54 &-5065814070759011496
 Rigidbody:
   m_ObjectHideFlags: 0

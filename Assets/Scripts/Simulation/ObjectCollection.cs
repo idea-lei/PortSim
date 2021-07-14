@@ -14,6 +14,7 @@ public class ObjectCollection : MonoBehaviour {
     public IoFieldsGenerator IoFieldsGenerator;
     public IoPort[] IoPorts;
     public FindNextOperation FindNextOperationAgent;
+    public CRPAgent CRPAgent;
     [HideInInspector] public Evaluation Evaluation;
 
     public OutField[] OutFields {
@@ -135,13 +136,16 @@ public class ObjectCollection : MonoBehaviour {
 
     private void Start() {
         InvokeRepeating(nameof(CheckStackFull), 10 + Random.Range(-5, 5), 10);
-        InvokeRepeating(nameof(DestoryGameObject), 60, 60); // for training, dont make too many empty indices
+        //InvokeRepeating(nameof(DestoryGameObject), 10, 10); // for training, dont make too many empty indices
     }
 
     private void DestoryGameObject() {
-        if (StackField.Count < 15)
+        if (StackField.Count == 0) {
             Destroy(gameObject);
+        }
     }
+
+
 
     // if stack field full and still has inField, destroy the object
     private void CheckStackFull() {

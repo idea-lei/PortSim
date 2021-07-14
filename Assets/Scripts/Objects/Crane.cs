@@ -50,6 +50,8 @@ public class Crane : MonoBehaviour {
 
     private StateMachine stateMachine;
 
+    public float TranslationHeight;
+
     private void Awake() {
         objs = GetComponentInParent<ObjectCollection>();
         stateMachine = GetComponent<StateMachine>();
@@ -64,6 +66,10 @@ public class Crane : MonoBehaviour {
         //setStateMoveOutEvents();
         //setStateRearrangeEvents();
         //setStateMoveTempEvents();
+    }
+
+    private void Start() {
+        TranslationHeight = 20;
     }
 
     private void OnTriggerEnter(Collider other) {
@@ -136,7 +142,7 @@ public class Crane : MonoBehaviour {
 
     #region private methods
     private void moveToWaitPosition() {
-        if (Parameters.TranslationHeight - transform.position.y > Parameters.DistanceError)
+        if (TranslationHeight - transform.position.y > Parameters.DistanceError)
             transform.position += new Vector3(0, Parameters.Vy_Unloaded * Time.deltaTime, 0);
         else reachedTop = true;
     }
@@ -162,6 +168,7 @@ public class Crane : MonoBehaviour {
                 break;
         }
         transform.position += step * Time.fixedDeltaTime;
+        //objs.CRPAgent.AddReward(-0.001f);
     }
 
     private void moveTo(Vector3 position, bool isLoaded) {
@@ -176,7 +183,7 @@ public class Crane : MonoBehaviour {
     /// <returns>the movement period</returns>
     private Movement moveState(Vector2 destination) {
         if (!reachedTop) {
-            if (Parameters.TranslationHeight - transform.position.y > Parameters.DistanceError) return Movement.up;
+            if (TranslationHeight - transform.position.y > Parameters.DistanceError) return Movement.up;
             else reachedTop = true;
         }
         var actualPos = new Vector2(transform.position.x, transform.position.z);
@@ -215,33 +222,39 @@ public class Crane : MonoBehaviour {
                 SimDebug.LogError(this, "container to pick is not null when making pickup decision");
                 return;
             }
-            var agent = objs.FindNextOperationAgent;
+            //var agent = objs.FindNextOperationAgent;
+            var agent = objs.CRPAgent;
 
             // move out
             if (canPickUp_Out) {
-                agent.Ob = new ObservationFindOperation() {
+                Debug.Log(objs.IoPorts[0].CurrentField.AvailableIndices);
+                var Ob = new ObservationFindOperation() {
                     ContainerField = objs.StackField,
                     Containers = objs.OutContainersOnPeak.ToList(),
                     TargetField = objs.IoPorts[0].CurrentField,
                     State = "container_out",
                     AvailableIndices = objs.IoPorts[0].CurrentField.AvailableIndices
                 };
-                agent.RequestDecision();
+                //agent.RequestDecision();
+                OpObj = new OpObject();
+                OpObj.State = Ob.State;
+                OpObj.Container = Ob.Containers[0];
+                OpObj.PickUpPos = Ob.Containers[0].transform.position;
+                OpObj.StackPos = Ob.TargetField.IndexToGlobalPosition(objs.IoPorts[0].CurrentField.AvailableIndices[0]);
+                OpObj.TargetField = Ob.TargetField;
+                objs.StateMachine.TriggerByState("PickUp");
+                //agent.RequestDecision();
                 return;
             }
             // relocation
             if (objs.OutContainers.Length > 0) {
-                var indices = objs.StackField.AvailableIndices.Except(objs.OutContainersIndices);
-                if (indices.Count() == 0) {
-                    indices = objs.StackField.AvailableIndices;
-                }
-                agent.Ob = new ObservationFindOperation() {
-                    ContainerField = objs.StackField,
-                    Containers = objs.PeakContainersToRelocate.ToList(),
-                    TargetField = objs.StackField,
+                OpObj = new OpObject {
+                    Container = objs.PeakContainersToRelocate[0],
                     State = "container_rearrange",
-                    AvailableIndices = indices.ToList()
+                    TargetField = objs.StackField
                 };
+                OpObj.PickUpPos = OpObj.Container.transform.position;
+
                 agent.RequestDecision();
                 return;
             }

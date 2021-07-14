@@ -33,9 +33,12 @@ public abstract class IoField : Field, IComparable<IoField> {
 
     #region logic methods
     protected override void initField(IoFieldsGenerator generator) {
-        DimX = UnityEngine.Random.Range(1, Parameters.DimX - Parameters.MinDim);
-        DimZ = UnityEngine.Random.Range(1, Parameters.DimZ - Parameters.MinDim);
-        MaxLayer = UnityEngine.Random.Range(1, Parameters.MaxLayer - Parameters.MinDim);
+        //DimX = UnityEngine.Random.Range(1, Parameters.DimX - Parameters.MinDim);
+        //DimZ = UnityEngine.Random.Range(1, Parameters.DimZ - Parameters.MinDim);
+        //MaxLayer = UnityEngine.Random.Range(1, Parameters.MaxLayer - Parameters.MinDim);
+        DimX = 1;
+        DimZ = 1;
+        MaxLayer = 1;
         TimePlaned = DateTime.Now + GenerateRandomTimeSpan();
         base.initField(generator);
     }
@@ -65,7 +68,6 @@ public abstract class IoField : Field, IComparable<IoField> {
     /// </summary>
     public virtual void DestroyField() {
         if (objs == null) objs = GetComponentInParent<ObjectCollection>();
-        objs.FindNextOperationAgent.EndEpisode();
         Invoke(nameof(disableField), Parameters.EventDelay);
         Destroy(gameObject, Parameters.EventDelay * 2);
     }
@@ -81,7 +83,8 @@ public abstract class IoField : Field, IComparable<IoField> {
     }
 
     public static TimeSpan GenerateRandomTimeSpan(bool isInField = false) {
-        return TimeSpan.FromSeconds(UnityEngine.Random.Range(0, isInField?30:100));
+        //return TimeSpan.FromSeconds(UnityEngine.Random.Range(0, isInField ? 30 : 100));
+        return TimeSpan.FromSeconds(UnityEngine.Random.Range(0, 10f));
     }
 
     public int CompareTo(IoField other) {

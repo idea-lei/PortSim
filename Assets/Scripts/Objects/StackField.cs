@@ -26,18 +26,22 @@ public sealed class StackField : Field {
     /// <summary>
     /// to generate containers for field
     /// </summary>
-    private void initContainers() {
+    public void initContainers() {
+        int i = 0;
         for (int x = 0; x < DimX; x++) {
-            for (int z = 0; z < DimZ; z++) {
-                for (int k = 0; k <= UnityEngine.Random.Range(0, MaxLayer); k++) {
-                    var idx = new IndexInStack(x, z);
-                    var pos = IndexToLocalPositionInWorldScale(idx);
-                    var container = generateContainer(pos);
-                    container.IndexInCurrentField = idx;
-                    AddToGround(container, idx);
-                    assignOutField(container, DateTime.Now);
-                    container.tag = "container_stacked";
+            for (int k = 0; k < Parameters.MaxLayer; k++) {
+                for (int z = 0; z < DimZ; z++) {
+                    if (i++ < Parameters.DimZ * (Parameters.MaxLayer - 1) + 1) {
+                        var idx = new IndexInStack(x, z);
+                        var pos = IndexToLocalPositionInWorldScale(idx);
+                        var container = generateContainer(pos);
+                        container.IndexInCurrentField = idx;
+                        AddToGround(container, idx);
+                        assignOutField(container, DateTime.Now);
+                        container.tag = "container_stacked";
+                    }
                 }
+
             }
         }
     }

@@ -22,8 +22,8 @@ public class FindNextOperation : Agent {
     [SerializeField] private BufferSensorComponent containerBuffer;
     [SerializeField] private BufferSensorComponent indexBuffer;
 
-    [SerializeField] private float c_t = 0.5f;
-    [SerializeField] private float c_e = 0.5f;
+    //[SerializeField] private float c_t = 0.5f;
+    //[SerializeField] private float c_e = 0.5f;
 
     private float maxObLength;
     private float distanceScaleZ;

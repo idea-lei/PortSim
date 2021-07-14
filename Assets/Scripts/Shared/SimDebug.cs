@@ -8,7 +8,7 @@ using UnityEngine;
 public static class SimDebug {
     public static void LogError(MonoBehaviour sender, string e) {
         var objectCollection = sender.GetComponentInParent<ObjectCollection>();
-        UnityEngine.Object.Destroy(objectCollection.gameObject);
+        //UnityEngine.Object.Destroy(objectCollection.gameObject);
 
         Debug.LogError(e);
     }

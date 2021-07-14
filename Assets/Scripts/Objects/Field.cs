@@ -52,12 +52,23 @@ public abstract class Field : MonoBehaviour {
         }
     }
 
+    public int HighestTier {
+        get {
+            int max = 0;
+            foreach(var s in Ground) {
+                if (s.Count > max) max = s.Count;
+            }
+            return max;
+        }
+    }
+
+
     public List<IndexInStack> AvailableIndices {
         get {
             var indices = new List<IndexInStack>();
-            for(int x = 0; x < DimX; x++) {
+            for (int x = 0; x < DimX; x++) {
                 for (int z = 0; z < DimZ; z++) {
-                    if (Ground[x,z].Count < MaxLayer) indices.Add(new IndexInStack(x,z));
+                    if (Ground[x, z].Count < MaxLayer) indices.Add(new IndexInStack(x, z));
                 }
             }
             return indices;
@@ -126,6 +137,7 @@ public abstract class Field : MonoBehaviour {
     /// <param name="container"></param>
     public virtual void AddToGround(Container container) {
         var index = GlobalPositionToIndex(container.transform.position);
+        Debug.Log(index);
         AddToGround(container, index);
     }
 
@@ -139,6 +151,10 @@ public abstract class Field : MonoBehaviour {
         return null;
     }
     public virtual Container RemoveFromGround(Container c) {
+        if(this is StackField) {
+            if (objs == null) objs = GetComponentInParent<ObjectCollection>();
+            objs.Crane.TranslationHeight = (objs.StackField.HighestTier + 2) * Parameters.ContainerHeight;
+        }
         if (Ground[c.IndexInCurrentField.x, c.IndexInCurrentField.z].Peek() == c) {
             if (c.StartMoveTime != null) {
                 SimDebug.LogError(this, "start move time is not null!");
@@ -152,11 +168,11 @@ public abstract class Field : MonoBehaviour {
 
     public bool IsAbleToAddContainerToIndex(int x, int z) {
         if (x >= DimX || z >= DimZ) {
-            SimDebug.LogError(this, "dimension exceeds");
+            Debug.LogWarning("dimension exceeds");
             return false;
         }
         if (Ground[x, z].Count + 1 > MaxLayer) {
-            SimDebug.LogError(this, "layer exceeds");
+            Debug.LogWarning($"layer exceeds, x = {x}, z = {z}, ");
             return false;
         }
         return true;

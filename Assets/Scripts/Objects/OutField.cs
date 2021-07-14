@@ -41,13 +41,27 @@ public class OutField : IoField {
 
     public override void AddToGround(Container container) {
         base.AddToGround(container);
+        if (objs == null) objs = GetComponentInParent<ObjectCollection>();
+        objs.CRPAgent.AddReward(1f);
         if (Finished) {
             DestroyField();
         }
     }
 
     public override void DestroyField() {
+        if (objs == null) objs = GetComponentInParent<ObjectCollection>();
+        if (objs.StackField.Count == 0) {
+            objs.CRPAgent.EndEpisode();
+            Invoke(nameof(initNewContainers), 2);
+        }
         Evaluation.Instance.UpdateEvaluation(GetComponentsInChildren<Container>());
         base.DestroyField();
     }
+
+    private void initNewContainers() {
+        objs.StackField.initContainers();
+        if (objs == null) objs = GetComponentInParent<ObjectCollection>();
+        objs.Crane.TranslationHeight = (objs.StackField.HighestTier + 2) * Parameters.ContainerHeight;
+    }
+    
 }
