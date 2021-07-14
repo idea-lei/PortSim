@@ -670,8 +670,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_SensorName: ContainerBuffer
-  m_ObservableSize: 104
-  m_MaxNumObservables: 100
+  m_ObservableSize: 29
+  m_MaxNumObservables: 25
 --- !u!114 &8310466476754938936
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -685,5 +685,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_SensorName: IndexBuffer
-  m_ObservableSize: 105
-  m_MaxNumObservables: 100
+  m_ObservableSize: 30
+  m_MaxNumObservables: 25

@@ -220,6 +220,7 @@ public class Crane : MonoBehaviour {
             // move out
             if (canPickUp_Out) {
                 agent.Ob = new ObservationFindOperation() {
+                    ContainerField = objs.StackField,
                     Containers = objs.OutContainersOnPeak.ToList(),
                     TargetField = objs.IoPorts[0].CurrentField,
                     State = "container_out",
@@ -235,6 +236,7 @@ public class Crane : MonoBehaviour {
                     indices = objs.StackField.AvailableIndices;
                 }
                 agent.Ob = new ObservationFindOperation() {
+                    ContainerField = objs.StackField,
                     Containers = objs.PeakContainersToRelocate.ToList(),
                     TargetField = objs.StackField,
                     State = "container_rearrange",
@@ -247,6 +249,7 @@ public class Crane : MonoBehaviour {
             // move in
             if (canPickUp_In) {
                 agent.Ob = new ObservationFindOperation() {
+                    ContainerField = objs.Infields[0],
                     Containers = objs.InContainersOnPeak.ToList(),
                     TargetField = objs.StackField,
                     State = "container_in",

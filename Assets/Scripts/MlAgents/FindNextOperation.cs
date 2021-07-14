@@ -6,9 +6,11 @@ using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Policies;
 using Unity.MLAgents.Sensors;
 using UnityEngine;
+using System.Linq;
 
 public class ObservationFindOperation {
     public List<Container> Containers;
+    public Field ContainerField;
     public Field TargetField;
     public List<IndexInStack> AvailableIndices;
     public string State;
@@ -155,10 +157,16 @@ public class FindNextOperation : Agent {
         var f = Ob.TargetField;
         var vec1 = crane.transform.position - container.transform.position;
         var vec2 = container.transform.position - f.IndexToGlobalPosition(index);
-        float tx = Mathf.Abs(vec1.x) / Parameters.Vx_Unloaded + Mathf.Abs(vec2.x) / Parameters.Vx_Loaded;
-        float tz = Mathf.Abs(vec1.z) / Parameters.Vz_Unloaded + Mathf.Abs(vec2.z) / Parameters.Vz_Loaded;
 
-        reward += 0.5f / (float)((tx + tz) * Time.timeScale * Parameters.SpeedScale);
+        float t = 0;
+        if (Mathf.Abs(vec1.x) > Parameters.DistanceError) t += Mathf.Abs(vec1.x) / Parameters.Vx_Unloaded + Parameters.T_adjust / Time.timeScale;
+        if (Mathf.Abs(vec1.z) > Parameters.DistanceError) t += Mathf.Abs(vec1.z) / Parameters.Vz_Unloaded + Parameters.T_adjust / Time.timeScale;
+        if (Mathf.Abs(vec2.x) > Parameters.DistanceError) t += Mathf.Abs(vec2.x) / Parameters.Vx_Unloaded + Parameters.T_adjust / Time.timeScale;
+        if (Mathf.Abs(vec2.z) > Parameters.DistanceError) t += Mathf.Abs(vec2.z) / Parameters.Vz_Unloaded + Parameters.T_adjust / Time.timeScale;
+
+        Debug.Log(t);
+
+        reward += 0.5f / (float)(t * Time.timeScale);
 
         return reward;
     }

@@ -35,7 +35,7 @@ public class Evaluation : Singleton<Evaluation> {
             Data.TotalTimeSpan += c.TotalMoveTime;
         }
         Data.avgRearrangeCount = (float)Data.RearrangeCount / Data.OutContainerCount;
-        Data.avgTimeSpan = new TimeSpan(Convert.ToInt64(Data.TotalTimeSpan.Ticks * Time.timeScale * Parameters.SpeedScale / Data.OutContainerCount));
+        Data.avgTimeSpan = new TimeSpan(Convert.ToInt64(Data.TotalTimeSpan.Ticks * Time.timeScale / Data.OutContainerCount));
         records.Add(new Data(Data));
     }
 
