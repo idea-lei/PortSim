@@ -9,8 +9,8 @@
     #endregion
 
     #region PlayGround
-    public static int DimZ = 5;
-    public static int DimX = 5;
+    public static int DimZ = 10;
+    public static int DimX = 10;
     public static int MaxLayer = 5;
     public static readonly int MinDim = 1; // this is only for test (random generation), should be smaller than the min Dim value
 

@@ -13,10 +13,6 @@ public class ObjectCollection : MonoBehaviour {
     public StateMachine StateMachine;
     public IoFieldsGenerator IoFieldsGenerator;
     public IoPort[] IoPorts;
-    //public TempField[] TempFields;
-    //public FindContainerInAgent FindContainerInAgent;
-    //public FindContainerOutAgent FindContainerOutAgent;
-    //public FindIndexAgent FindIndexAgent;
     public FindNextOperation FindNextOperationAgent;
     [HideInInspector] public Evaluation Evaluation;
 
@@ -76,7 +72,7 @@ public class ObjectCollection : MonoBehaviour {
         get {
             if (!HasInField) return new Container[0];
             var list = new List<Container>();
-            foreach(var s in Infields[0].Ground) {
+            foreach (var s in Infields[0].Ground) {
                 if (s.Count > 0) list.Add(s.Peek());
             }
             return list.ToArray();
@@ -94,7 +90,7 @@ public class ObjectCollection : MonoBehaviour {
     public IndexInStack[] OutContainersIndices {
         get {
             var set = new HashSet<IndexInStack>();
-            foreach(var c in OutContainers) {
+            foreach (var c in OutContainers) {
                 set.Add(c.IndexInCurrentField);
             }
             return set.ToArray();
@@ -108,7 +104,7 @@ public class ObjectCollection : MonoBehaviour {
             foreach (var c in OutContainers) {
                 set.Add(c.IndexInCurrentField);
             }
-            foreach(var i in set) {
+            foreach (var i in set) {
                 containers.Add(StackField.Ground[i.x, i.z].Peek());
             }
             return containers.ToArray();
@@ -139,6 +135,12 @@ public class ObjectCollection : MonoBehaviour {
 
     private void Start() {
         InvokeRepeating(nameof(CheckStackFull), 10 + Random.Range(-5, 5), 10);
+        InvokeRepeating(nameof(DestoryGameObject), 60, 60); // for training, dont make too many empty indices
+    }
+
+    private void DestoryGameObject() {
+        if (StackField.Count < 15)
+            Destroy(gameObject);
     }
 
     // if stack field full and still has inField, destroy the object
