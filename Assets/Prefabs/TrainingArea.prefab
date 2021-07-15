@@ -670,7 +670,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_SensorName: BufferSensor
   m_ObservableSize: 45
-  m_MaxNumObservables: 40
+  m_MaxNumObservables: 42
 --- !u!1 &8310466476754938941
 GameObject:
   m_ObjectHideFlags: 0

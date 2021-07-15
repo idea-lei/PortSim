@@ -168,7 +168,7 @@ public class Crane : MonoBehaviour {
                 break;
         }
         transform.position += step * Time.fixedDeltaTime;
-        //objs.CRPAgent.AddReward(-0.001f);
+        objs.CRPAgent.AddReward(-0.002f);
     }
 
     private void moveTo(Vector3 position, bool isLoaded) {

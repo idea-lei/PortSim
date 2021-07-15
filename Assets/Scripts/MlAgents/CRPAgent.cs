@@ -29,7 +29,7 @@ public class CRPAgent : Agent {
     /// <param name="y"></param>
     /// <returns></returns>
     private float[] addBuffer(DateTime start, int i, DateTime t, int z, float y) {
-        int length = Parameters.DimX * Parameters.DimZ * Parameters.MaxLayer + 3;
+        int length = Parameters.DimX * Parameters.DimZ * Parameters.MaxLayer + 3;//
         var buffer = new float[length];
         buffer[i] = 1;
         buffer[length - 1] = (float)(t - start).TotalSeconds / 100;
@@ -99,9 +99,9 @@ public class CRPAgent : Agent {
         }
 
         // cause relocation
-        if (objs.StackField.IsStackNeedRearrange(index)) {
-            AddReward(-0.5f);
-        }
+        //if (objs.StackField.IsStackNeedRearrange(index)) {
+        //    AddReward(-0.5f);
+        //}
 
         objs.Crane.OpObj.StackPos = objs.Crane.OpObj.TargetField.IndexToGlobalPosition(index);
         objs.StateMachine.TriggerByState("PickUp");
