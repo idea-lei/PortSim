@@ -229,7 +229,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &824517793
 Transform:
   m_ObjectHideFlags: 0
@@ -457,6 +457,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: TrainingArea
+      objectReference: {fileID: 0}
+    - target: {fileID: 687449102868733342, guid: 0ff6156c304ea974faaf48cc7513dadc,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 687449102868733343, guid: 0ff6156c304ea974faaf48cc7513dadc,
         type: 3}

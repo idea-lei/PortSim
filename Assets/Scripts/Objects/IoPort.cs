@@ -49,7 +49,7 @@ public class IoPort : MonoBehaviour {
 
         transform.position = GetComponentInParent<ObjectCollection>().transform.position + new Vector3(0, 0,
             Mathf.Sign(transform.position.z - GetComponentInParent<ObjectCollection>().transform.position.z) * ((Parameters.DimZ + 2) * (Parameters.ContainerWidth + Parameters.Gap_Container) + Parameters.Gap_Field));
-        InvokeRepeating(nameof(delayField), Parameters.SetDelayInterval, Parameters.SetDelayInterval);
+        //InvokeRepeating(nameof(delayField), Parameters.SetDelayInterval, Parameters.SetDelayInterval);
         InvokeRepeating(nameof(UpdateCurrentField), 2f, 2f);
     }
 
@@ -107,7 +107,7 @@ public class IoPort : MonoBehaviour {
         string oldName = field.name;
         field.TimePlaned += IoField.GenerateRandomTimeSpan();
         UpdateCurrentField();
-        Debug.Log($"delay field {oldName} to {field.TimePlaned.ToString("G")}");
+        Debug.Log($"delay field {oldName} to {field.TimePlaned.ToString("hh:mm:ss.fff")}");
         // this is to delay the outfields correspond to the inField
         if (field is InField) {
             var outFields = new List<OutField>(); // avoid repetition

@@ -249,11 +249,9 @@ public class Crane : MonoBehaviour {
             // relocation
             if (objs.OutContainers.Length > 0) {
                 OpObj = new OpObject {
-                    Container = objs.PeakContainersToRelocate[0],
                     State = "container_rearrange",
                     TargetField = objs.StackField
                 };
-                OpObj.PickUpPos = OpObj.Container.transform.position;
 
                 agent.RequestDecision();
                 return;

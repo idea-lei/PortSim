@@ -50,6 +50,12 @@ public sealed class StackField : Field {
                 container.tag = "container_stacked";
             }
         }
+        //var cs = GetComponentsInChildren<Container>();
+        //var timeSet = new HashSet<DateTime>();
+        //foreach(var c in cs) {
+        //    timeSet.Add(c.OutField.TimePlaned);
+        //}
+        //if (cs.Length > timeSet.Count) Destroy(objs.gameObject);
     }
 
     public bool IsIndexFull(IndexInStack idx) {
