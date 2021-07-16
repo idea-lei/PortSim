@@ -17,7 +17,8 @@ public class CRPAgent : Agent {
     //private float distanceScaleX;
 
     private int rTimes = 0;
-    private float normTime = 10;
+    private float normTime = 20;
+    private DateTime start;
 
     private void Awake() {
         objs = GetComponentInParent<ObjectCollection>();
@@ -25,10 +26,11 @@ public class CRPAgent : Agent {
 
     public override void OnEpisodeBegin() {
         rTimes = 0;
+        start = DateTime.Now;
     }
 
     public override void CollectObservations(VectorSensor sensor) {
-        var start = DateTime.Now;
+        
         var outContainer = objs.OutContainers[0];
 
         for (int z = 0; z < Parameters.DimZ; z++) {
@@ -71,10 +73,15 @@ public class CRPAgent : Agent {
             foreach (var l in list) {
                 buffer.Add(l);
             }
-
-
-
-            Debug.Assert(buffer.Count == 60);
+            
+            if(!buffer.All(b => b <= 1 && b >= -1)) {
+                StringBuilder sb = new StringBuilder();
+                foreach(var b in buffer) {
+                    sb.Append($"{b}, ");
+                }
+                SimDebug.LogError(this, sb.ToString());
+            }
+            Debug.Assert(buffer.Count == 26);
             bufferSensor.AppendObservation(buffer.ToArray());
         }
     }
