@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -26,8 +27,8 @@ public class Bay2DAgent : Agent {
 
     public override void Heuristic(in ActionBuffers actionsOut) {
         var aout = actionsOut.DiscreteActions;
-        aout[0] = Random.Range(0, Parameters.DimZ);
-        aout[1] = Random.Range(0, Parameters.DimZ);
+        aout[0] = UnityEngine.Random.Range(0, Parameters.DimZ);
+        aout[1] = UnityEngine.Random.Range(0, Parameters.DimZ);
     }
 
     // actions can only be relocation
@@ -75,12 +76,58 @@ public class Bay2DAgent : Agent {
 
 
 
-public struct Container2D {
+public struct Container2D : IComparable {
+    public int priority;
+    public int relocationTimes;
 
+    public Container2D(int p) {
+        relocationTimes = 0;
+        priority = p;
+    }
+
+    public static bool operator >(Container2D a, Container2D b) {
+        return a.priority > b.priority;
+    }
+
+    public static bool operator <(Container2D a, Container2D b) {
+        return a.priority < b.priority;
+    }
+
+    public static bool operator ==(Container2D a, Container2D b) {
+        return a.Equals(b);
+    }
+
+    public static bool operator !=(Container2D a, Container2D b) {
+        return !a.Equals(b);
+    }
+
+    public int CompareTo(object obj) {
+        if (obj is Container2D c) {
+            if (priority > c.priority) return 1;
+            if (priority == c.priority) return 0;
+            else return -1;
+        }
+        throw new Exception("other is not Container2D");
+    }
+
+    public override bool Equals(object obj) {
+        if (obj is Container2D c) {
+            return GetHashCode() == c.GetHashCode();
+        }
+        return false;
+    }
+
+    public override int GetHashCode() {
+        return base.GetHashCode();
+    }
+
+    public override string ToString() {
+        return priority.ToString();
+    }
 }
 
 public class Bay {
-    private Stack<int>[] bay; //[z,t]
+    private Stack<Container2D>[] bay; //[z,t]
     private int maxTier;
     private int dimZ;
     private int initTier;
@@ -112,7 +159,7 @@ public class Bay {
                 if (list.Count == 0) continue;
                 list.Reverse();
                 for (int t = 0; t < maxTier; t++) {
-                    if (t < list.Count) res[z, t] = list[t] / (float)maxLabel;
+                    if (t < list.Count) res[z, t] = list[t].priority / (float)maxLabel;
                     else continue;
                 }
             }
@@ -131,18 +178,20 @@ public class Bay {
     }
 
     /// <summary>
-    /// Item1: value, 
+    /// Item1: Item, 
     /// Item2: z-index
     /// </summary>
-    public (int, int) min {
+    public (Container2D, int) min {
         get {
-            int m = int.MaxValue;
+            Container2D m = new Container2D(int.MaxValue);
             int index = 0;
             for (int i = 0; i < bay.Length; i++) {
-                int tempMin = bay[i].Count > 0 ? bay[i].Min() : int.MaxValue;
-                if (m > tempMin) {
-                    m = tempMin;
-                    index = i;
+                if (bay[i].Count > 0) {
+                    var _m = bay[i].Min();
+                    if (m > _m) {
+                        m = _m;
+                        index = i;
+                    }
                 }
             }
             return (m, index);
@@ -150,9 +199,9 @@ public class Bay {
     }
 
     public Bay(int z, int t, int _initTier, int _maxLabel) {
-        bay = new Stack<int>[z];
+        bay = new Stack<Container2D>[z];
         for (int i = 0; i < z; i++) {
-            bay[i] = new Stack<int>();
+            bay[i] = new Stack<Container2D>();
         }
         maxTier = t;
         dimZ = z;
@@ -171,7 +220,7 @@ public class Bay {
         return true;
     }
 
-    public bool stack(int z, int v) {
+    public bool stack(int z, Container2D v) {
         if (bay[z].Count == maxTier) return false;
         bay[z].Push(v);
         return true;
@@ -179,8 +228,8 @@ public class Bay {
 
     public bool retrieve() {
         var m = min;
-        if (bay[m.Item1].Peek() != m.Item1) return false;
-        bay[m.Item1].Pop();
+        if (bay[m.Item2].Peek() != m.Item1) return false;
+        bay[m.Item2].Pop();
         return true;
     }
 
@@ -194,20 +243,20 @@ public class Bay {
         while (i < arr.Length) {
             int z = UnityEngine.Random.Range(0, dimZ);
             if (bay[z].Count >= initTier) continue;
-            if (stack(z, arr[i])) i++;
+            if (stack(z, new Container2D(arr[i]))) i++;
         }
     }
 
     // peak value of z-index
-    public int Peek(int z) {
+    public Container2D Peek(int z) {
         return bay[z].Peek();
     }
 
 
     // from https://iopscience.iop.org/article/10.1088/1742-6596/1873/1/012050/pdf
-    public int BlockingDegree(Stack<int> s) {
+    public int BlockingDegree(Stack<Container2D> s) {
         int degree = 0;
-        var list = s.ToList();
+        var list = s.Select(c => c.priority).ToList();
         list.Reverse();
 
         List<int> hList;
