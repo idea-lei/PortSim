@@ -17,7 +17,7 @@ public class Bay2DAgent : Agent {
     public override void OnEpisodeBegin() {
         bay = new Bay(Parameters.DimZ, Parameters.MaxLayer, Parameters.SpawnMaxLayer, maxLabel);
         Debug.Log(bay);
-        RequestDecision();
+        nextOperation();
     }
 
     public override void CollectObservations(VectorSensor sensor) {
@@ -30,37 +30,16 @@ public class Bay2DAgent : Agent {
         aout[1] = Random.Range(0, Parameters.DimZ);
     }
 
+    // actions can only be relocation
     public override void OnActionReceived(ActionBuffers actions) {
         int z0 = actions.DiscreteActions[0];
         int z1 = actions.DiscreteActions[1];
-
-        // retrieval
-        if (z0 == z1) {
-            if (bay.retrieve(z0)) {
-                AddReward(1);
-                Debug.Log(bay);
-                if (bay.empty) EndEpisode();
-            } else {
-                AddReward(-1);
-                Debug.LogWarning($"failed to retrieve at {z0}");
-            }
-
-            RequestDecision();
-            return;
-        }
-
-        // if min value is on top, it must be retrieved
-        var min = bay.min;
-        if (bay.Peek(min.Item2) == min.Item1) {
-            AddReward(-1);
-            RequestDecision();
-        }
 
         // relocation failed
         if (!bay.relocate(z0, z1)) {
             AddReward(-1);
             Debug.LogWarning($"failed to relocate from {z0} to {z1}");
-            RequestDecision();
+            nextOperation();
             return;
         }
 
@@ -71,10 +50,17 @@ public class Bay2DAgent : Agent {
 
         Debug.Log(bay);
         // relocation success
-        RequestDecision();
+        nextOperation();
     }
 
-    
+    private void nextOperation() {
+        if (bay.empty) EndEpisode();
+        if (bay.canRetrieve) {
+            bay.retrieve();
+            AddReward(1);
+        }
+        RequestDecision();
+    }
 
 }
 
@@ -89,7 +75,9 @@ public class Bay2DAgent : Agent {
 
 
 
+public struct Container2D {
 
+}
 
 public class Bay {
     private Stack<int>[] bay; //[z,t]
@@ -97,6 +85,15 @@ public class Bay {
     private int dimZ;
     private int initTier;
     private int maxLabel;
+
+    public int[] BlockingDegrees => bay.Select(s => BlockingDegree(s)).ToArray();
+
+    public bool canRetrieve {
+        get {
+            var m = min;
+            return bay[m.Item2].Peek() == m.Item1;
+        }
+    }
 
     public bool empty {
         get {
@@ -166,6 +163,7 @@ public class Bay {
 
     // if not relocateable, return false
     public bool relocate(int z0, int z1) {
+        if (z0 == z1) return false;
         if (bay[z1].Count == maxTier) return false;
         if (bay[z0].Count == 0) return false;
 
@@ -179,10 +177,10 @@ public class Bay {
         return true;
     }
 
-    public bool retrieve(int z) {
-        if (bay[z].Count == 0) return false;
-        if (bay[z].Peek() != min.Item1) return false;
-        bay[z].Pop();
+    public bool retrieve() {
+        var m = min;
+        if (bay[m.Item1].Peek() != m.Item1) return false;
+        bay[m.Item1].Pop();
         return true;
     }
 
@@ -203,6 +201,24 @@ public class Bay {
     // peak value of z-index
     public int Peek(int z) {
         return bay[z].Peek();
+    }
+
+
+    // from https://iopscience.iop.org/article/10.1088/1742-6596/1873/1/012050/pdf
+    public int BlockingDegree(Stack<int> s) {
+        int degree = 0;
+        var list = s.ToList();
+        list.Reverse();
+
+        List<int> hList;
+        while (list.Count > 1) {
+            int truncate = list.IndexOf(list.Min());
+            hList = list.GetRange(truncate, list.Count - truncate);
+            if (hList.Count > 1) foreach (int x in hList) degree += hList[0] - x;
+            list = list.GetRange(0, truncate);
+        }
+
+        return degree;
     }
 
     public override string ToString() {

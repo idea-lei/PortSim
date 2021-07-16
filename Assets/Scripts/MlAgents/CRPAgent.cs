@@ -136,22 +136,21 @@ public class CRPAgent : Agent {
         return -0.1f * (Mathf.Exp(-t) - 1) / initContainerAmout;
     }
 
-    // represented by time
+    // each above will add 1
     public int blockingDegree(Stack<Container> s) {
         int degree = 0;
         var list = s.ToList();
         list.Reverse();
 
-        List<Container> hList = new List<Container>();
-
+        List<Container> hList;
         while (list.Count > 1) {
-            degree += hList.Count > 0 ? hList.Count - 1 : 0;
-
-            int idx = MinByTime(list);
-            hList = list.GetRange(idx, list.Count - idx);
-            list = list.GetRange(0, idx);
+            int truncate = list.IndexOf(list.Min());
+            hList = list.GetRange(truncate, list.Count - truncate);
+            if (hList.Count > 1) foreach (Container x in hList) degree += hList[0] == x ? 0 : 1;
+            list = list.GetRange(0, truncate);
         }
-        return 0;
+
+        return degree;
     }
 
     int MinByTime(List<Container> list) {
