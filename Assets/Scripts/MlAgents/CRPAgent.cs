@@ -17,8 +17,11 @@ public class CRPAgent : Agent {
     //private float distanceScaleX;
 
     private int rTimes = 0;
-    private float normTime = 20;
+    private float normTime = 10;
     private DateTime start;
+    private int initContainerAmout;
+
+    public int bDegree;
 
     private void Awake() {
         objs = GetComponentInParent<ObjectCollection>();
@@ -27,10 +30,12 @@ public class CRPAgent : Agent {
     public override void OnEpisodeBegin() {
         rTimes = 0;
         start = DateTime.Now;
+        initContainerAmout = 0;
     }
 
     public override void CollectObservations(VectorSensor sensor) {
-        
+        if (initContainerAmout == 0) initContainerAmout = objs.StackField.Count;
+        bDegree = 0;
         var outContainer = objs.OutContainers[0];
 
         for (int z = 0; z < Parameters.DimZ; z++) {
@@ -64,7 +69,9 @@ public class CRPAgent : Agent {
             buffer.Add(objs.StackField.Ground[0, z].Contains(outContainer) ? 1 : 0);
 
             // blocking degree
-            buffer.Add(blockingDegree(objs.StackField.Ground[0, z]) / (float)Parameters.MaxLayer);
+            int bd = blockingDegree(objs.StackField.Ground[0, z]);
+            bDegree += bd;
+            buffer.Add(bd / (float)Parameters.MaxLayer);
 
             var oh = new float[Parameters.DimZ];
             oh[z] = 1;
@@ -73,15 +80,15 @@ public class CRPAgent : Agent {
             foreach (var l in list) {
                 buffer.Add(l);
             }
-            
-            if(!buffer.All(b => b <= 1 && b >= -1)) {
+
+            if (!buffer.All(b => b <= 1 && b >= -1)) {
                 StringBuilder sb = new StringBuilder();
-                foreach(var b in buffer) {
+                foreach (var b in buffer) {
                     sb.Append($"{b}, ");
                 }
                 SimDebug.LogError(this, sb.ToString());
             }
-            Debug.Assert(buffer.Count == 26);
+            Debug.Assert(buffer.Count == 59);
             bufferSensor.AppendObservation(buffer.ToArray());
         }
     }
@@ -130,6 +137,7 @@ public class CRPAgent : Agent {
 
         // from here the decision can be used
 
+
         AddReward(normRelocationReward(rTimes++));
 
         if (objs.StackField.Ground[targetIndex.x, targetIndex.z].Count > 0) {
@@ -139,28 +147,28 @@ public class CRPAgent : Agent {
             } else {
                 AddReward(0.5f);
             }
-        } else { // index empty
-            var start = DateTime.Now;
-            var cs = objs.StackField.GetComponentsInChildren<Container>();
-            float maxOutTime = (float)(cs.Max(c => c.OutField.TimePlaned) - start).TotalSeconds;
-            float minOutTime = (float)(cs.Min(c => c.OutField.TimePlaned) - start).TotalSeconds;
-            float cTime = (float)(objs.Crane.OpObj.Container.OutField.TimePlaned - start).TotalSeconds;
+        } 
+        //else { // index empty
+        //    var start = DateTime.Now;
+        //    var cs = objs.StackField.GetComponentsInChildren<Container>();
+        //    float maxOutTime = (float)(cs.Max(c => c.OutField.TimePlaned) - start).TotalSeconds;
+        //    float minOutTime = (float)(cs.Min(c => c.OutField.TimePlaned) - start).TotalSeconds;
+        //    float cTime = (float)(objs.Crane.OpObj.Container.OutField.TimePlaned - start).TotalSeconds;
 
-            AddReward(Mathf.InverseLerp(minOutTime, maxOutTime, cTime) - 0.5f);
-        }
+        //    AddReward(Mathf.InverseLerp(minOutTime, maxOutTime, cTime) - 0.5f);
+        //}
 
 
-        AddReward((targetIndex.z - objs.Crane.OpObj.Container.IndexInCurrentField.z) * 0.1f);
+        AddReward((targetIndex.z - objs.Crane.OpObj.Container.IndexInCurrentField.z) * 0.01f);
         objs.StateMachine.TriggerByState("PickUp");
     }
 
     float normRelocationReward(int t) {
-        //return Mathf.Exp(-t) - 1;
-        return -0.03f * t;
+        return -0.1f * (Mathf.Exp(-t) - 1) / initContainerAmout;
     }
 
     // represented by time
-    int blockingDegree(Stack<Container> s) {
+    public int blockingDegree(Stack<Container> s) {
         int degree = 0;
         var list = s.ToList();
         list.Reverse();

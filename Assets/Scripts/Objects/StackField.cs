@@ -25,6 +25,12 @@ public sealed class StackField : Field {
     public override void AddToGround(Container container) {
         base.AddToGround(container);
         container.tag = "container_stacked";
+
+        int bd = 0;
+        foreach (var s in Ground) {
+            bd += objs.CRPAgent.blockingDegree(s);
+        }
+        objs.CRPAgent.AddReward((bd - objs.CRPAgent.bDegree) * 0.3f);
     }
 
     /// <summary>
@@ -32,14 +38,16 @@ public sealed class StackField : Field {
     /// </summary>
     public void initContainers() {
         int i = 0;
-        int amount = (int)envParams.GetWithDefault("amount", Parameters.DimZ * (Parameters.MaxLayer - 1) + 1);
+        int amount = (int)(envParams?.GetWithDefault("amount", Parameters.DimZ * (Parameters.SpawnMaxLayer - 1) + 1) ?? 6);
+        amount += UnityEngine.Random.Range(-3, 3);
+        if (amount > Parameters.DimZ * Parameters.SpawnMaxLayer - 1) amount = Parameters.DimZ * Parameters.SpawnMaxLayer - 1;
         for (int x = 0; x < DimX; x++) { // x for crp is always 1
 
             while (i < amount) {
                 int z = UnityEngine.Random.Range(0, Parameters.DimZ);
 
                 var idx = new IndexInStack(x, z);
-                if (IsIndexFull(idx)) continue;
+                if (Ground[idx.x, idx.z].Count >= Parameters.SpawnMaxLayer) continue;
 
                 i++;
                 var pos = IndexToLocalPositionInWorldScale(idx);
