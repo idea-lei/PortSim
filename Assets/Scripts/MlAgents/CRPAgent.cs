@@ -112,15 +112,6 @@ public class CRPAgent : Agent {
             return;
         }
 
-        //container index no need to relocate
-        if (!objs.StackField.IsStackNeedRearrange(containerIndex)) {
-            AddReward(-1f);
-        }
-
-        objs.Crane.OpObj.Container = objs.StackField.Ground[containerIndex.x, containerIndex.z].Peek();
-        objs.Crane.OpObj.PickUpPos = objs.Crane.OpObj.Container.transform.position;
-        objs.Crane.OpObj.StackPos = objs.Crane.OpObj.TargetField.IndexToGlobalPosition(targetIndex);
-
         // target index full
         if (objs.StackField.IsIndexFull(targetIndex)) {
             AddReward(-1);
@@ -128,35 +119,13 @@ public class CRPAgent : Agent {
             return;
         }
 
-        // same index
-        if (targetIndex == containerIndex) {
-            AddReward(-1);
-            RequestDecision();
-            return;
-        }
-
         // from here the decision can be used
+        objs.Crane.OpObj.Container = objs.StackField.Ground[containerIndex.x, containerIndex.z].Peek();
+        objs.Crane.OpObj.PickUpPos = objs.Crane.OpObj.Container.transform.position;
+        objs.Crane.OpObj.StackPos = objs.Crane.OpObj.TargetField.IndexToGlobalPosition(targetIndex);
 
-
+        // relocation times
         AddReward(normRelocationReward(rTimes++));
-
-        if (objs.StackField.Ground[targetIndex.x, targetIndex.z].Count > 0) {
-            // cause new relocation
-            if (objs.Crane.OpObj.Container.OutField.TimePlaned > objs.StackField.Ground[targetIndex.x, targetIndex.z].Min(c => c.OutField.TimePlaned)) {
-                AddReward(-0.5f);
-            } else {
-                AddReward(0.5f);
-            }
-        } 
-        //else { // index empty
-        //    var start = DateTime.Now;
-        //    var cs = objs.StackField.GetComponentsInChildren<Container>();
-        //    float maxOutTime = (float)(cs.Max(c => c.OutField.TimePlaned) - start).TotalSeconds;
-        //    float minOutTime = (float)(cs.Min(c => c.OutField.TimePlaned) - start).TotalSeconds;
-        //    float cTime = (float)(objs.Crane.OpObj.Container.OutField.TimePlaned - start).TotalSeconds;
-
-        //    AddReward(Mathf.InverseLerp(minOutTime, maxOutTime, cTime) - 0.5f);
-        //}
 
 
         AddReward((targetIndex.z - objs.Crane.OpObj.Container.IndexInCurrentField.z) * 0.01f);

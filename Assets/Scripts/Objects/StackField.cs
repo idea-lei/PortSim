@@ -30,7 +30,7 @@ public sealed class StackField : Field {
         foreach (var s in Ground) {
             bd += objs.CRPAgent.blockingDegree(s);
         }
-        objs.CRPAgent.AddReward((bd - objs.CRPAgent.bDegree) * 0.3f);
+        objs.CRPAgent.AddReward((bd - objs.CRPAgent.bDegree) * 0.5f);
     }
 
     /// <summary>
