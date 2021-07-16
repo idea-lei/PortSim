@@ -168,7 +168,8 @@ public class Crane : MonoBehaviour {
                 break;
         }
         transform.position += step * Time.fixedDeltaTime;
-        //objs.CRPAgent.AddReward(-0.002f);
+        if (objs.CRPAgent.initContainerAmout != 0) 
+            objs.CRPAgent.AddReward(-0.002f / objs.CRPAgent.initContainerAmout);
     }
 
     private void moveTo(Vector3 position, bool isLoaded) {
@@ -326,7 +327,7 @@ public class Crane : MonoBehaviour {
     private void setStateOperateEvents() {
         var state = stateMachine.Graph.GetState("Operate");
         state.OnEnterState.AddListener(() => {
-            if(ContainerCarrying == null) {
+            if (ContainerCarrying == null) {
                 SimDebug.LogError(this, "container carrying is null");
                 return;
             }

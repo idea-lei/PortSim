@@ -19,7 +19,7 @@ public class CRPAgent : Agent {
     private int rTimes = 0;
     private float normTime = 10;
     private DateTime start;
-    private int initContainerAmout;
+    public int initContainerAmout;
 
     public int bDegree;
 
