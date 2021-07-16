@@ -458,6 +458,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: TrainingArea
       objectReference: {fileID: 0}
+    - target: {fileID: 687449102868733342, guid: 0ff6156c304ea974faaf48cc7513dadc,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 687449102868733343, guid: 0ff6156c304ea974faaf48cc7513dadc,
         type: 3}
       propertyPath: Evaluation

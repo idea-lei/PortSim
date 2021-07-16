@@ -38,8 +38,8 @@ public sealed class StackField : Field {
     /// </summary>
     public void initContainers() {
         int i = 0;
-        int amount = (int)(envParams?.GetWithDefault("amount", Parameters.DimZ * (Parameters.SpawnMaxLayer - 1) + 1) ?? 6);
-        amount += UnityEngine.Random.Range(-3, 3);
+        int amount = (int)envParams.GetWithDefault("amount", 16);
+        if (Academy.Instance.IsCommunicatorOn) amount += UnityEngine.Random.Range(-3, 3);
         if (amount > Parameters.DimZ * Parameters.SpawnMaxLayer - 1) amount = Parameters.DimZ * Parameters.SpawnMaxLayer - 1;
         for (int x = 0; x < DimX; x++) { // x for crp is always 1
 

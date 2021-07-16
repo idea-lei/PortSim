@@ -631,7 +631,7 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 0
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 0}
+  m_Model: {fileID: 5022602860645237092, guid: db0b84f0fa5641e49a81013352ec9345, type: 3}
   m_InferenceDevice: 1
   m_BehaviorType: 0
   m_BehaviorName: CRPBehaviour
@@ -656,6 +656,7 @@ MonoBehaviour:
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
   bufferSensor: {fileID: 763727377}
+  bDegree: 0
 --- !u!114 &763727377
 MonoBehaviour:
   m_ObjectHideFlags: 0
