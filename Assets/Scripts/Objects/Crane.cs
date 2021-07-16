@@ -227,7 +227,6 @@ public class Crane : MonoBehaviour {
 
             // move out
             if (canPickUp_Out) {
-                Debug.Log(objs.IoPorts[0].CurrentField.AvailableIndices);
                 var Ob = new ObservationFindOperation() {
                     ContainerField = objs.StackField,
                     Containers = objs.OutContainersOnPeak.ToList(),

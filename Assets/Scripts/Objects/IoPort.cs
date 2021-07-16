@@ -23,10 +23,10 @@ public class IoPort : MonoBehaviour {
         get => _nextField;
         set {
             _nextField = value;
-            if (value) {
-                var span = value.TimePlaned - DateTime.Now;
-                if (span > TimeSpan.Zero) Debug.Log($"{name} next {value.name} has {span} to enable");
-            }
+            //if (value) {
+            //    var span = value.TimePlaned - DateTime.Now;
+            //    if (span > TimeSpan.Zero) Debug.Log($"{name} next {value.name} has {span} to enable");
+            //}
         }
     }
 

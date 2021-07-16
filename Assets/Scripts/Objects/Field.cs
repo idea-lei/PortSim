@@ -137,7 +137,6 @@ public abstract class Field : MonoBehaviour {
     /// <param name="container"></param>
     public virtual void AddToGround(Container container) {
         var index = GlobalPositionToIndex(container.transform.position);
-        Debug.Log(index);
         AddToGround(container, index);
     }
 

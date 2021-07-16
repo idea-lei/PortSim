@@ -72,6 +72,8 @@ public class CRPAgent : Agent {
                 buffer.Add(l);
             }
 
+
+
             Debug.Assert(buffer.Count == 60);
             bufferSensor.AppendObservation(buffer.ToArray());
         }
