@@ -336,7 +336,7 @@ public abstract class Field : MonoBehaviour {
         model.transform.position = initPos + transform.position;
         var (r, g, b) = genRGB();
         model.GetComponent<MeshRenderer>().material.color = new Color(r, g, b);
-        model.name = "Container_" + DateTime.Now.ToString("hh:mm:ss.fff");
+        model.name = "Container_" + DateTime.Now.ToString("g");
         model.transform.parent = transform;
 
         var container = model.GetComponent<Container>();

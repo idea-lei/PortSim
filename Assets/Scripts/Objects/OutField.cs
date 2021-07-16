@@ -17,7 +17,7 @@ public class OutField : IoField {
         get => base.TimePlaned;
         set {
             base.TimePlaned = value;
-            name = "OutField_" + value.ToString("hh:mm:ss.fff");
+            name = "OutField_" + value.ToString("g");
         }
     }
 

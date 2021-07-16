@@ -107,7 +107,7 @@ public class IoPort : MonoBehaviour {
         string oldName = field.name;
         field.TimePlaned += IoField.GenerateRandomTimeSpan();
         UpdateCurrentField();
-        Debug.Log($"delay field {oldName} to {field.TimePlaned.ToString("hh:mm:ss.fff")}");
+        Debug.Log($"delay field {oldName} to {field.TimePlaned.ToString("g")}");
         // this is to delay the outfields correspond to the inField
         if (field is InField) {
             var outFields = new List<OutField>(); // avoid repetition

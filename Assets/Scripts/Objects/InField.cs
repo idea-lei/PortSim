@@ -9,7 +9,7 @@ public sealed class InField : IoField {
         get => base.TimePlaned;
         set {
             base.TimePlaned = value;
-            name = "InField_" + value.ToString("hh:mm:ss.fff");
+            name = "InField_" + value.ToString("g");
         }
     }
 

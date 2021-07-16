@@ -21,24 +21,6 @@ public class CRPAgent : Agent {
 
     private void Awake() {
         objs = GetComponentInParent<ObjectCollection>();
-        //distanceScaleZ = objs.StackField.transform.localScale.z * 10;
-        //distanceScaleX = objs.StackField.transform.localScale.x * 10;
-    }
-
-    /// <param name="start"> start time stampel</param>
-    /// <param name="i">hotencoding index</param>
-    /// <param name="t">time out</param>
-    /// <param name="z"></param>
-    /// <param name="y"></param>
-    /// <returns></returns>
-    private float[] addBuffer(DateTime start, int i, DateTime t, int z, float y) {
-        int length = Parameters.DimX * Parameters.DimZ * Parameters.MaxLayer + 3;//
-        var buffer = new float[length];
-        buffer[i] = 1;
-        buffer[length - 1] = (float)(t - start).TotalSeconds / normTime;
-        buffer[length - 2] = z / (float)Parameters.DimZ;
-        buffer[length - 3] = y / objs.Crane.TranslationHeight;
-        return buffer;
     }
 
     public override void OnEpisodeBegin() {
@@ -179,24 +161,22 @@ public class CRPAgent : Agent {
         while (list.Count > 1) {
             degree += hList.Count > 0 ? hList.Count - 1 : 0;
 
-            var (container, idx) = MinByTime(list);
+            int idx = MinByTime(list);
             hList = list.GetRange(idx, list.Count - idx);
             list = list.GetRange(0, idx);
         }
         return 0;
     }
 
-    (Container, int) MinByTime(List<Container> list) {
+    int MinByTime(List<Container> list) {
         Container min = list.First();
-        int i = 0;
         int idx = 0;
-        foreach (var c in list) {
-            i++;
-            if (min.OutField.TimePlaned > c.OutField.TimePlaned) {
-                min = c;
+        for (int i = 0; i < list.Count; i++) {
+            if (min.OutField.TimePlaned > list[i].OutField.TimePlaned) {
+                min = list[i];
                 idx = i;
             }
         }
-        return (min, idx);
+        return idx;
     }
 }

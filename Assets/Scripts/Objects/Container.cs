@@ -31,7 +31,7 @@ public class Container : MonoBehaviour {
         get => _totalMoveTime;
         set {
             _totalMoveTime = value;
-            totalTimeDisplay = _totalMoveTime.ToString("hh:mm:ss.fff");
+            totalTimeDisplay = _totalMoveTime.ToString("g");
         }
     }
     [SerializeField] private string totalTimeDisplay;

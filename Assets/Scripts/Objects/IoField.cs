@@ -84,7 +84,7 @@ public abstract class IoField : Field, IComparable<IoField> {
 
     public static TimeSpan GenerateRandomTimeSpan(bool isInField = false) {
         //return TimeSpan.FromSeconds(UnityEngine.Random.Range(0, isInField ? 30 : 100));
-        return TimeSpan.FromMilliseconds(UnityEngine.Random.Range(0, 10000f));
+        return TimeSpan.FromMilliseconds(UnityEngine.Random.Range(0, 500000f)/100);
     }
 
     public int CompareTo(IoField other) {
