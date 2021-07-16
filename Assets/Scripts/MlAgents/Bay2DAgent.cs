@@ -36,13 +36,24 @@ public class Bay2DAgent : Agent {
 
         // retrieval
         if (z0 == z1) {
-            if (bay.retrieve(z0)) AddReward(1);
-            else Debug.LogWarning($"failed to retrieve at {z0}");
+            if (bay.retrieve(z0)) {
+                AddReward(1);
+                Debug.Log(bay);
+                if (bay.empty) EndEpisode();
+            } else {
+                AddReward(-1);
+                Debug.LogWarning($"failed to retrieve at {z0}");
+            }
 
-            if (bay.empty) EndEpisode();
-            Debug.Log(bay);
             RequestDecision();
             return;
+        }
+
+        // if min value is on top, it must be retrieved
+        var min = bay.min;
+        if (bay.Peek(min.Item2) == min.Item1) {
+            AddReward(-1);
+            RequestDecision();
         }
 
         // relocation failed
@@ -62,6 +73,8 @@ public class Bay2DAgent : Agent {
         // relocation success
         RequestDecision();
     }
+
+    
 
 }
 
@@ -185,6 +198,11 @@ public class Bay {
             if (bay[z].Count >= initTier) continue;
             if (stack(z, arr[i])) i++;
         }
+    }
+
+    // peak value of z-index
+    public int Peek(int z) {
+        return bay[z].Peek();
     }
 
     public override string ToString() {
