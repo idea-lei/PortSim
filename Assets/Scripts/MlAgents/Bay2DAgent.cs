@@ -13,11 +13,14 @@ public class Bay2DAgent : Agent {
     int maxLabel = 6;
     readonly float blockingDegreeCoefficient = 100;
     int blockingDegreeOfState;
+    EnvironmentParameters envParams;
 
     public override void Initialize() {
+        envParams = Academy.Instance.EnvironmentParameters;
     }
 
     public override void OnEpisodeBegin() {
+        maxLabel = (int)envParams.GetWithDefault("amount", 16);
         bay = new Bay(Parameters.DimZ, Parameters.MaxLayer, Parameters.SpawnMaxLayer, maxLabel);
         Debug.Log(bay);
         nextOperation();
