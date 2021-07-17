@@ -29,6 +29,7 @@ public class Bay2DAgent : Agent {
     readonly float blockingDegreeCoefficient = 100;
     int blockingDegreeOfState;
     int[] indicesToAvoid = null;
+    int relocationTimes = 0;
 
     EnvironmentParameters envParams;
 
@@ -37,6 +38,7 @@ public class Bay2DAgent : Agent {
     }
 
     public override void OnEpisodeBegin() {
+        relocationTimes = 0;
         maxLabel = (int)envParams.GetWithDefault("amount", 16);
         //maxLabel = 16;
         bay = new Bay(Parameters.DimZ, Parameters.MaxLayer, Parameters.SpawnMaxLayer, maxLabel);
@@ -71,10 +73,7 @@ public class Bay2DAgent : Agent {
             }
 
             Debug.Assert(list.Count == bay.DimZ + bay.MaxTier + 2);
-            if(!list.All(l => l <= 1 && l >= -1)) {
-                Debug.LogError(string.Join(" - ", list));
-            }
-            //Debug.Assert(list.All(l => l <= 1 && l >= -1));
+            Debug.Assert(list.All(l => l <= 1 && l >= -1));
             ob.Add(list);
         }
 
@@ -95,6 +94,8 @@ public class Bay2DAgent : Agent {
 
     public override void Heuristic(in ActionBuffers actionsOut) {
         var aout = actionsOut.DiscreteActions;
+
+
         aout[0] = UnityEngine.Random.Range(0, Parameters.DimZ);
         aout[1] = UnityEngine.Random.Range(0, Parameters.DimZ);
     }
@@ -107,12 +108,12 @@ public class Bay2DAgent : Agent {
         int z1 = actions.DiscreteActions[1];
 
         // relocation failed
-        var relocationRes = bay.relocate(z0, z1);
-        if (!relocationRes.Item1) {
+        var canRelocate = bay.canRelocate(z0, z1);
+        if (!canRelocate.Item1) {
             AddReward(-1);
             Debug.LogWarning($"failed to relocate from {z0} to {z1}");
             int[] indicesToAvoid = null;
-            switch (relocationRes.Item2) {
+            switch (canRelocate.Item2) {
                 case 0: // z0
                 case 3:
                     indicesToAvoid = new int[] { z0 };
@@ -127,6 +128,7 @@ public class Bay2DAgent : Agent {
             nextOperation(indicesToAvoid);
             return;
         }
+        bay.relocate(z0, z1);
 
         // rewarding system
 
@@ -134,13 +136,9 @@ public class Bay2DAgent : Agent {
         float bd = bay.BlockingDegrees.Sum();
         AddReward((blockingDegreeOfState - bd) / blockingDegreeCoefficient);
 
-        // z-index
-        AddReward(0.05f * (z1 - z0));
-
         // step reward
         AddReward(0.01f / bay.MaxLabel);
 
-        //Debug.Log(bay);
         // relocation success
         nextOperation(null);
     }
@@ -148,13 +146,14 @@ public class Bay2DAgent : Agent {
     private void nextOperation(int[] _indicesToAvoid) {
         if (bay.empty) EndEpisode();
         if (bay.canRetrieve) {
-            bay.retrieve();
-            AddReward(1);
+            var min = bay.min;
+            relocationTimes += bay.retrieve();
+            AddReward(1 - 0.001f * min.Item2);
         }
         indicesToAvoid = _indicesToAvoid;
+
         RequestDecision();
     }
-
 }
 
 
@@ -169,7 +168,7 @@ public class Bay2DAgent : Agent {
 
 
 public class Container2D : IComparable {
-    public int priority;
+    public readonly int priority;
     public int relocationTimes;
 
     public Container2D(int p) {
@@ -221,11 +220,8 @@ public class Container2D : IComparable {
 
 public class Bay {
     private Stack<Container2D>[] layout; //[z,t]
-    private int maxTier;
-    public int MaxTier => maxTier;
-
-    private int dimZ;
-    public int DimZ => dimZ;
+    public readonly int MaxTier;
+    public readonly int DimZ;
 
     private int initTier;
     private int maxLabel;
@@ -236,8 +232,8 @@ public class Bay {
     /// </summary>
     public List<Container2D>[] Layout {
         get {
-            var list = new List<Container2D>[dimZ];
-            for (int i = 0; i < dimZ; i++) {
+            var list = new List<Container2D>[DimZ];
+            for (int i = 0; i < DimZ; i++) {
                 list[i] = layout[i].ToList();
             }
             return list;
@@ -246,10 +242,10 @@ public class Bay {
 
     public Container2D[,] LayoutAs2DArray {
         get {
-            var res = new Container2D[dimZ, maxTier];
+            var res = new Container2D[DimZ, MaxTier];
             var layout = Layout;
-            for (int z = 0; z < dimZ; z++) {
-                for (int t = 0; t < dimZ; t++) {
+            for (int z = 0; z < DimZ; z++) {
+                for (int t = 0; t < DimZ; t++) {
                     res[z, t] = t < layout[z].Count ? layout[z][t] : null;
                 }
             }
@@ -258,13 +254,6 @@ public class Bay {
     }
 
     public int[] BlockingDegrees => layout.Select(s => BlockingDegree(s)).ToArray();
-
-    public bool canRetrieve {
-        get {
-            var m = min;
-            return layout[m.Item2].Peek() == m.Item1;
-        }
-    }
 
     public bool empty {
         get {
@@ -301,41 +290,57 @@ public class Bay {
         for (int i = 0; i < z; i++) {
             layout[i] = new Stack<Container2D>();
         }
-        maxTier = t;
-        dimZ = z;
+        MaxTier = t;
+        DimZ = z;
         initTier = _initTier;
         maxLabel = _maxLabel;
         assignValues(generateSequence(_maxLabel));
     }
 
+    public bool CheckDim() {
+        return Layout.All(s => s.Count <= MaxTier);
+    }
+
     /// <param name="z0">pick up pos</param>
     /// <param name="z1">stack pos</param>
     /// <returns>true if can relocate, the Item2 is reason--> 0: z0 empty, 1: z1 full, 2: both, 3: same index, 4: success</returns>
-    public (bool, int) relocate(int z0, int z1) {
-        (bool, int) res = (true, -1);
-        if (layout[z0].Count == 0) res = (false, 0);
-        if (layout[z1].Count == maxTier) {
-            if (res.Item1) res.Item2 = 1;
-            else res.Item2 = 2;
-        }
-        if (!res.Item1) return res;
-        if (z0 == z1) return (false, 3);
 
-        layout[z1].Push(layout[z0].Pop());
-        return (true, 4);
+    public (bool, int) canRelocate(int z0, int z1) {
+        (bool, int) res = (true, 4);
+        if (layout[z0].Count <= 0) res = (false, 0);
+        if (layout[z1].Count >= DimZ) res = (false, 1);
+        if (layout[z0].Count <= 0 && layout[z1].Count >= DimZ) res = (false, 2);
+        if (z0 == z1) res = (false, 3);
+        return res;
+    }
+
+    // check canRelocate first
+    public void relocate(int z0, int z1) {
+        var c = layout[z0].Pop();
+        c.relocationTimes++;
+        layout[z1].Push(c);
     }
 
     public bool stack(int z, Container2D v) {
-        if (layout[z].Count == maxTier) return false;
+        if (layout[z].Count == MaxTier) return false;
         layout[z].Push(v);
         return true;
     }
 
-    public bool retrieve() {
-        var m = min;
-        if (layout[m.Item2].Peek() != m.Item1) return false;
-        layout[m.Item2].Pop();
-        return true;
+    public bool canRetrieve {
+        get {
+            var m = min;
+            return layout[m.Item2].Peek() == m.Item1;
+        }
+    }
+
+    /// <summary>
+    /// check canRetrieve first!
+    /// </summary>
+    /// <returns> relocation times of this container</returns>
+    public int retrieve() {
+        var c = layout[min.Item2].Pop();
+        return c.relocationTimes;
     }
 
     private int[] generateSequence(int i) {
@@ -346,7 +351,7 @@ public class Bay {
     private void assignValues(int[] arr) {
         int i = 0;
         while (i < arr.Length) {
-            int z = UnityEngine.Random.Range(0, dimZ);
+            int z = UnityEngine.Random.Range(0, DimZ);
             if (layout[z].Count >= initTier) continue;
             if (stack(z, new Container2D(arr[i]))) i++;
         }
