@@ -24,29 +24,44 @@ public static class ToolFunctions {
 }
 
 public class Bay2DAgent : Agent {
+
+
     Bay bay;
     int maxLabel = 6;
     readonly float blockingDegreeCoefficient = 100;
     int blockingDegreeOfState;
-    int[] indicesToAvoid = null;
     int relocationTimes = 0;
 
+    LastOperation lastOperation = new LastOperation();
+
     EnvironmentParameters envParams;
+    BufferSensorComponent bs;
 
     public override void Initialize() {
         envParams = Academy.Instance.EnvironmentParameters;
+        bs = GetComponent<BufferSensorComponent>();
+        Debug.Assert(bs != null);
     }
 
     public override void OnEpisodeBegin() {
         relocationTimes = 0;
-        maxLabel = (int)envParams.GetWithDefault("amount", 16);
-        //maxLabel = 16;
+        lastOperation = new LastOperation();
         bay = new Bay(Parameters.DimZ, Parameters.MaxLayer, Parameters.SpawnMaxLayer, maxLabel);
+        // randomize maxLabel to avoid local optimal
+        maxLabel = (int)envParams.GetWithDefault("amount", 16);
+        if (Academy.Instance.IsCommunicatorOn) maxLabel += UnityEngine.Random.Range(-3, 3);
+        if (maxLabel > 16) maxLabel = 16;
+
+        
         //Debug.Log(bay);
-        nextOperation(indicesToAvoid);
+        nextOperation();
     }
 
     public override void CollectObservations(VectorSensor sensor) {
+        sensor.AddObservation(lastOperation.success);
+        sensor.AddObservation(lastOperation.z0 / bay.DimZ);
+        sensor.AddObservation(lastOperation.z1 / bay.DimZ);
+
         var bd = bay.BlockingDegrees;
         //blockingDegreeOfState = bd.Sum();
 
@@ -54,10 +69,8 @@ public class Bay2DAgent : Agent {
 
         var ob = new List<List<float>>();
         for (int z = 0; z < bay.DimZ; z++) {
+            // list is index obervation, it should contain containers information
             var list = new List<float>();
-
-            // avoid this index? -- 1
-            list.Add((indicesToAvoid !=null && indicesToAvoid.Contains(z)) ? 0 : 1);
 
             // one hot -- dimZ
             var oh = new float[bay.DimZ];
@@ -70,12 +83,15 @@ public class Bay2DAgent : Agent {
             // blockingDegree of stack -- 1
             list.Add(bd[z] / blockingDegreeCoefficient);
 
-            // layout -- maxTier
+            // container info -- maxTier * (1 + maxTier)
             for (int t = 0; t < bay.MaxTier; t++) {
+                var ohStack = new float[bay.MaxTier];
+                ohStack[t] = 1;
+                list.AddRange(ohStack);
                 list.Add(layout[z, t] is null ? 0 : layout[z, t].priority / (float)bay.MaxLabel);
             }
 
-            Debug.Assert(list.Count == bay.DimZ + bay.MaxTier + 3);
+            Debug.Assert(list.Count == bay.DimZ + bay.MaxTier * (1 + bay.MaxTier) + 2);
             Debug.Assert(list.All(l => l <= 1 && l >= -1));
             ob.Add(list);
         }
@@ -86,8 +102,8 @@ public class Bay2DAgent : Agent {
         var rnd = new System.Random();
         ob.OrderBy(n => rnd.Next());
 
-        foreach(var l in ob) {
-            sensor.AddObservation(l);
+        foreach (var l in ob) {
+            bs.AppendObservation(l.ToArray());
         }
 
         //var observation = new List<float>();
@@ -109,7 +125,6 @@ public class Bay2DAgent : Agent {
 
     // actions can only be relocation
     public override void OnActionReceived(ActionBuffers actions) {
-        indicesToAvoid = null;
 
         int z0 = actions.DiscreteActions[0];
         int z1 = actions.DiscreteActions[1];
@@ -119,25 +134,28 @@ public class Bay2DAgent : Agent {
         if (!canRelocate.Item1) {
             AddReward(-1);
             Debug.LogWarning($"failed to relocate from {z0} to {z1}");
-            int[] indicesToAvoid = null;
-            switch (canRelocate.Item2) {
-                case 0: // z0
-                case 3:
-                    indicesToAvoid = new int[] { z0 };
-                    break;
-                case 1: // z1
-                    indicesToAvoid = new int[] { z1 };
-                    break;
-                case 2: // z0 and z1
-                    indicesToAvoid = new int[] { z0, z1 };
-                    break;
-            }
-            nextOperation(indicesToAvoid);
+            //int[] indicesToAvoid = null;
+            //switch (canRelocate.Item2) {
+            //    case 0: // z0
+            //    case 3:
+            //        indicesToAvoid = new int[] { z0 };
+            //        break;
+            //    case 1: // z1
+            //        indicesToAvoid = new int[] { z1 };
+            //        break;
+            //    case 2: // z0 and z1
+            //        indicesToAvoid = new int[] { z0, z1 };
+            //        break;
+            //}
+            lastOperation = new LastOperation(false, z0, z1);
+            nextOperation();
             return;
         }
-        bay.relocate(z0, z1);
 
-        // rewarding system
+        // till here, the reward can be used
+        var c = bay.relocate(z0, z1);
+        AddReward(0.1f * c.relocationTimes / bay.MaxLabel);
+
 
         // state blocking degree 
         float bd = bay.BlockingDegrees.Sum();
@@ -147,20 +165,25 @@ public class Bay2DAgent : Agent {
         AddReward(0.01f / bay.MaxLabel);
 
         // relocation success
-        nextOperation(null);
+        lastOperation = new LastOperation();
+        nextOperation();
     }
 
-    private void nextOperation(int[] _indicesToAvoid) {
+    private void nextOperation() {
         if (bay.empty) {
             Evaluation2D.Instance.UpdateValue(maxLabel, relocationTimes);
             EndEpisode();
+            return;
         }
+
         if (bay.canRetrieve) {
             var min = bay.min;
             relocationTimes += bay.retrieve();
-            AddReward(1 - 0.001f * min.Item2);
+            AddReward(10 * (1 - 0.01f * min.Item2) / bay.MaxLabel);
+            nextOperation();
+            lastOperation = new LastOperation();
+            return;
         }
-        indicesToAvoid = _indicesToAvoid;
 
         RequestDecision();
     }
@@ -325,10 +348,11 @@ public class Bay {
     }
 
     // check canRelocate first
-    public void relocate(int z0, int z1) {
+    public Container2D relocate(int z0, int z1) {
         var c = layout[z0].Pop();
         c.relocationTimes++;
         layout[z1].Push(c);
+        return c;
     }
 
     public bool stack(int z, Container2D v) {
@@ -398,5 +422,36 @@ public class Bay {
             sb.Append(string.Join(", ", list) + "\n");
         }
         return sb.ToString();
+    }
+}
+
+public struct LastOperation {
+    public readonly bool success;
+    public readonly int z0;
+    public readonly int z1;
+
+    public LastOperation(bool s = true, int _0 = -1, int _1 = -1) {
+        success = s;
+        z0 = _0;
+        z1 = _1;
+    }
+
+    public static bool operator ==(LastOperation a, LastOperation b) {
+        return a.success == b.success && a.z0 == b.z0 && a.z1 == b.z1;
+    }
+
+    public static bool operator !=(LastOperation a, LastOperation b) {
+        return !(a == b);
+    }
+
+    public override bool Equals(object obj) {
+        if (obj is LastOperation c) {
+            return GetHashCode() == c.GetHashCode();
+        }
+        return false;
+    }
+
+    public override int GetHashCode() {
+        return base.GetHashCode();
     }
 }
