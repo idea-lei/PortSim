@@ -42,7 +42,7 @@ public class Bay2DAgent : Agent {
         maxLabel = (int)envParams.GetWithDefault("amount", 16);
         //maxLabel = 16;
         bay = new Bay(Parameters.DimZ, Parameters.MaxLayer, Parameters.SpawnMaxLayer, maxLabel);
-        Debug.Log(bay);
+        //Debug.Log(bay);
         nextOperation(indicesToAvoid);
     }
 
@@ -55,6 +55,9 @@ public class Bay2DAgent : Agent {
         var ob = new List<List<float>>();
         for (int z = 0; z < bay.DimZ; z++) {
             var list = new List<float>();
+
+            // avoid this index? -- 1
+            list.Add((indicesToAvoid !=null && indicesToAvoid.Contains(z)) ? 0 : 1);
 
             // one hot -- dimZ
             var oh = new float[bay.DimZ];
@@ -72,24 +75,28 @@ public class Bay2DAgent : Agent {
                 list.Add(layout[z, t] is null ? 0 : layout[z, t].priority / (float)bay.MaxLabel);
             }
 
-            Debug.Assert(list.Count == bay.DimZ + bay.MaxTier + 2);
+            Debug.Assert(list.Count == bay.DimZ + bay.MaxTier + 3);
             Debug.Assert(list.All(l => l <= 1 && l >= -1));
             ob.Add(list);
         }
 
         // remove the avoided index
-        ToolFunctions.RemoveAtIndices(ref ob, indicesToAvoid);
+        //ToolFunctions.RemoveAtIndices(ref ob, indicesToAvoid);
 
         var rnd = new System.Random();
         ob.OrderBy(n => rnd.Next());
 
-        var observation = new List<float>();
-        foreach (var o in ob) {
-            observation.AddRange(o);
+        foreach(var l in ob) {
+            sensor.AddObservation(l);
         }
-        observation.AddRange(new float[bay.DimZ * (bay.DimZ + bay.MaxTier + 2) - observation.Count]);
 
-        sensor.AddObservation(observation);
+        //var observation = new List<float>();
+        //foreach (var o in ob) {
+        //    observation.AddRange(o);
+        //}
+        //observation.AddRange(new float[bay.DimZ * (bay.DimZ + bay.MaxTier + 3) - observation.Count]);
+
+        //sensor.AddObservation(observation);
     }
 
     public override void Heuristic(in ActionBuffers actionsOut) {
@@ -144,7 +151,10 @@ public class Bay2DAgent : Agent {
     }
 
     private void nextOperation(int[] _indicesToAvoid) {
-        if (bay.empty) EndEpisode();
+        if (bay.empty) {
+            Evaluation2D.Instance.UpdateValue(maxLabel, relocationTimes);
+            EndEpisode();
+        }
         if (bay.canRetrieve) {
             var min = bay.min;
             relocationTimes += bay.retrieve();
