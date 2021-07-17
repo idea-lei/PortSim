@@ -11,6 +11,8 @@ using UnityEngine;
 public class Bay2DAgent : Agent {
     Bay bay;
     int maxLabel = 6;
+    readonly float blockingDegreeCoefficient = 100;
+    int blockingDegreeOfState;
 
     public override void Initialize() {
     }
@@ -22,7 +24,11 @@ public class Bay2DAgent : Agent {
     }
 
     public override void CollectObservations(VectorSensor sensor) {
-        sensor.AddObservation(bay.Observation);
+        var bd = bay.BlockingDegrees;
+        blockingDegreeOfState = bd.Sum();
+
+        sensor.AddObservation(bay.LayoutAsList.Select(b => b / (float)maxLabel).ToArray());
+        sensor.AddObservation(bd.Select(b => b / blockingDegreeCoefficient).ToArray());
     }
 
     public override void Heuristic(in ActionBuffers actionsOut) {
@@ -46,8 +52,12 @@ public class Bay2DAgent : Agent {
 
         // rewarding system
 
+        // state blocking degree 
+        float bd = bay.BlockingDegrees.Sum();
+        AddReward((blockingDegreeOfState - bd) / blockingDegreeCoefficient);
 
-
+        // z-index
+        AddReward(0.05f * (z1 - z0));
 
         Debug.Log(bay);
         // relocation success
@@ -151,15 +161,15 @@ public class Bay {
         }
     }
 
-    public float[,] Observation2D {
+    public int[,] LayoutAsMatrix {
         get {
-            float[,] res = new float[dimZ, maxTier];
+            int[,] res = new int[dimZ, maxTier];
             for (int z = 0; z < dimZ; z++) {
                 var list = bay[z].ToList();
                 if (list.Count == 0) continue;
                 list.Reverse();
                 for (int t = 0; t < maxTier; t++) {
-                    if (t < list.Count) res[z, t] = list[t].priority / (float)maxLabel;
+                    if (t < list.Count) res[z, t] = list[t].priority;
                     else continue;
                 }
             }
@@ -167,10 +177,10 @@ public class Bay {
         }
     }
 
-    public float[] Observation {
+    public int[] LayoutAsList {
         get {
-            var list = new List<float>();
-            foreach (var i in Observation2D) {
+            var list = new List<int>();
+            foreach (var i in LayoutAsMatrix) {
                 list.Add(i);
             }
             return list.ToArray();
