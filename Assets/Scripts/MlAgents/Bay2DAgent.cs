@@ -52,9 +52,9 @@ public class Bay2DAgent : Agent {
         if (Academy.Instance.IsCommunicatorOn) maxLabel += UnityEngine.Random.Range(-3, 3);
         if (maxLabel > 16) maxLabel = 16;
 
-        
+
         //Debug.Log(bay);
-        nextOperation();
+        Invoke(nameof(nextOperation), 0.1f);
     }
 
     public override void CollectObservations(VectorSensor sensor) {
@@ -132,37 +132,24 @@ public class Bay2DAgent : Agent {
         // relocation failed
         var canRelocate = bay.canRelocate(z0, z1);
         if (!canRelocate.Item1) {
-            AddReward(-1);
             Debug.LogWarning($"failed to relocate from {z0} to {z1}");
-            //int[] indicesToAvoid = null;
-            //switch (canRelocate.Item2) {
-            //    case 0: // z0
-            //    case 3:
-            //        indicesToAvoid = new int[] { z0 };
-            //        break;
-            //    case 1: // z1
-            //        indicesToAvoid = new int[] { z1 };
-            //        break;
-            //    case 2: // z0 and z1
-            //        indicesToAvoid = new int[] { z0, z1 };
-            //        break;
-            //}
-            lastOperation = new LastOperation(false, z0, z1);
+            lastOperation = new LastOperation(false, z0, z1, lastOperation.repeatTimes + 1);
+            AddReward(-1 * lastOperation.repeatTimes);
             nextOperation();
             return;
         }
 
         // till here, the reward can be used
         var c = bay.relocate(z0, z1);
-        AddReward(0.1f * c.relocationTimes / bay.MaxLabel);
+        AddReward(-0.1f * c.relocationTimes / bay.MaxLabel);
+
+        // step reward
+        AddReward(-0.01f / bay.MaxLabel);
 
 
         // state blocking degree 
         float bd = bay.BlockingDegrees.Sum();
-        AddReward((blockingDegreeOfState - bd) / blockingDegreeCoefficient);
-
-        // step reward
-        AddReward(0.01f / bay.MaxLabel);
+        AddReward(-(bd - blockingDegreeOfState) / blockingDegreeCoefficient); // if new bd smaller than old, should add positive reward
 
         // relocation success
         lastOperation = new LastOperation();
@@ -429,11 +416,13 @@ public struct LastOperation {
     public readonly bool success;
     public readonly int z0;
     public readonly int z1;
+    public readonly int repeatTimes;
 
-    public LastOperation(bool s = true, int _0 = -1, int _1 = -1) {
+    public LastOperation(bool s = true, int _0 = -1, int _1 = -1, int r = 0) {
         success = s;
         z0 = _0;
         z1 = _1;
+        repeatTimes = r;
     }
 
     public static bool operator ==(LastOperation a, LastOperation b) {
