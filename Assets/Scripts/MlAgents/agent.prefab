@@ -46,7 +46,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 3
+    VectorObservationSize: 4
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 0
@@ -55,7 +55,7 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 0
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 0}
+  m_Model: {fileID: 5022602860645237092, guid: 5ab5892e5f692584f97d9eb86b7fccbc, type: 3}
   m_InferenceDevice: 0
   m_BehaviorType: 0
   m_BehaviorName: CRP
@@ -92,5 +92,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_SensorName: Bay2D
-  m_ObservableSize: 50
+  m_ObservableSize: 52
   m_MaxNumObservables: 6

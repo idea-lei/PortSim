@@ -61,6 +61,7 @@ public class Bay2DAgent : Agent {
         sensor.AddObservation(lastOperation.success);
         sensor.AddObservation(lastOperation.z0 / bay.DimZ);
         sensor.AddObservation(lastOperation.z1 / bay.DimZ);
+        sensor.AddObservation(lastOperation.z3 / bay.DimZ);
 
         var bd = bay.BlockingDegrees;
         //blockingDegreeOfState = bd.Sum();
@@ -80,6 +81,12 @@ public class Bay2DAgent : Agent {
             // z index -- 1
             list.Add(z / (float)bay.DimZ);
 
+            // isFull -- 1
+            list.Add(bay.IndexEmpty(z) ? 1 : 0);
+
+            // isFull -- 1
+            list.Add(bay.IndexFull(z) ? 1 : 0);
+
             // blockingDegree of stack -- 1
             list.Add(bd[z] / blockingDegreeCoefficient);
 
@@ -91,7 +98,7 @@ public class Bay2DAgent : Agent {
                 list.Add(layout[z, t] is null ? 0 : layout[z, t].priority / (float)bay.MaxLabel);
             }
 
-            Debug.Assert(list.Count == bay.DimZ + bay.MaxTier * (1 + bay.MaxTier) + 2);
+            Debug.Assert(list.Count == bay.DimZ + bay.MaxTier * (1 + bay.MaxTier) + 4);
             Debug.Assert(list.All(l => l <= 1 && l >= -1));
             ob.Add(list);
         }
@@ -133,23 +140,43 @@ public class Bay2DAgent : Agent {
         var canRelocate = bay.canRelocate(z0, z1);
         if (!canRelocate.Item1) {
             Debug.LogWarning($"failed to relocate from {z0} to {z1}");
-            lastOperation = new LastOperation(false, z0, z1, lastOperation.repeatTimes + 1);
+            bool repeat = (lastOperation.z0 == z0 && lastOperation.z1 == z1) || lastOperation.z3 == z0;
+            switch (canRelocate.Item2) {
+                case 0: // z0
+                    lastOperation = new LastOperation(false, _0: z0, r: repeat ? lastOperation.repeatTimes + 1 : 0);
+                    break;
+                case 1: // z1
+                    lastOperation = new LastOperation(false, _1: z1, r: repeat ? lastOperation.repeatTimes + 1 : 0);
+                    break;
+                case 2: // z0 and z1
+                    lastOperation = new LastOperation(false, _0: z0, _1: z1, r: repeat ? lastOperation.repeatTimes + 1 : 0);
+                    break;
+                case 3:
+                    lastOperation = new LastOperation(false, _3: z0, r: repeat ? lastOperation.repeatTimes + 1 : 0);
+                    break;
+                default:
+                    lastOperation = new LastOperation();
+                    break;
+            }
+
+
             AddReward(-1 * lastOperation.repeatTimes);
             nextOperation();
             return;
         }
 
         // till here, the reward can be used
+
         var c = bay.relocate(z0, z1);
-        AddReward(-0.1f * c.relocationTimes / bay.MaxLabel);
+        //AddReward(-0.1f * c.relocationTimes / bay.MaxLabel);
 
         // step reward
-        AddReward(-0.01f / bay.MaxLabel);
+        AddReward(-0.1f);
 
 
         // state blocking degree 
-        float bd = bay.BlockingDegrees.Sum();
-        AddReward(-(bd - blockingDegreeOfState) / blockingDegreeCoefficient); // if new bd smaller than old, should add positive reward
+        //float bd = bay.BlockingDegrees.Sum();
+        //AddReward(-(bd - blockingDegreeOfState) / blockingDegreeCoefficient); // if new bd smaller than old, should add positive reward
 
         // relocation success
         lastOperation = new LastOperation();
@@ -166,7 +193,7 @@ public class Bay2DAgent : Agent {
         if (bay.canRetrieve) {
             var min = bay.min;
             relocationTimes += bay.retrieve();
-            AddReward(10 * (1 - 0.01f * min.Item2) / bay.MaxLabel);
+            AddReward(1 - 0.01f * min.Item2); //20 * (1 - 0.01f * min.Item2) / bay.MaxLabel
             nextOperation();
             lastOperation = new LastOperation();
             return;
@@ -321,15 +348,23 @@ public class Bay {
         return Layout.All(s => s.Count <= MaxTier);
     }
 
+    public bool IndexFull(int z) {
+        return layout[z].Count >= DimZ;
+    }
+
+    public bool IndexEmpty(int z) {
+        return layout[z].Count <= 0;
+    }
+
     /// <param name="z0">pick up pos</param>
     /// <param name="z1">stack pos</param>
     /// <returns>true if can relocate, the Item2 is reason--> 0: z0 empty, 1: z1 full, 2: both, 3: same index, 4: success</returns>
 
     public (bool, int) canRelocate(int z0, int z1) {
         (bool, int) res = (true, 4);
-        if (layout[z0].Count <= 0) res = (false, 0);
-        if (layout[z1].Count >= DimZ) res = (false, 1);
-        if (layout[z0].Count <= 0 && layout[z1].Count >= DimZ) res = (false, 2);
+        if (IndexEmpty(z0)) res = (false, 0);
+        if (IndexFull(z1)) res = (false, 1);
+        if (IndexEmpty(z0) && IndexFull(z1)) res = (false, 2);
         if (z0 == z1) res = (false, 3);
         return res;
     }
@@ -414,14 +449,16 @@ public class Bay {
 
 public struct LastOperation {
     public readonly bool success;
-    public readonly int z0;
-    public readonly int z1;
+    public readonly int z0; // pick up pos
+    public readonly int z1; // stack pos
+    public readonly int z3; // same index pos
     public readonly int repeatTimes;
 
-    public LastOperation(bool s = true, int _0 = -1, int _1 = -1, int r = 0) {
+    public LastOperation(bool s = true, int _0 = -1, int _1 = -1, int _3 = -1, int r = 0) {
         success = s;
         z0 = _0;
         z1 = _1;
+        z3 = _3;
         repeatTimes = r;
     }
 
