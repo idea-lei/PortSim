@@ -71,19 +71,15 @@ public class Bay2DAgent : Agent {
             // list is index obervation, it should contain containers information
             var list = new List<float>();
 
-            // one hot -- dimZ
+            // one hot, represent the z-index -- dimZ
             var oh = new float[bay.DimZ];
             oh[z] = 1;
             list.AddRange(oh);
-
-            // z index -- 1
-            list.Add(z / (float)bay.DimZ);
 
             // can pickup -- 1
             // 1. can not be empty 2. last time success or (unsuccess but lastOperation.z0 != z)
             bool canPickup =
                 !bay.IndexEmpty(z) && (lastOperation.success || (!lastOperation.success && lastOperation.z0 != z));
-
             list.Add(canPickup ? 1 : 0);
 
             // can stack -- 1
@@ -94,15 +90,16 @@ public class Bay2DAgent : Agent {
             // blockingDegree of stack -- 1
             list.Add(bd[z] / blockingDegreeCoefficient);
 
-            // container info -- maxTier * (1 + maxTier)
+            // container info -- maxTier * (2 + maxTier)
             for (int t = 0; t < bay.MaxTier; t++) {
                 var ohStack = new float[bay.MaxTier];
                 ohStack[t] = 1;
                 list.AddRange(ohStack);
-                list.Add(layout[z, t] is null ? 0 : layout[z, t].priority / (float)bay.MaxLabel);
+                list.Add(t == 0 ? 1 : 0); // is on top? or, can be moved
+                list.Add(layout[z, t] is null ? 1 : layout[z, t].priority / (float)(bay.MaxLabel + 1));
             }
 
-            Debug.Assert(list.Count == bay.DimZ + bay.MaxTier * (1 + bay.MaxTier) + 4);
+            Debug.Assert(list.Count == bay.DimZ + bay.MaxTier * (2 + bay.MaxTier) + 4);
             Debug.Assert(list.All(l => l <= 1 && l >= -1));
             ob.Add(list);
         }
@@ -277,7 +274,7 @@ public class Bay {
     public int MaxLabel => maxLabel;
 
     /// <summary>
-    /// this property is for observation, the stack will automatically from top to bottom
+    /// this property is for observation, the first element is stack top, last is bottom
     /// </summary>
     public List<Container2D>[] Layout {
         get {
