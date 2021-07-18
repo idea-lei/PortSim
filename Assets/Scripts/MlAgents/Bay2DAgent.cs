@@ -47,10 +47,12 @@ public class Bay2DAgent : Agent {
         relocationTimes = 0;
         lastOperation = new LastOperation();
         bay = new Bay(Parameters.DimZ, Parameters.MaxLayer, Parameters.SpawnMaxLayer, maxLabel);
-        // randomize maxLabel to avoid local optimal
+        
         maxLabel = (int)envParams.GetWithDefault("amount", 16);
-        if (Academy.Instance.IsCommunicatorOn) maxLabel += UnityEngine.Random.Range(-3, 3);
-        if (maxLabel > 16) maxLabel = 16;
+
+        //// randomize maxLabel to avoid local optimal
+        //if (Academy.Instance.IsCommunicatorOn) maxLabel += UnityEngine.Random.Range(-3, 3);
+        //if (maxLabel > 16) maxLabel = 16;
 
 
         //Debug.Log(bay);
@@ -58,10 +60,6 @@ public class Bay2DAgent : Agent {
     }
 
     public override void CollectObservations(VectorSensor sensor) {
-        sensor.AddObservation(lastOperation.success);
-        sensor.AddObservation(lastOperation.z0 / bay.DimZ);
-        sensor.AddObservation(lastOperation.z1 / bay.DimZ);
-        sensor.AddObservation(lastOperation.z3 / bay.DimZ);
 
         var bd = bay.BlockingDegrees;
         //blockingDegreeOfState = bd.Sum();
@@ -81,11 +79,17 @@ public class Bay2DAgent : Agent {
             // z index -- 1
             list.Add(z / (float)bay.DimZ);
 
-            // isFull -- 1
-            list.Add(bay.IndexEmpty(z) ? 1 : 0);
+            // can pickup -- 1
+            // 1. can not be empty 2. last time success or (unsuccess but lastOperation.z0 != z)
+            bool canPickup = 
+                !bay.IndexEmpty(z) && (lastOperation.success || (!lastOperation.success && lastOperation.z0 != z));
 
-            // isFull -- 1
-            list.Add(bay.IndexFull(z) ? 1 : 0);
+            list.Add(canPickup ? 1 : 0);
+
+            // can stack -- 1
+            bool canStack =
+                !bay.IndexFull(z) && (lastOperation.success || (!lastOperation.success && lastOperation.z1 != z));
+            list.Add(canStack ? 1 : 0);
 
             // blockingDegree of stack -- 1
             list.Add(bd[z] / blockingDegreeCoefficient);
@@ -140,7 +144,7 @@ public class Bay2DAgent : Agent {
         var canRelocate = bay.canRelocate(z0, z1);
         if (!canRelocate.Item1) {
             Debug.LogWarning($"failed to relocate from {z0} to {z1}");
-            bool repeat = (lastOperation.z0 == z0 && lastOperation.z1 == z1) || lastOperation.z3 == z0;
+            bool repeat = lastOperation.z0 == z0 && lastOperation.z1 == z1;
             switch (canRelocate.Item2) {
                 case 0: // z0
                     lastOperation = new LastOperation(false, _0: z0, r: repeat ? lastOperation.repeatTimes + 1 : 0);
@@ -149,10 +153,8 @@ public class Bay2DAgent : Agent {
                     lastOperation = new LastOperation(false, _1: z1, r: repeat ? lastOperation.repeatTimes + 1 : 0);
                     break;
                 case 2: // z0 and z1
-                    lastOperation = new LastOperation(false, _0: z0, _1: z1, r: repeat ? lastOperation.repeatTimes + 1 : 0);
-                    break;
                 case 3:
-                    lastOperation = new LastOperation(false, _3: z0, r: repeat ? lastOperation.repeatTimes + 1 : 0);
+                    lastOperation = new LastOperation(false, _0: z0, _1: z1, r: repeat ? lastOperation.repeatTimes + 1 : 0);
                     break;
                 default:
                     lastOperation = new LastOperation();
@@ -451,14 +453,12 @@ public struct LastOperation {
     public readonly bool success;
     public readonly int z0; // pick up pos
     public readonly int z1; // stack pos
-    public readonly int z3; // same index pos
     public readonly int repeatTimes;
 
-    public LastOperation(bool s = true, int _0 = -1, int _1 = -1, int _3 = -1, int r = 0) {
+    public LastOperation(bool s = true, int _0 = -1, int _1 = -1, int r = 0) {
         success = s;
         z0 = _0;
         z1 = _1;
-        z3 = _3;
         repeatTimes = r;
     }
 
