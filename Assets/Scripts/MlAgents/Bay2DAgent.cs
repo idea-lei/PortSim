@@ -47,16 +47,16 @@ public class Bay2DAgent : Agent {
         relocationTimes = 0;
         lastOperation = new LastOperation();
         bay = new Bay(Parameters.DimZ, Parameters.MaxLayer, Parameters.SpawnMaxLayer, maxLabel);
-        
-        maxLabel = (int)envParams.GetWithDefault("amount", 16);
 
-        //// randomize maxLabel to avoid local optimal
-        //if (Academy.Instance.IsCommunicatorOn) maxLabel += UnityEngine.Random.Range(-3, 3);
-        //if (maxLabel > 16) maxLabel = 16;
+        int lowerRange = (int)envParams.GetWithDefault("amount", 16);
+        maxLabel = UnityEngine.Random.Range(lowerRange, 16 + 1);
+
+        // randomize maxLabel to avoid local optimal
+        if (!Academy.Instance.IsCommunicatorOn) maxLabel = 16;
 
 
         //Debug.Log(bay);
-        Invoke(nameof(nextOperation), 0.1f);
+        Invoke(nameof(nextOperation), 0.2f);
     }
 
     public override void CollectObservations(VectorSensor sensor) {
@@ -81,7 +81,7 @@ public class Bay2DAgent : Agent {
 
             // can pickup -- 1
             // 1. can not be empty 2. last time success or (unsuccess but lastOperation.z0 != z)
-            bool canPickup = 
+            bool canPickup =
                 !bay.IndexEmpty(z) && (lastOperation.success || (!lastOperation.success && lastOperation.z0 != z));
 
             list.Add(canPickup ? 1 : 0);
